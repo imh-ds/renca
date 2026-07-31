@@ -11,7 +11,7 @@ from uuid import UUID
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-SCHEMA_VERSION = "1.0.0"
+SCHEMA_VERSION = "1.1.0"
 
 
 class MissingDataPolicy(StrEnum):
@@ -56,6 +56,11 @@ class SplitSpec(Model):
     inference_folds: Annotated[int, Field(ge=2)] = 5
 
 
+class AuditSpec(Model):
+    minimum_rows_per_inference_fold: Annotated[int, Field(ge=1)] = 100
+    minimum_clusters: Annotated[int, Field(ge=1)] = 20
+
+
 class DesignSpec(Model):
     """Declared sampling design metadata."""
 
@@ -78,6 +83,7 @@ class NodeSpec(Model):
     outcome_type: OutcomeType
     loss: LossName
     delta: Annotated[float, Field(gt=0)]
+    minimum_standard_deviation: Annotated[float, Field(ge=0)] = 1e-8
 
     @model_validator(mode="after")
     def require_supported_loss_for_outcome(self) -> "NodeSpec":
@@ -105,9 +111,12 @@ class ProjectSpec(Model):
 
     schema_version: Literal[SCHEMA_VERSION]
     analysis_id: UUID
+    preanalysis_reference: Annotated[str, Field(min_length=1)]
+    seed: int
     missing_data_policy: MissingDataPolicy
     design: DesignSpec
     split: SplitSpec = Field(default_factory=SplitSpec)
+    audit: AuditSpec = Field(default_factory=AuditSpec)
     nodes: Annotated[list[NodeSpec], Field(min_length=2)]
 
     @model_validator(mode="after")
@@ -151,6 +160,13 @@ def write_json_schemas(destination: str | Path) -> dict[str, Path]:
         "node": (NodeSpec, "node_spec.schema.json"),
         "artifact_header": (ArtifactHeader, "artifact_header.schema.json"),
     }
+    from renca.artifacts.manifest import AnalysisManifest, RunReceipt
+    from renca.audit import AuditReport
+    contracts.update({
+        "audit_report": (AuditReport, "audit_report.schema.json"),
+        "analysis_manifest": (AnalysisManifest, "analysis_manifest.schema.json"),
+        "run_receipt": (RunReceipt, "run_receipt.schema.json"),
+    })
     paths: dict[str, Path] = {}
     for contract_name, (model, filename) in contracts.items():
         output_path = output_directory / filename

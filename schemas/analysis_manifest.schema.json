@@ -1,0 +1,49 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "analysis_id": {
+      "title": "Analysis Id",
+      "type": "string"
+    },
+    "audit_eligible": {
+      "title": "Audit Eligible",
+      "type": "boolean"
+    },
+    "config_sha256": {
+      "title": "Config Sha256",
+      "type": "string"
+    },
+    "data_sha256": {
+      "title": "Data Sha256",
+      "type": "string"
+    },
+    "package_version": {
+      "title": "Package Version",
+      "type": "string"
+    },
+    "preanalysis_reference_sha256": {
+      "title": "Preanalysis Reference Sha256",
+      "type": "string"
+    },
+    "schema_version": {
+      "default": "1.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "seed": {
+      "title": "Seed",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "analysis_id",
+    "config_sha256",
+    "data_sha256",
+    "preanalysis_reference_sha256",
+    "seed",
+    "package_version",
+    "audit_eligible"
+  ],
+  "title": "AnalysisManifest",
+  "type": "object"
+}

@@ -30,6 +30,12 @@
     "loss": {
       "$ref": "#/$defs/LossName"
     },
+    "minimum_standard_deviation": {
+      "default": 1e-08,
+      "minimum": 0,
+      "title": "Minimum Standard Deviation",
+      "type": "number"
+    },
     "node_id": {
       "minLength": 1,
       "pattern": "^[A-Za-z][A-Za-z0-9_]*$",

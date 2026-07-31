@@ -1,0 +1,83 @@
+{
+  "$defs": {
+    "AuditCheck": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/CheckStatus"
+        }
+      },
+      "required": [
+        "code",
+        "status",
+        "message"
+      ],
+      "title": "AuditCheck",
+      "type": "object"
+    },
+    "CheckStatus": {
+      "enum": [
+        "pass",
+        "warning",
+        "fail"
+      ],
+      "title": "CheckStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "analysis_id": {
+      "title": "Analysis Id",
+      "type": "string"
+    },
+    "analysis_row_count": {
+      "title": "Analysis Row Count",
+      "type": "integer"
+    },
+    "checks": {
+      "items": {
+        "$ref": "#/$defs/AuditCheck"
+      },
+      "title": "Checks",
+      "type": "array"
+    },
+    "disabled_modules": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Disabled Modules",
+      "type": "array"
+    },
+    "eligible": {
+      "title": "Eligible",
+      "type": "boolean"
+    },
+    "excluded_row_count": {
+      "title": "Excluded Row Count",
+      "type": "integer"
+    },
+    "schema_version": {
+      "default": "1.1.0",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "analysis_id",
+    "eligible",
+    "analysis_row_count",
+    "excluded_row_count",
+    "checks"
+  ],
+  "title": "AuditReport",
+  "type": "object"
+}

@@ -1,5 +1,24 @@
 {
   "$defs": {
+    "AuditSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "minimum_clusters": {
+          "default": 20,
+          "minimum": 1,
+          "title": "Minimum Clusters",
+          "type": "integer"
+        },
+        "minimum_rows_per_inference_fold": {
+          "default": 100,
+          "minimum": 1,
+          "title": "Minimum Rows Per Inference Fold",
+          "type": "integer"
+        }
+      },
+      "title": "AuditSpec",
+      "type": "object"
+    },
     "DesignSpec": {
       "additionalProperties": false,
       "description": "Declared sampling design metadata.",
@@ -56,6 +75,12 @@
         },
         "loss": {
           "$ref": "#/$defs/LossName"
+        },
+        "minimum_standard_deviation": {
+          "default": 1e-08,
+          "minimum": 0,
+          "title": "Minimum Standard Deviation",
+          "type": "number"
         },
         "node_id": {
           "minLength": 1,
@@ -124,6 +149,9 @@
       "title": "Analysis Id",
       "type": "string"
     },
+    "audit": {
+      "$ref": "#/$defs/AuditSpec"
+    },
     "design": {
       "$ref": "#/$defs/DesignSpec"
     },
@@ -138,10 +166,19 @@
       "title": "Nodes",
       "type": "array"
     },
+    "preanalysis_reference": {
+      "minLength": 1,
+      "title": "Preanalysis Reference",
+      "type": "string"
+    },
     "schema_version": {
-      "const": "1.0.0",
+      "const": "1.1.0",
       "title": "Schema Version",
       "type": "string"
+    },
+    "seed": {
+      "title": "Seed",
+      "type": "integer"
     },
     "split": {
       "$ref": "#/$defs/SplitSpec"
@@ -150,6 +187,8 @@
   "required": [
     "schema_version",
     "analysis_id",
+    "preanalysis_reference",
+    "seed",
     "missing_data_policy",
     "design",
     "nodes"
