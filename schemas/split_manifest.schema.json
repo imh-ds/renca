@@ -1,0 +1,88 @@
+{
+  "$defs": {
+    "SamplingUnit": {
+      "description": "Sampling-unit declaration used by the later audit stage.",
+      "enum": [
+        "iid",
+        "clustered"
+      ],
+      "title": "SamplingUnit",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Versioned record of the data partition used by downstream stages.",
+  "properties": {
+    "analysis_id": {
+      "title": "Analysis Id",
+      "type": "string"
+    },
+    "inference_fold_by_row_position": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Inference Fold By Row Position",
+      "type": "object"
+    },
+    "inference_folds": {
+      "title": "Inference Folds",
+      "type": "integer"
+    },
+    "inference_row_positions": {
+      "items": {
+        "type": "integer"
+      },
+      "title": "Inference Row Positions",
+      "type": "array"
+    },
+    "input_order_sha256": {
+      "title": "Input Order Sha256",
+      "type": "string"
+    },
+    "sampling_unit": {
+      "$ref": "#/$defs/SamplingUnit"
+    },
+    "schema_version": {
+      "const": "1.2.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "seed": {
+      "title": "Seed",
+      "type": "integer"
+    },
+    "selection_fraction": {
+      "title": "Selection Fraction",
+      "type": "number"
+    },
+    "selection_row_positions": {
+      "items": {
+        "type": "integer"
+      },
+      "title": "Selection Row Positions",
+      "type": "array"
+    },
+    "stratification_columns": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Stratification Columns",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "analysis_id",
+    "seed",
+    "selection_fraction",
+    "inference_folds",
+    "sampling_unit",
+    "selection_row_positions",
+    "inference_row_positions",
+    "inference_fold_by_row_position",
+    "stratification_columns",
+    "input_order_sha256"
+  ],
+  "title": "SplitManifest",
+  "type": "object"
+}

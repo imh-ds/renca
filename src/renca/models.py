@@ -163,10 +163,12 @@ def write_json_schemas(destination: str | Path) -> dict[str, Path]:
     }
     from renca.artifacts.manifest import AnalysisManifest, RunReceipt
     from renca.audit import AuditReport
+    from renca.screening import SplitManifest
     contracts.update({
         "audit_report": (AuditReport, "audit_report.schema.json"),
         "analysis_manifest": (AnalysisManifest, "analysis_manifest.schema.json"),
         "run_receipt": (RunReceipt, "run_receipt.schema.json"),
+        "split_manifest": (SplitManifest, "split_manifest.schema.json"),
     })
     paths: dict[str, Path] = {}
     for contract_name, (model, filename) in contracts.items():
