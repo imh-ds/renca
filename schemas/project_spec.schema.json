@@ -119,6 +119,33 @@
       "title": "SamplingUnit",
       "type": "string"
     },
+    "ScreeningSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "max_neighbors": {
+          "default": 10,
+          "minimum": 1,
+          "title": "Max Neighbors",
+          "type": "integer"
+        },
+        "max_separator_size": {
+          "default": 1,
+          "maximum": 3,
+          "minimum": 0,
+          "title": "Max Separator Size",
+          "type": "integer"
+        },
+        "separators_per_pair": {
+          "default": 1,
+          "maximum": 3,
+          "minimum": 1,
+          "title": "Separators Per Pair",
+          "type": "integer"
+        }
+      },
+      "title": "ScreeningSpec",
+      "type": "object"
+    },
     "SplitSpec": {
       "additionalProperties": false,
       "description": "Predeclared outer-split and inference-fold settings.",
@@ -182,6 +209,9 @@
       "const": "1.2.0",
       "title": "Schema Version",
       "type": "string"
+    },
+    "screening": {
+      "$ref": "#/$defs/ScreeningSpec"
     },
     "seed": {
       "title": "Seed",

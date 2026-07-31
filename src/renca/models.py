@@ -62,6 +62,18 @@ class AuditSpec(Model):
     minimum_clusters: Annotated[int, Field(ge=1)] = 20
 
 
+class ScreeningSpec(Model):
+    max_neighbors: Annotated[int, Field(ge=1)] = 10
+    max_separator_size: Annotated[int, Field(ge=0, le=3)] = 1
+    separators_per_pair: Annotated[int, Field(ge=1, le=3)] = 1
+
+    @model_validator(mode="after")
+    def require_available_separator_ranks(self) -> "ScreeningSpec":
+        if self.separators_per_pair > self.max_separator_size + 1:
+            raise ValueError("separators_per_pair cannot exceed max_separator_size + 1")
+        return self
+
+
 class DesignSpec(Model):
     """Declared sampling design metadata."""
 
@@ -118,6 +130,7 @@ class ProjectSpec(Model):
     design: DesignSpec
     split: SplitSpec = Field(default_factory=SplitSpec)
     audit: AuditSpec = Field(default_factory=AuditSpec)
+    screening: ScreeningSpec = Field(default_factory=ScreeningSpec)
     nodes: Annotated[list[NodeSpec], Field(min_length=2)]
 
     @model_validator(mode="after")
@@ -164,11 +177,13 @@ def write_json_schemas(destination: str | Path) -> dict[str, Path]:
     from renca.artifacts.manifest import AnalysisManifest, RunReceipt
     from renca.audit import AuditReport
     from renca.screening import SplitManifest
+    from renca.screening.separators import SeparatorCandidate
     contracts.update({
         "audit_report": (AuditReport, "audit_report.schema.json"),
         "analysis_manifest": (AnalysisManifest, "analysis_manifest.schema.json"),
         "run_receipt": (RunReceipt, "run_receipt.schema.json"),
         "split_manifest": (SplitManifest, "split_manifest.schema.json"),
+        "separator_candidate": (SeparatorCandidate, "separator_candidate.schema.json"),
     })
     paths: dict[str, Path] = {}
     for contract_name, (model, filename) in contracts.items():

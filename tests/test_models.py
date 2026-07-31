@@ -30,6 +30,7 @@ def valid_project_payload() -> dict[str, object]:
             "stratification_columns": [],
         },
         "audit": {"minimum_rows_per_inference_fold": 100, "minimum_clusters": 20},
+        "screening": {"max_neighbors": 10, "max_separator_size": 1, "separators_per_pair": 1},
         "nodes": [
             {
                 "node_id": "stress",

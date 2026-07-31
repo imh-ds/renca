@@ -1,0 +1,56 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "admissibility_flags": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Admissibility Flags",
+      "type": "array"
+    },
+    "node_i": {
+      "title": "Node I",
+      "type": "string"
+    },
+    "node_j": {
+      "title": "Node J",
+      "type": "string"
+    },
+    "pair_id": {
+      "title": "Pair Id",
+      "type": "string"
+    },
+    "rank": {
+      "title": "Rank",
+      "type": "integer"
+    },
+    "selection_method": {
+      "const": "cross_fitted_bidirectional_loss",
+      "title": "Selection Method",
+      "type": "string"
+    },
+    "selection_score": {
+      "title": "Selection Score",
+      "type": "number"
+    },
+    "separator": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Separator",
+      "type": "array"
+    }
+  },
+  "required": [
+    "pair_id",
+    "node_i",
+    "node_j",
+    "rank",
+    "separator",
+    "selection_score",
+    "selection_method",
+    "admissibility_flags"
+  ],
+  "title": "SeparatorCandidate",
+  "type": "object"
+}
