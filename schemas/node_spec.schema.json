@@ -1,0 +1,51 @@
+{
+  "$defs": {
+    "LossName": {
+      "description": "Losses supported by the first confirmatory engine.",
+      "enum": [
+        "squared",
+        "brier"
+      ],
+      "title": "LossName",
+      "type": "string"
+    },
+    "OutcomeType": {
+      "description": "Outcome types supported by the first confirmatory engine.",
+      "enum": [
+        "continuous",
+        "binary"
+      ],
+      "title": "OutcomeType",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Target-specific outcome, loss, and practical-resolution settings.",
+  "properties": {
+    "delta": {
+      "exclusiveMinimum": 0,
+      "title": "Delta",
+      "type": "number"
+    },
+    "loss": {
+      "$ref": "#/$defs/LossName"
+    },
+    "node_id": {
+      "minLength": 1,
+      "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+      "title": "Node Id",
+      "type": "string"
+    },
+    "outcome_type": {
+      "$ref": "#/$defs/OutcomeType"
+    }
+  },
+  "required": [
+    "node_id",
+    "outcome_type",
+    "loss",
+    "delta"
+  ],
+  "title": "NodeSpec",
+  "type": "object"
+}

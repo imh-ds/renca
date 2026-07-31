@@ -1,0 +1,159 @@
+{
+  "$defs": {
+    "DesignSpec": {
+      "additionalProperties": false,
+      "description": "Declared sampling design metadata.",
+      "properties": {
+        "cluster_id_column": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cluster Id Column"
+        },
+        "sampling_unit": {
+          "$ref": "#/$defs/SamplingUnit"
+        }
+      },
+      "required": [
+        "sampling_unit"
+      ],
+      "title": "DesignSpec",
+      "type": "object"
+    },
+    "LossName": {
+      "description": "Losses supported by the first confirmatory engine.",
+      "enum": [
+        "squared",
+        "brier"
+      ],
+      "title": "LossName",
+      "type": "string"
+    },
+    "MissingDataPolicy": {
+      "description": "Predeclared policy for handling missing observations.",
+      "enum": [
+        "complete_case",
+        "multiple_imputation",
+        "model_based"
+      ],
+      "title": "MissingDataPolicy",
+      "type": "string"
+    },
+    "NodeSpec": {
+      "additionalProperties": false,
+      "description": "Target-specific outcome, loss, and practical-resolution settings.",
+      "properties": {
+        "delta": {
+          "exclusiveMinimum": 0,
+          "title": "Delta",
+          "type": "number"
+        },
+        "loss": {
+          "$ref": "#/$defs/LossName"
+        },
+        "node_id": {
+          "minLength": 1,
+          "pattern": "^[A-Za-z][A-Za-z0-9_]*$",
+          "title": "Node Id",
+          "type": "string"
+        },
+        "outcome_type": {
+          "$ref": "#/$defs/OutcomeType"
+        }
+      },
+      "required": [
+        "node_id",
+        "outcome_type",
+        "loss",
+        "delta"
+      ],
+      "title": "NodeSpec",
+      "type": "object"
+    },
+    "OutcomeType": {
+      "description": "Outcome types supported by the first confirmatory engine.",
+      "enum": [
+        "continuous",
+        "binary"
+      ],
+      "title": "OutcomeType",
+      "type": "string"
+    },
+    "SamplingUnit": {
+      "description": "Sampling-unit declaration used by the later audit stage.",
+      "enum": [
+        "iid",
+        "clustered"
+      ],
+      "title": "SamplingUnit",
+      "type": "string"
+    },
+    "SplitSpec": {
+      "additionalProperties": false,
+      "description": "Predeclared outer-split and inference-fold settings.",
+      "properties": {
+        "inference_folds": {
+          "default": 5,
+          "minimum": 2,
+          "title": "Inference Folds",
+          "type": "integer"
+        },
+        "selection_fraction": {
+          "default": 0.2,
+          "exclusiveMaximum": 0.5,
+          "exclusiveMinimum": 0,
+          "title": "Selection Fraction",
+          "type": "number"
+        }
+      },
+      "title": "SplitSpec",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Predeclared configuration required before an analysis can start.",
+  "properties": {
+    "analysis_id": {
+      "format": "uuid",
+      "title": "Analysis Id",
+      "type": "string"
+    },
+    "design": {
+      "$ref": "#/$defs/DesignSpec"
+    },
+    "missing_data_policy": {
+      "$ref": "#/$defs/MissingDataPolicy"
+    },
+    "nodes": {
+      "items": {
+        "$ref": "#/$defs/NodeSpec"
+      },
+      "minItems": 2,
+      "title": "Nodes",
+      "type": "array"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "split": {
+      "$ref": "#/$defs/SplitSpec"
+    }
+  },
+  "required": [
+    "schema_version",
+    "analysis_id",
+    "missing_data_policy",
+    "design",
+    "nodes"
+  ],
+  "title": "ProjectSpec",
+  "type": "object"
+}

@@ -1,0 +1,29 @@
+{
+  "additionalProperties": false,
+  "description": "Metadata required at every external artifact boundary.",
+  "properties": {
+    "analysis_id": {
+      "format": "uuid",
+      "title": "Analysis Id",
+      "type": "string"
+    },
+    "artifact_type": {
+      "minLength": 1,
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Artifact Type",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "analysis_id",
+    "artifact_type"
+  ],
+  "title": "ArtifactHeader",
+  "type": "object"
+}
