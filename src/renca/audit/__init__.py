@@ -37,6 +37,7 @@ def audit_project(data: pd.DataFrame, project_spec: ProjectSpec) -> AuditReport:
     """Audit a DataFrame without mutating it."""
     checks: list[AuditCheck] = []
     expected = {node.node_id for node in project_spec.nodes}
+    expected.update(project_spec.split.stratification_columns)
     if project_spec.design.cluster_id_column:
         expected.add(project_spec.design.cluster_id_column)
     columns = list(data.columns)

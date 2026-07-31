@@ -11,7 +11,7 @@ from uuid import UUID
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-SCHEMA_VERSION = "1.1.0"
+SCHEMA_VERSION = "1.2.0"
 
 
 class MissingDataPolicy(StrEnum):
@@ -54,6 +54,7 @@ class SplitSpec(Model):
 
     selection_fraction: Annotated[float, Field(gt=0, lt=0.5)] = 0.2
     inference_folds: Annotated[int, Field(ge=2)] = 5
+    stratification_columns: list[str] = Field(default_factory=list)
 
 
 class AuditSpec(Model):
