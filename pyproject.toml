@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "rccn"
+name = "renca"
 version = "0.0.1"
 description = "Resolution-aware causal compatibility network contracts"
 readme = "README.md"

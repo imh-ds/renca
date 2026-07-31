@@ -7,7 +7,7 @@ import jsonschema
 import pytest
 from pydantic import ValidationError
 
-from rccn.models import (
+from renca.models import (
     ArtifactHeader,
     NodeSpec,
     ProjectSpec,

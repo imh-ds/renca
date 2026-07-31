@@ -6,7 +6,7 @@ Accepted for the initial Python reference engine.
 
 ## Decision
 
-`rccn` may certify that two variables are practically predictively separated
+`renca` may certify that two variables are practically predictively separated
 relative to a predeclared separator family and practical thresholds. This is a
 predictive result, not a causal nonedge or a direct-effect claim.
 
