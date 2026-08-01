@@ -18,7 +18,7 @@ from renca.models import (
 
 def valid_project_payload() -> dict[str, object]:
     return {
-        "schema_version": "1.3.0",
+        "schema_version": "1.4.0",
         "analysis_id": "dddb2c74-2a57-4561-8afc-2c56e086674b",
         "preanalysis_reference": "osf.io/example",
         "seed": 7,
@@ -39,6 +39,12 @@ def valid_project_payload() -> dict[str, object]:
                 "loss": "squared",
                 "delta": 0.01,
                 "minimum_standard_deviation": 1e-8,
+                "measurement_level": "continuous",
+                "scale_min": None,
+                "scale_max": None,
+                "continuous_approximation": False,
+                "max_boundary_mass": 0.15,
+                "minimum_distinct_values": 5,
             },
             {
                 "node_id": "sleep_problem",
@@ -46,6 +52,12 @@ def valid_project_payload() -> dict[str, object]:
                 "loss": "brier",
                 "delta": 0.02,
                 "minimum_standard_deviation": 1e-8,
+                "measurement_level": "continuous",
+                "scale_min": None,
+                "scale_max": None,
+                "continuous_approximation": False,
+                "max_boundary_mass": 0.15,
+                "minimum_distinct_values": 5,
             },
         ],
     }
@@ -131,7 +143,7 @@ def test_loader_reads_a_valid_yaml_project(tmp_path: Path) -> None:
     project_path = tmp_path / "project.yaml"
     project_path.write_text(
         """\
-schema_version: 1.3.0
+schema_version: 1.4.0
 analysis_id: dddb2c74-2a57-4561-8afc-2c56e086674b
 preanalysis_reference: osf.io/example
 seed: 7
@@ -167,7 +179,7 @@ def test_schema_export_is_deterministic_and_artifact_headers_are_versioned(
     committed = Path(__file__).parents[1] / "schemas" / "project_spec.schema.json"
     assert first["project"].read_bytes() == committed.read_bytes()
     header = ArtifactHeader(
-        schema_version="1.3.0",
+        schema_version="1.4.0",
         analysis_id="dddb2c74-2a57-4561-8afc-2c56e086674b",
         artifact_type="audit",
     )

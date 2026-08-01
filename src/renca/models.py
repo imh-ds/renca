@@ -11,7 +11,7 @@ from uuid import UUID
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-SCHEMA_VERSION = "1.3.0"
+SCHEMA_VERSION = "1.4.0"
 
 
 class MissingDataPolicy(StrEnum):
@@ -27,6 +27,11 @@ class OutcomeType(StrEnum):
 
     CONTINUOUS = "continuous"
     BINARY = "binary"
+
+class MeasurementLevel(StrEnum):
+    CONTINUOUS = "continuous"
+    BOUNDED_COMPOSITE = "bounded_composite"
+    ORDINAL_ITEM = "ordinal_item"
 
 
 class LossName(StrEnum):
@@ -104,6 +109,12 @@ class NodeSpec(Model):
     loss: LossName
     delta: Annotated[float, Field(gt=0)]
     minimum_standard_deviation: Annotated[float, Field(ge=0)] = 1e-8
+    measurement_level: MeasurementLevel = MeasurementLevel.CONTINUOUS
+    scale_min: float | None = None
+    scale_max: float | None = None
+    continuous_approximation: bool = False
+    max_boundary_mass: Annotated[float, Field(ge=0, le=1)] = 0.15
+    minimum_distinct_values: Literal[5] = 5
 
     @model_validator(mode="after")
     def require_supported_loss_for_outcome(self) -> "NodeSpec":
@@ -115,6 +126,13 @@ class NodeSpec(Model):
             raise ValueError(
                 f"loss must be '{expected_loss.value}' for a {self.outcome_type.value} outcome"
             )
+        if self.measurement_level is MeasurementLevel.BOUNDED_COMPOSITE:
+            if self.scale_min is None or self.scale_max is None or self.scale_min >= self.scale_max:
+                raise ValueError("bounded_composite requires ordered scale_min and scale_max")
+            if not self.continuous_approximation:
+                raise ValueError("bounded_composite requires continuous_approximation=true")
+        elif self.scale_min is not None or self.scale_max is not None or self.continuous_approximation:
+            raise ValueError("scale bounds and continuous_approximation are only valid for bounded_composite")
         return self
 
 
