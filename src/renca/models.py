@@ -11,7 +11,7 @@ from uuid import UUID
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-SCHEMA_VERSION = "1.2.0"
+SCHEMA_VERSION = "1.3.0"
 
 
 class MissingDataPolicy(StrEnum):
@@ -74,6 +74,13 @@ class ScreeningSpec(Model):
         return self
 
 
+class VimpSpec(Model):
+    confidence_level: Annotated[float, Field(gt=0, lt=1)] = 0.95
+    ridge_alpha: Annotated[float, Field(gt=0)] = 1.0
+    forest_trees: Annotated[int, Field(ge=10)] = 100
+    forest_max_depth: Annotated[int, Field(ge=1)] = 5
+
+
 class DesignSpec(Model):
     """Declared sampling design metadata."""
 
@@ -131,6 +138,7 @@ class ProjectSpec(Model):
     split: SplitSpec = Field(default_factory=SplitSpec)
     audit: AuditSpec = Field(default_factory=AuditSpec)
     screening: ScreeningSpec = Field(default_factory=ScreeningSpec)
+    vimp: VimpSpec = Field(default_factory=VimpSpec)
     nodes: Annotated[list[NodeSpec], Field(min_length=2)]
 
     @model_validator(mode="after")
@@ -178,12 +186,14 @@ def write_json_schemas(destination: str | Path) -> dict[str, Path]:
     from renca.audit import AuditReport
     from renca.screening import SplitManifest
     from renca.screening.separators import SeparatorCandidate
+    from renca.vimp import VimpEstimate
     contracts.update({
         "audit_report": (AuditReport, "audit_report.schema.json"),
         "analysis_manifest": (AnalysisManifest, "analysis_manifest.schema.json"),
         "run_receipt": (RunReceipt, "run_receipt.schema.json"),
         "split_manifest": (SplitManifest, "split_manifest.schema.json"),
         "separator_candidate": (SeparatorCandidate, "separator_candidate.schema.json"),
+        "vimp_estimate": (VimpEstimate, "vimp_estimate.schema.json"),
     })
     paths: dict[str, Path] = {}
     for contract_name, (model, filename) in contracts.items():
