@@ -37,4 +37,12 @@ def certify_pairs(estimates:list[VimpEstimate], alpha:float=.05)->list[EdgeCerti
         out.append(EdgeCertificate(pair_id=a.pair_id,state=state,separator=a.separator,delta_i=a.delta_target,delta_j=b.delta_target,theta_i_from_j=a.theta_hat,theta_j_from_i=b.theta_hat,raw_p=raw,adjusted_p=adj))
     return sorted(out,key=lambda x:x.pair_id)
 def write_edge_certificates(certificates:list[EdgeCertificate],output_dir:str|Path)->Path:
-    d=Path(output_dir);d.mkdir(parents=True,exist_ok=True);p=d/"edge_certificates.parquet";pd.DataFrame([c.model_dump() for c in certificates]).to_parquet(p,index=False);return p
+    """Write deterministic Parquet and canonical JSON certificate artifacts."""
+    d=Path(output_dir); d.mkdir(parents=True,exist_ok=True)
+    ordered=sorted(certificates,key=lambda certificate: certificate.pair_id)
+    p=d/"edge_certificates.parquet"; pd.DataFrame([c.model_dump() for c in ordered]).to_parquet(p,index=False)
+    json_path=d/"edge_certificates.json"
+    temporary=json_path.with_suffix(".json.tmp")
+    temporary.write_bytes((json.dumps([c.model_dump(mode="json") for c in ordered],sort_keys=True,separators=(",",":"),ensure_ascii=False)+"\n").encode())
+    temporary.replace(json_path)
+    return p
