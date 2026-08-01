@@ -1,0 +1,114 @@
+{
+  "$defs": {
+    "PairState": {
+      "enum": [
+        "certified_nonedge",
+        "candidate_adjacency",
+        "unresolved"
+      ],
+      "title": "PairState",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "adjusted_p": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Adjusted P"
+    },
+    "assumptions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Assumptions",
+      "type": "array"
+    },
+    "causal_status": {
+      "const": "not_yet_causal",
+      "default": "not_yet_causal",
+      "title": "Causal Status",
+      "type": "string"
+    },
+    "delta_i": {
+      "title": "Delta I",
+      "type": "number"
+    },
+    "delta_j": {
+      "title": "Delta J",
+      "type": "number"
+    },
+    "error_control": {
+      "const": "FWER_Holm",
+      "default": "FWER_Holm",
+      "title": "Error Control",
+      "type": "string"
+    },
+    "pair_id": {
+      "title": "Pair Id",
+      "type": "string"
+    },
+    "raw_p": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Raw P"
+    },
+    "separator": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Separator",
+      "type": "array"
+    },
+    "state": {
+      "$ref": "#/$defs/PairState"
+    },
+    "theta_i_from_j": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Theta I From J"
+    },
+    "theta_j_from_i": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Theta J From I"
+    }
+  },
+  "required": [
+    "pair_id",
+    "state",
+    "separator",
+    "delta_i",
+    "delta_j"
+  ],
+  "title": "EdgeCertificate",
+  "type": "object"
+}

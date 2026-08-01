@@ -5,6 +5,16 @@
       "title": "Added Variable",
       "type": "string"
     },
+    "calibration_status": {
+      "default": "uncalibrated",
+      "enum": [
+        "uncalibrated",
+        "calibrated_success",
+        "calibration_failed"
+      ],
+      "title": "Calibration Status",
+      "type": "string"
+    },
     "delta_target": {
       "title": "Delta Target",
       "type": "number"

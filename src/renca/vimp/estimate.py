@@ -31,6 +31,7 @@ class VimpEstimate(Model):
     lower_ci: float | None = None
     delta_target: float
     p_equivalence: float | None = None
+    calibration_status: Literal["uncalibrated", "calibrated_success", "calibration_failed"] = "uncalibrated"
     nuisance_diagnostic: dict[str, object] = Field(default_factory=dict)
     status: Literal["success", "full_worse_than_reduced", "nonpositive_null_risk", "nonfinite_standard_error", "learner_failure"]
 

@@ -187,6 +187,7 @@ def write_json_schemas(destination: str | Path) -> dict[str, Path]:
     from renca.screening import SplitManifest
     from renca.screening.separators import SeparatorCandidate
     from renca.vimp import VimpEstimate
+    from renca.certification import EdgeCertificate
     contracts.update({
         "audit_report": (AuditReport, "audit_report.schema.json"),
         "analysis_manifest": (AnalysisManifest, "analysis_manifest.schema.json"),
@@ -194,6 +195,7 @@ def write_json_schemas(destination: str | Path) -> dict[str, Path]:
         "split_manifest": (SplitManifest, "split_manifest.schema.json"),
         "separator_candidate": (SeparatorCandidate, "separator_candidate.schema.json"),
         "vimp_estimate": (VimpEstimate, "vimp_estimate.schema.json"),
+        "edge_certificate": (EdgeCertificate, "edge_certificate.schema.json"),
     })
     paths: dict[str, Path] = {}
     for contract_name, (model, filename) in contracts.items():
