@@ -75,6 +75,9 @@ def fit_crossfitted_vimp(data_infer: pd.DataFrame, target: str, added_variable: 
             diagnostics["folds"][str(fold)] = {"train_rows": train_rows.tolist(), "validation_rows": valid_rows.tolist(), "reduced_risks": reduced_risks, "full_risks": full_risks, "reduced_selected": reduced_name, "full_selected": full_name}
         diff, null = np.asarray(reduced_losses) - np.asarray(full_losses), np.asarray(null_losses)
         psi, risk = float(diff.mean()), float(null.mean())
+        diagnostics["null_risk"] = risk
+        diagnostics["mean_reduced_loss"] = float(np.mean(reduced_losses))
+        diagnostics["mean_full_loss"] = float(np.mean(full_losses))
         if risk <= 0: return VimpEstimate(pair_id="--".join(sorted([target, added_variable])), target=target, added_variable=added_variable, separator=separator, delta_target=node_spec.delta, nuisance_diagnostic=diagnostics, status="nonpositive_null_risk")
         theta = psi / risk; influence = (diff - psi - theta * (null - risk)) / risk; se = float(np.sqrt(np.var(influence, ddof=1) / len(influence)))
         if not np.isfinite(se) or se <= 0: return VimpEstimate(pair_id="--".join(sorted([target, added_variable])), target=target, added_variable=added_variable, separator=separator, psi_hat=psi, theta_hat=theta, delta_target=node_spec.delta, nuisance_diagnostic=diagnostics, status="nonfinite_standard_error")
