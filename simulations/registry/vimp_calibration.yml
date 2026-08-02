@@ -9,7 +9,11 @@ records:
     evaluation_replications: 300
     empirical_rejection_rate: 0.05
     upper_rejection_bound: 0.0747
+    validation_scenario_families: []
+    validation_replications_per_family: {}
+    grid_rejection_rates: {}
+    grid_upper_rejection_bounds: {}
     status: rejected
-# Required independent families before any production validated record:
-# bounded_composite_unsaturated_v1, bounded_composite_saturated_v1,
-# nonlinear_continuous_v1, learner_misspecification_v1
+# No record may be marked validated until all five required scenario families have
+# at least 5,000 independent evaluations and a one-sided 95% upper rejection
+# bound no greater than alpha.  The package enforces this condition.

@@ -16,6 +16,10 @@ class CalibrationRecord(Model):
     evaluation_replications: int
     empirical_rejection_rate: float
     upper_rejection_bound: float
+    validation_scenario_families: list[str] = Field(default_factory=list)
+    validation_replications_per_family: dict[str, int] = Field(default_factory=dict)
+    grid_rejection_rates: dict[str, float] = Field(default_factory=dict)
+    grid_upper_rejection_bounds: dict[str, float] = Field(default_factory=dict)
     status: Literal["validated", "rejected"]
 
 class CalibrationRegistry(Model):
@@ -32,5 +36,11 @@ def calibration_status(registry: CalibrationRegistry, scenario_family: str, samp
     matches=[r for r in registry.records if r.scenario_family==scenario_family and r.sample_size==sample_size and r.inference_folds==inference_folds and r.vimp_fingerprint==vimp_fingerprint(spec)]
     if not matches: return "uncalibrated"
     record=matches[-1]
-    if record.status=="validated" and record.calibration_replications>=5000 and record.evaluation_replications>=5000 and record.upper_rejection_bound<=alpha: return "calibrated_success"
+    required = set(record.validation_scenario_families)
+    grid_is_sufficient = bool(required) and all(
+        record.validation_replications_per_family.get(family, 0) >= 5000
+        and record.grid_upper_rejection_bounds.get(family, float("inf")) <= alpha
+        for family in required
+    )
+    if record.status=="validated" and record.calibration_replications>=5000 and record.evaluation_replications>=5000 and record.upper_rejection_bound<=alpha and grid_is_sufficient: return "calibrated_success"
     return "calibration_failed"

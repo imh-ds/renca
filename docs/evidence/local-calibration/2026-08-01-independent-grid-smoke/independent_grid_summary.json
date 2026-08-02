@@ -1,0 +1,40 @@
+{
+  "calibration_replications": 1000,
+  "critical_value": -2.1099877626362535,
+  "empirical_rejection_rate": 0.6,
+  "evaluation_replications": 20,
+  "grid_rejection_rates": {
+    "bounded_composite_saturated_v1": 0.55,
+    "bounded_composite_unsaturated_v1": 0.4,
+    "continuous_linear_boundary_v1": 0.6,
+    "learner_misspecification_v1": 0.0,
+    "nonlinear_continuous_v1": 0.75
+  },
+  "grid_upper_rejection_bounds": {
+    "bounded_composite_saturated_v1": 0.7413493902510877,
+    "bounded_composite_unsaturated_v1": 0.6064151132430304,
+    "continuous_linear_boundary_v1": 0.7829314106299258,
+    "learner_misspecification_v1": 0.13910834066826516,
+    "nonlinear_continuous_v1": 0.8959191640898638
+  },
+  "inference_folds": 5,
+  "sample_size": 300,
+  "scenario_family": "continuous_linear_boundary_v1",
+  "status": "rejected",
+  "upper_rejection_bound": 0.7829314106299258,
+  "validation_replications_per_family": {
+    "bounded_composite_saturated_v1": 20,
+    "bounded_composite_unsaturated_v1": 20,
+    "continuous_linear_boundary_v1": 20,
+    "learner_misspecification_v1": 20,
+    "nonlinear_continuous_v1": 20
+  },
+  "validation_scenario_families": [
+    "continuous_linear_boundary_v1",
+    "bounded_composite_unsaturated_v1",
+    "bounded_composite_saturated_v1",
+    "nonlinear_continuous_v1",
+    "learner_misspecification_v1"
+  ],
+  "vimp_fingerprint": "fd183bd74c30c6db8fa911f7a09bb2ca45c542939169eb7bfb679ef86a4fa442"
+}
