@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 from pydantic import Field
 from scipy.stats import norm
+from scipy.optimize import minimize
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LogisticRegression, Ridge
 from sklearn.model_selection import KFold
@@ -65,6 +66,18 @@ def _predictions(train: pd.DataFrame, valid: pd.DataFrame, target: str, features
             prediction = _fit_predict(name, train.iloc[inner_train], train.iloc[inner_valid], target, features, binary, spec, seed + fold)
             losses.extend(loss_fn(train.iloc[inner_valid][target].to_numpy(), prediction).tolist())
         inner_risks[name] = float(np.mean(losses))
+    if not binary and spec.learner_library_version == "v3_nested_blend":
+        matrix = np.empty((len(train), len(names)))
+        for column, name in enumerate(names):
+            for inner_train, inner_valid in KFold(n_splits=3, shuffle=True, random_state=seed).split(train):
+                matrix[inner_valid, column] = _fit_predict(name, train.iloc[inner_train], train.iloc[inner_valid], target, features, binary, spec, seed)
+        result = minimize(lambda weights: float(np.mean((y_train - matrix @ weights) ** 2)), np.repeat(1 / len(names), len(names)), bounds=[(0, 1)] * len(names), constraints={"type": "eq", "fun": lambda weights: weights.sum() - 1})
+        weights = result.x if result.success else np.array([1.0, *([0.0] * (len(names) - 1))])
+        prediction = sum(weight * _fit_predict(name, train, valid, target, features, binary, spec, seed) for weight, name in zip(weights, names))
+        inner_risks["blend_weight_ridge"] = float(weights[0])
+        inner_risks["blend_weight_quadratic_ridge"] = float(weights[1])
+        inner_risks["blend_weight_forest"] = float(weights[2])
+        return prediction, inner_risks, "nested_convex_blend"
     selected = min(inner_risks, key=inner_risks.get)
     return _fit_predict(selected, train, valid, target, features, binary, spec, seed), inner_risks, selected
 

@@ -1,0 +1,59 @@
+{
+  "alpha": 0.05,
+  "calibration_replications": 100,
+  "calibration_successful_replications_per_family": {
+    "bounded_composite_saturated_v1": 100,
+    "bounded_composite_unsaturated_v1": 100,
+    "continuous_linear_boundary_v1": 100,
+    "learner_misspecification_v1": 86,
+    "nonlinear_continuous_v1": 95
+  },
+  "critical_value": -2.733496640908359,
+  "delta_target": 0.05,
+  "distribution_file": "calibration_distribution.parquet",
+  "distribution_sha256": "4fb58084ca93679efbcfe0ec659ef5b328e832bdc62a496c10cb568248582f09",
+  "empirical_rejection_rate": 0.02,
+  "evaluation_replications": 100,
+  "grid_ineligibility_rates": {
+    "bounded_composite_saturated_v1": 0.0,
+    "bounded_composite_unsaturated_v1": 0.0,
+    "continuous_linear_boundary_v1": 0.0,
+    "learner_misspecification_v1": 0.11,
+    "nonlinear_continuous_v1": 0.0
+  },
+  "grid_rejection_rates": {
+    "bounded_composite_saturated_v1": 0.02,
+    "bounded_composite_unsaturated_v1": 0.0,
+    "continuous_linear_boundary_v1": 0.02,
+    "learner_misspecification_v1": 0.05,
+    "nonlinear_continuous_v1": 0.02
+  },
+  "grid_upper_rejection_bounds": {
+    "bounded_composite_saturated_v1": 0.06161920039604069,
+    "bounded_composite_unsaturated_v1": 0.02951304960703993,
+    "continuous_linear_boundary_v1": 0.06161920039604069,
+    "learner_misspecification_v1": 0.1022533776432745,
+    "nonlinear_continuous_v1": 0.06161920039604069
+  },
+  "inference_folds": 5,
+  "inference_rows": 300,
+  "profile_id": "v3-nested-blend-n300-d005-rehearsal100",
+  "scenario_family": "continuous_linear_boundary_v1",
+  "status": "rejected",
+  "upper_rejection_bound": 0.06161920039604069,
+  "validation_replications_per_family": {
+    "bounded_composite_saturated_v1": 100,
+    "bounded_composite_unsaturated_v1": 100,
+    "continuous_linear_boundary_v1": 100,
+    "learner_misspecification_v1": 100,
+    "nonlinear_continuous_v1": 100
+  },
+  "validation_scenario_families": [
+    "continuous_linear_boundary_v1",
+    "bounded_composite_unsaturated_v1",
+    "bounded_composite_saturated_v1",
+    "nonlinear_continuous_v1",
+    "learner_misspecification_v1"
+  ],
+  "vimp_fingerprint": "60ffacc5a214bfd1ae7e9f1a830de89f8f66a53e1d193f99f857611a8a8ddb29"
+}

@@ -18,7 +18,7 @@ from renca.models import (
 
 def valid_project_payload() -> dict[str, object]:
     return {
-        "schema_version": "1.6.0",
+        "schema_version": "1.7.0",
         "analysis_id": "dddb2c74-2a57-4561-8afc-2c56e086674b",
         "preanalysis_reference": "osf.io/example",
         "seed": 7,
@@ -144,7 +144,7 @@ def test_loader_reads_a_valid_yaml_project(tmp_path: Path) -> None:
     project_path = tmp_path / "project.yaml"
     project_path.write_text(
         """\
-schema_version: 1.6.0
+schema_version: 1.7.0
 analysis_id: dddb2c74-2a57-4561-8afc-2c56e086674b
 preanalysis_reference: osf.io/example
 seed: 7
@@ -180,7 +180,7 @@ def test_schema_export_is_deterministic_and_artifact_headers_are_versioned(
     committed = Path(__file__).parents[1] / "schemas" / "project_spec.schema.json"
     assert first["project"].read_bytes() == committed.read_bytes()
     header = ArtifactHeader(
-        schema_version="1.6.0",
+        schema_version="1.7.0",
         analysis_id="dddb2c74-2a57-4561-8afc-2c56e086674b",
         artifact_type="audit",
     )

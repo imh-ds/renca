@@ -273,8 +273,11 @@
           "type": "integer"
         },
         "learner_library_version": {
-          "const": "v2_quadratic_ridge",
           "default": "v2_quadratic_ridge",
+          "enum": [
+            "v2_quadratic_ridge",
+            "v3_nested_blend"
+          ],
           "title": "Learner Library Version",
           "type": "string"
         },
@@ -323,7 +326,7 @@
       "type": "string"
     },
     "schema_version": {
-      "const": "1.6.0",
+      "const": "1.7.0",
       "title": "Schema Version",
       "type": "string"
     },

@@ -11,7 +11,7 @@ from uuid import UUID
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-SCHEMA_VERSION = "1.6.0"
+SCHEMA_VERSION = "1.7.0"
 
 
 class MissingDataPolicy(StrEnum):
@@ -84,7 +84,7 @@ class VimpSpec(Model):
     ridge_alpha: Annotated[float, Field(gt=0)] = 1.0
     forest_trees: Annotated[int, Field(ge=10)] = 100
     forest_max_depth: Annotated[int, Field(ge=1)] = 5
-    learner_library_version: Literal["v2_quadratic_ridge"] = "v2_quadratic_ridge"
+    learner_library_version: Literal["v2_quadratic_ridge", "v3_nested_blend"] = "v2_quadratic_ridge"
 
 
 class CalibrationSpec(Model):

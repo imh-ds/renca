@@ -14,7 +14,7 @@ from renca.vimp import fit_crossfitted_vimp
 
 def _inference_manifest(n: int, seed: int, folds: int) -> SplitManifest:
     rows = list(range(n))
-    return SplitManifest(schema_version="1.6.0", analysis_id="00000000-0000-0000-0000-000000000001", seed=seed, selection_fraction=.2, inference_folds=folds, sampling_unit="iid", selection_row_positions=[], inference_row_positions=rows, inference_fold_by_row_position={row: row % folds for row in rows}, stratification_columns=[], input_order_sha256="calibration")
+    return SplitManifest(schema_version="1.7.0", analysis_id="00000000-0000-0000-0000-000000000001", seed=seed, selection_fraction=.2, inference_folds=folds, sampling_unit="iid", selection_row_positions=[], inference_row_positions=rows, inference_fold_by_row_position={row: row % folds for row in rows}, stratification_columns=[], input_order_sha256="calibration")
 
 
 def run_independent_grid(*, replications: int, sample_size: int, inference_folds: int, delta: float, critical_value: float, vimp_spec: VimpSpec, seed: int, scenario_families: tuple[str, ...] = REQUIRED_SCENARIO_FAMILIES, boundary_signals: dict[str, float] | None = None) -> pd.DataFrame:

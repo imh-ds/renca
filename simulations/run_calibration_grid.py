@@ -20,8 +20,9 @@ def main() -> None:
     parser.add_argument("--validation-replications", type=int, default=20)
     parser.add_argument("--sample-size", type=int, default=300)
     parser.add_argument("--seed", type=int, default=20260801)
+    parser.add_argument("--learner-library-version", choices=["v2_quadratic_ridge", "v3_nested_blend"], default="v2_quadratic_ridge")
     args = parser.parse_args()
-    delta = .05; folds = 5; spec = VimpSpec(forest_trees=10)
+    delta = .05; folds = 5; spec = VimpSpec(forest_trees=10, learner_library_version=args.learner_library_version)
     signals = {family: tune_boundary_signal(family, delta) for family in REQUIRED_SCENARIO_FAMILIES}
     signal_values = {family: item[0] for family, item in signals.items()}
     training = run_independent_grid(replications=args.training_replications, sample_size=args.sample_size, inference_folds=folds, delta=delta, critical_value=float("-inf"), vimp_spec=spec, seed=args.seed, boundary_signals=signal_values)

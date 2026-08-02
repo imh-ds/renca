@@ -4,6 +4,7 @@ import math
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from renca.models import NodeSpec, VimpSpec
 from renca.screening import SplitManifest
@@ -12,7 +13,7 @@ from renca.vimp import fit_crossfitted_vimp
 
 def manifest(n: int = 180) -> SplitManifest:
     positions = list(range(n))
-    return SplitManifest(schema_version="1.6.0", analysis_id="dddb2c74-2a57-4561-8afc-2c56e086674b", seed=11, selection_fraction=0.2, inference_folds=3, sampling_unit="iid", selection_row_positions=[], inference_row_positions=positions, inference_fold_by_row_position={row: row % 3 for row in positions}, stratification_columns=[], input_order_sha256="fixture")
+    return SplitManifest(schema_version="1.7.0", analysis_id="dddb2c74-2a57-4561-8afc-2c56e086674b", seed=11, selection_fraction=0.2, inference_folds=3, sampling_unit="iid", selection_row_positions=[], inference_row_positions=positions, inference_fold_by_row_position={row: row % 3 for row in positions}, stratification_columns=[], input_order_sha256="fixture")
 
 
 def continuous_node() -> NodeSpec:
@@ -42,3 +43,15 @@ def test_continuous_and_binary_signals_are_positive_and_deterministic() -> None:
     node = NodeSpec(node_id="y", outcome_type="binary", loss="brier", delta=.01)
     result = fit_crossfitted_vimp(binary, "y", "x", ["z"], node, manifest(), spec)
     assert result.status in {"success", "full_worse_than_reduced"} and result.theta_hat > 0 and result.se_theta > 0
+
+
+def test_nested_blend_is_deterministic_and_records_convex_weights() -> None:
+    rng = np.random.default_rng(14); z = rng.normal(size=180); x = rng.normal(size=180)
+    data = pd.DataFrame({"z": z, "x": x, "y": z * x + rng.normal(scale=.3, size=180)})
+    spec = VimpSpec(forest_trees=10, learner_library_version="v3_nested_blend")
+    first = fit_crossfitted_vimp(data, "y", "x", ["z"], continuous_node(), manifest(), spec)
+    second = fit_crossfitted_vimp(data, "y", "x", ["z"], continuous_node(), manifest(), spec)
+    assert first == second
+    for fold in first.nuisance_diagnostic["folds"].values():
+        assert fold["full_selected"] == "nested_convex_blend"
+        assert sum(fold["full_risks"][f"blend_weight_{name}"] for name in ("ridge", "quadratic_ridge", "forest")) == pytest.approx(1)
