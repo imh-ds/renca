@@ -1,0 +1,37 @@
+[
+  {
+    "scenario_family":"bounded_composite_saturated_v1",
+    "total":100,
+    "successful":100,
+    "abstentions":0,
+    "abstention_rate":0.0
+  },
+  {
+    "scenario_family":"bounded_composite_unsaturated_v1",
+    "total":100,
+    "successful":100,
+    "abstentions":0,
+    "abstention_rate":0.0
+  },
+  {
+    "scenario_family":"continuous_linear_boundary_v1",
+    "total":100,
+    "successful":99,
+    "abstentions":1,
+    "abstention_rate":0.01
+  },
+  {
+    "scenario_family":"learner_misspecification_v1",
+    "total":100,
+    "successful":66,
+    "abstentions":34,
+    "abstention_rate":0.34
+  },
+  {
+    "scenario_family":"nonlinear_continuous_v1",
+    "total":100,
+    "successful":96,
+    "abstentions":4,
+    "abstention_rate":0.04
+  }
+]
