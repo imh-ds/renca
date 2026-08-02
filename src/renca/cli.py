@@ -8,8 +8,8 @@ app=typer.Typer()
 def main() -> None:
     """Run renca analysis commands."""
 @app.command()
-def run(config:Path=typer.Option(...),data:Path=typer.Option(...),output:Path=typer.Option(...)):
-    try: run_analysis(pd.read_csv(data),load_project_spec(config),output)
+def run(config:Path=typer.Option(...),data:Path=typer.Option(...),output:Path=typer.Option(...),calibration_registry:Path|None=typer.Option(None)):
+    try: run_analysis(pd.read_csv(data),load_project_spec(config),output,calibration_registry)
     except Exception as error: raise typer.Exit(code=typer.echo(str(error),err=True) or 1)
 if __name__ == "__main__":
     app()

@@ -1,8 +1,9 @@
 # Calibration registry protocol
 
-Each candidate VIMP critical value is bound to one scenario family, sample size,
-number of inference folds, and a SHA-256 fingerprint of the complete `VimpSpec`.
-Changing any of these creates a new calibration problem.
+Each candidate VIMP critical value is bound to a profile ID, target delta,
+inference-row count, number of inference folds, alpha, and a SHA-256
+fingerprint of the complete `VimpSpec`. Changing any of these creates a new
+calibration problem.
 
 The independent validation grid must include these five families:
 
@@ -19,7 +20,12 @@ replications used to establish the critical value.  A smaller run is useful
 diagnostic evidence, but is always recorded as `rejected` and cannot mark VIMP
 artifacts `calibrated_success`.
 
-`renca.calibration.run_independent_grid` produces a deterministic, seed-traced
-table for the grid.  `validate_grid` reduces it to a registry record.  The
-published 1,000/300 linear comparison is deliberately retained as a rejected
-record: it is preliminary evidence, not a production calibration.
+Every family is first boundary-tuned with an independent oracle Monte Carlo
+calculation before it enters the train/validation ledger. The calibrated
+directional p-value is the maximum family-specific empirical left-tail p-value
+with plus-one smoothing. The profile also records the worst-family alpha
+critical value. `renca.calibration.run_independent_grid` produces the
+seed-traced ledger and `simulations/run_calibration_grid.py` writes its training
+distribution, disjoint validation ledger, tuning metadata, and summary record.
+The published 1,000/300 linear comparison remains rejected preliminary
+evidence, not a production calibration.

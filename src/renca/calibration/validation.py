@@ -12,7 +12,7 @@ REQUIRED_SCENARIO_FAMILIES = (
     "learner_misspecification_v1",
 )
 
-def validate_grid(results: pd.DataFrame, *, scenario_family: str, sample_size: int, inference_folds: int, vimp_fingerprint: str, critical_value: float, calibration_replications: int | None = None, required_scenario_families: tuple[str, ...] = REQUIRED_SCENARIO_FAMILIES, alpha: float = .05) -> CalibrationRecord:
+def validate_grid(results: pd.DataFrame, *, profile_id: str, scenario_family: str, delta_target: float, inference_rows: int, inference_folds: int, vimp_fingerprint: str, critical_value: float, distribution_file: str = "", distribution_sha256: str = "", calibration_replications: int | None = None, required_scenario_families: tuple[str, ...] = REQUIRED_SCENARIO_FAMILIES, alpha: float = .05) -> CalibrationRecord:
     """Summarize an independent scenario grid; only 5,000-per-family evidence can validate it."""
     if set(results.columns) < {"replicate", "reject"}: raise ValueError("results require replicate and reject columns")
     frame = results.copy()
@@ -33,4 +33,4 @@ def validate_grid(results: pd.DataFrame, *, scenario_family: str, sample_size: i
     primary_n = counts[scenario_family]
     calibrated_n = calibration_replications if calibration_replications is not None else primary_n
     valid = calibrated_n >= 5000 and all(counts[f] >= 5000 and uppers[f] <= alpha for f in families)
-    return CalibrationRecord(scenario_family=scenario_family,sample_size=sample_size,inference_folds=inference_folds,vimp_fingerprint=vimp_fingerprint,critical_value=critical_value,calibration_replications=calibrated_n,evaluation_replications=primary_n,empirical_rejection_rate=rates[scenario_family],upper_rejection_bound=uppers[scenario_family],validation_scenario_families=list(families),validation_replications_per_family=counts,grid_rejection_rates=rates,grid_upper_rejection_bounds=uppers,status="validated" if valid else "rejected")
+    return CalibrationRecord(profile_id=profile_id,scenario_family=scenario_family,delta_target=delta_target,inference_rows=inference_rows,inference_folds=inference_folds,vimp_fingerprint=vimp_fingerprint,alpha=alpha,critical_value=critical_value,distribution_file=distribution_file,distribution_sha256=distribution_sha256,calibration_replications=calibrated_n,evaluation_replications=primary_n,empirical_rejection_rate=rates[scenario_family],upper_rejection_bound=uppers[scenario_family],validation_scenario_families=list(families),validation_replications_per_family=counts,grid_rejection_rates=rates,grid_upper_rejection_bounds=uppers,status="validated" if valid else "rejected")

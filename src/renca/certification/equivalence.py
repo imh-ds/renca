@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Literal
 import pandas as pd
 from pydantic import Field
-from scipy.stats import norm
 from statsmodels.stats.multitest import multipletests
 from renca.models import Model
 from renca.vimp import VimpEstimate
@@ -19,7 +18,7 @@ class EdgeCertificate(Model):
 
 def _p(e: VimpEstimate) -> float|None:
     if e.calibration_status != "calibrated_success" or e.status != "success" or e.theta_hat is None or e.se_theta is None or e.se_theta <= 0: return None
-    return float(norm.cdf((e.theta_hat-e.delta_target)/e.se_theta))
+    return e.p_equivalence
 def certify_pairs(estimates:list[VimpEstimate], alpha:float=.05)->list[EdgeCertificate]:
     grouped:dict[str,list[VimpEstimate]]={}
     for e in estimates: grouped.setdefault(e.pair_id,[]).append(e)

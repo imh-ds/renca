@@ -1,10 +1,14 @@
-schema_version: "1.0"
+schema_version: "2.0"
 records:
-  - scenario_family: continuous_linear_boundary_v1
-    sample_size: 300
+  - profile_id: exploratory_linear_v1
+    scenario_family: continuous_linear_boundary_v1
+    delta_target: 0.05
+    inference_rows: 300
     inference_folds: 5
     vimp_fingerprint: "ba5fa223a9d114ae10f6c37748293e30b3f52cac6f3014e79a41d48a8dc785ef"
     critical_value: -2.1099877626362535
+    distribution_file: ""
+    distribution_sha256: ""
     calibration_replications: 1000
     evaluation_replications: 300
     empirical_rejection_rate: 0.05

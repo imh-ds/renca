@@ -5,13 +5,14 @@ import pandas as pd
 from renca.artifacts.manifest import build_analysis_manifest, write_audit_artifacts
 from renca.audit import audit_project
 from renca.certification import certify_pairs, write_edge_certificates
+from renca.calibration import CalibrationRegistry, apply_profile
 from renca.models import ProjectSpec
 from renca.reporting.edge_table import write_edge_report
 from renca.screening import create_outer_split, rank_separators, screen_neighbors, write_separator_candidates, write_split_manifest
 from renca.vimp import fit_crossfitted_vimp, write_vimp_estimates
 @dataclass(frozen=True)
 class RunArtifacts: output_dir: Path
-def run_analysis(data:pd.DataFrame,project_spec:ProjectSpec,output_dir:str|Path)->RunArtifacts:
+def run_analysis(data:pd.DataFrame,project_spec:ProjectSpec,output_dir:str|Path,calibration_registry_path:str|Path|None=None)->RunArtifacts:
     report=audit_project(data,project_spec)
     if not report.eligible: raise ValueError("Audit failed")
     clean=data.dropna(subset=[n.node_id for n in project_spec.nodes]).reset_index(drop=True); out=Path(output_dir); out.mkdir(parents=True,exist_ok=True)
@@ -21,4 +22,8 @@ def run_analysis(data:pd.DataFrame,project_spec:ProjectSpec,output_dir:str|Path)
     nodes={n.node_id:n for n in project_spec.nodes}; estimates=[]
     for c in candidates:
         estimates.extend([fit_crossfitted_vimp(clean,c.node_i,c.node_j,c.separator,nodes[c.node_i],split,project_spec.vimp),fit_crossfitted_vimp(clean,c.node_j,c.node_i,c.separator,nodes[c.node_j],split,project_spec.vimp)])
+    if project_spec.calibration.profile_id and calibration_registry_path is None:
+        raise ValueError("A calibration registry is required when calibration.profile_id is declared")
+    if calibration_registry_path is not None:
+        estimates=apply_profile(estimates,registry=CalibrationRegistry.load(calibration_registry_path),registry_path=calibration_registry_path,profile_id=project_spec.calibration.profile_id,inference_rows=len(split.inference_row_positions),inference_folds=split.inference_folds,vimp_spec=project_spec.vimp)
     write_vimp_estimates(estimates,out); certificates=certify_pairs(estimates); write_edge_certificates(certificates,out); write_edge_report(certificates,estimates,out); return RunArtifacts(out)

@@ -1,0 +1,116 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "alpha": {
+      "default": 0.05,
+      "title": "Alpha",
+      "type": "number"
+    },
+    "calibration_replications": {
+      "title": "Calibration Replications",
+      "type": "integer"
+    },
+    "critical_value": {
+      "title": "Critical Value",
+      "type": "number"
+    },
+    "delta_target": {
+      "title": "Delta Target",
+      "type": "number"
+    },
+    "distribution_file": {
+      "default": "",
+      "title": "Distribution File",
+      "type": "string"
+    },
+    "distribution_sha256": {
+      "default": "",
+      "title": "Distribution Sha256",
+      "type": "string"
+    },
+    "empirical_rejection_rate": {
+      "title": "Empirical Rejection Rate",
+      "type": "number"
+    },
+    "evaluation_replications": {
+      "title": "Evaluation Replications",
+      "type": "integer"
+    },
+    "grid_rejection_rates": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "title": "Grid Rejection Rates",
+      "type": "object"
+    },
+    "grid_upper_rejection_bounds": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "title": "Grid Upper Rejection Bounds",
+      "type": "object"
+    },
+    "inference_folds": {
+      "title": "Inference Folds",
+      "type": "integer"
+    },
+    "inference_rows": {
+      "title": "Inference Rows",
+      "type": "integer"
+    },
+    "profile_id": {
+      "title": "Profile Id",
+      "type": "string"
+    },
+    "scenario_family": {
+      "title": "Scenario Family",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "validated",
+        "rejected"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "upper_rejection_bound": {
+      "title": "Upper Rejection Bound",
+      "type": "number"
+    },
+    "validation_replications_per_family": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Validation Replications Per Family",
+      "type": "object"
+    },
+    "validation_scenario_families": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Validation Scenario Families",
+      "type": "array"
+    },
+    "vimp_fingerprint": {
+      "title": "Vimp Fingerprint",
+      "type": "string"
+    }
+  },
+  "required": [
+    "profile_id",
+    "scenario_family",
+    "delta_target",
+    "inference_rows",
+    "inference_folds",
+    "vimp_fingerprint",
+    "critical_value",
+    "calibration_replications",
+    "evaluation_replications",
+    "empirical_rejection_rate",
+    "upper_rejection_bound",
+    "status"
+  ],
+  "title": "CalibrationRecord",
+  "type": "object"
+}

@@ -9,7 +9,8 @@ from renca.vimp import VimpEstimate
 
 
 def estimate(pair: str, target: str, added: str, theta: float, *, calibrated: bool = True, status: str = "success", separator: list[str] | None = None) -> VimpEstimate:
-    return VimpEstimate(pair_id=pair, target=target, added_variable=added, separator=separator or ["z"], psi_hat=theta, theta_hat=theta, se_theta=.01, lower_ci=theta-.02, upper_ci=theta+.02, delta_target=.1, calibration_status="calibrated_success" if calibrated else "uncalibrated", status=status)
+    p = .001 if theta <= .02 else (.04 if theta < .1 else .99)
+    return VimpEstimate(pair_id=pair, target=target, added_variable=added, separator=separator or ["z"], psi_hat=theta, theta_hat=theta, se_theta=.01, lower_ci=theta-.02, upper_ci=theta+.02, delta_target=.1, p_equivalence=p if calibrated else None, calibration_status="calibrated_success" if calibrated else "uncalibrated", status=status)
 
 
 def test_both_directions_pass_iut_and_holm_certifies() -> None:

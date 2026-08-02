@@ -11,7 +11,7 @@ from uuid import UUID
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-SCHEMA_VERSION = "1.4.0"
+SCHEMA_VERSION = "1.5.0"
 
 
 class MissingDataPolicy(StrEnum):
@@ -86,6 +86,12 @@ class VimpSpec(Model):
     forest_max_depth: Annotated[int, Field(ge=1)] = 5
 
 
+class CalibrationSpec(Model):
+    """Optional immutable calibration profile required for hard certification."""
+
+    profile_id: Annotated[str, Field(min_length=1)] | None = None
+
+
 class DesignSpec(Model):
     """Declared sampling design metadata."""
 
@@ -157,6 +163,7 @@ class ProjectSpec(Model):
     audit: AuditSpec = Field(default_factory=AuditSpec)
     screening: ScreeningSpec = Field(default_factory=ScreeningSpec)
     vimp: VimpSpec = Field(default_factory=VimpSpec)
+    calibration: CalibrationSpec = Field(default_factory=CalibrationSpec)
     nodes: Annotated[list[NodeSpec], Field(min_length=2)]
 
     @model_validator(mode="after")
@@ -206,6 +213,7 @@ def write_json_schemas(destination: str | Path) -> dict[str, Path]:
     from renca.screening.separators import SeparatorCandidate
     from renca.vimp import VimpEstimate
     from renca.certification import EdgeCertificate
+    from renca.calibration.registry import CalibrationRecord
     contracts.update({
         "audit_report": (AuditReport, "audit_report.schema.json"),
         "analysis_manifest": (AnalysisManifest, "analysis_manifest.schema.json"),
@@ -214,6 +222,7 @@ def write_json_schemas(destination: str | Path) -> dict[str, Path]:
         "separator_candidate": (SeparatorCandidate, "separator_candidate.schema.json"),
         "vimp_estimate": (VimpEstimate, "vimp_estimate.schema.json"),
         "edge_certificate": (EdgeCertificate, "edge_certificate.schema.json"),
+        "calibration_profile": (CalibrationRecord, "calibration_profile.schema.json"),
     })
     paths: dict[str, Path] = {}
     for contract_name, (model, filename) in contracts.items():

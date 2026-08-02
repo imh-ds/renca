@@ -13,7 +13,7 @@ from renca.models import ProjectSpec
 
 def project_spec(**updates: object) -> ProjectSpec:
     payload: dict[str, object] = {
-        "schema_version": "1.4.0",
+        "schema_version": "1.5.0",
         "analysis_id": "dddb2c74-2a57-4561-8afc-2c56e086674b",
         "preanalysis_reference": "osf.io/example",
         "seed": 7,

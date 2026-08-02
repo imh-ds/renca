@@ -19,6 +19,27 @@
       "title": "AuditSpec",
       "type": "object"
     },
+    "CalibrationSpec": {
+      "additionalProperties": false,
+      "description": "Optional immutable calibration profile required for hard certification.",
+      "properties": {
+        "profile_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Profile Id"
+        }
+      },
+      "title": "CalibrationSpec",
+      "type": "object"
+    },
     "DesignSpec": {
       "additionalProperties": false,
       "description": "Declared sampling design metadata.",
@@ -273,6 +294,9 @@
     "audit": {
       "$ref": "#/$defs/AuditSpec"
     },
+    "calibration": {
+      "$ref": "#/$defs/CalibrationSpec"
+    },
     "design": {
       "$ref": "#/$defs/DesignSpec"
     },
@@ -293,7 +317,7 @@
       "type": "string"
     },
     "schema_version": {
-      "const": "1.4.0",
+      "const": "1.5.0",
       "title": "Schema Version",
       "type": "string"
     },

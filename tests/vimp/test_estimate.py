@@ -12,7 +12,7 @@ from renca.vimp import fit_crossfitted_vimp
 
 def manifest(n: int = 180) -> SplitManifest:
     positions = list(range(n))
-    return SplitManifest(schema_version="1.4.0", analysis_id="dddb2c74-2a57-4561-8afc-2c56e086674b", seed=11, selection_fraction=0.2, inference_folds=3, sampling_unit="iid", selection_row_positions=[], inference_row_positions=positions, inference_fold_by_row_position={row: row % 3 for row in positions}, stratification_columns=[], input_order_sha256="fixture")
+    return SplitManifest(schema_version="1.5.0", analysis_id="dddb2c74-2a57-4561-8afc-2c56e086674b", seed=11, selection_fraction=0.2, inference_folds=3, sampling_unit="iid", selection_row_positions=[], inference_row_positions=positions, inference_fold_by_row_position={row: row % 3 for row in positions}, stratification_columns=[], input_order_sha256="fixture")
 
 
 def continuous_node() -> NodeSpec:
