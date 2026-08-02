@@ -1,0 +1,101 @@
+name: Phase-0 VIMP calibration
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  training:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        family: [continuous_linear_boundary_v1, bounded_composite_unsaturated_v1, bounded_composite_saturated_v1, nonlinear_continuous_v1, learner_misspecification_v1]
+        start: [0, 1000, 2000, 3000, 4000, 5000]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: pip install .
+      - run: python simulations/phase0_calibration.py shard --phase training --family ${{ matrix.family }} --start ${{ matrix.start }} --count 1000 --output out/${{ matrix.family }}-${{ matrix.start }}.parquet
+      - uses: actions/upload-artifact@v4
+        with:
+          name: training-${{ matrix.family }}-${{ matrix.start }}
+          path: out/*.parquet
+          retention-days: 90
+
+  assemble-training:
+    needs: training
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: pip install .
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: training-*
+          path: downloaded
+      - run: mkdir shards
+      - run: find downloaded -name '*.parquet' -exec cp {} shards/ \;
+      - run: python simulations/phase0_calibration.py training-manifest --shards shards --output training --training-replications 6000
+      - uses: actions/upload-artifact@v4
+        with:
+          name: phase0-training-manifest
+          path: training
+          retention-days: 90
+
+  validation:
+    needs: assemble-training
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        family: [continuous_linear_boundary_v1, bounded_composite_unsaturated_v1, bounded_composite_saturated_v1, nonlinear_continuous_v1, learner_misspecification_v1]
+        start: [0, 1000, 2000, 3000, 4000]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: pip install .
+      - uses: actions/download-artifact@v5
+        with:
+          name: phase0-training-manifest
+          path: training
+      - run: python simulations/phase0_calibration.py shard --phase validation --family ${{ matrix.family }} --start ${{ matrix.start }} --count 1000 --training-manifest training/training_manifest.json --output out/${{ matrix.family }}-${{ matrix.start }}.parquet
+      - uses: actions/upload-artifact@v4
+        with:
+          name: validation-${{ matrix.family }}-${{ matrix.start }}
+          path: out/*.parquet
+          retention-days: 90
+
+  finalize:
+    needs: validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: pip install .
+      - uses: actions/download-artifact@v5
+        with:
+          name: phase0-training-manifest
+          path: training
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: validation-*
+          path: downloaded
+      - run: mkdir validation
+      - run: find downloaded -name '*.parquet' -exec cp {} validation/ \;
+      - run: python simulations/phase0_calibration.py final --training training --validation validation --output phase0
+      - uses: actions/upload-artifact@v4
+        with:
+          name: phase0-calibration-evidence
+          path: phase0
+          retention-days: 90
