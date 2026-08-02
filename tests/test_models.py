@@ -18,7 +18,7 @@ from renca.models import (
 
 def valid_project_payload() -> dict[str, object]:
     return {
-        "schema_version": "1.5.0",
+        "schema_version": "1.6.0",
         "analysis_id": "dddb2c74-2a57-4561-8afc-2c56e086674b",
         "preanalysis_reference": "osf.io/example",
         "seed": 7,
@@ -31,7 +31,7 @@ def valid_project_payload() -> dict[str, object]:
         },
         "audit": {"minimum_rows_per_inference_fold": 100, "minimum_clusters": 20},
         "screening": {"max_neighbors": 10, "max_separator_size": 1, "separators_per_pair": 1},
-        "vimp": {"confidence_level": 0.95, "ridge_alpha": 1.0, "forest_trees": 100, "forest_max_depth": 5},
+        "vimp": {"confidence_level": 0.95, "ridge_alpha": 1.0, "forest_trees": 100, "forest_max_depth": 5, "learner_library_version": "v2_quadratic_ridge"},
         "calibration": {"profile_id": None},
         "nodes": [
             {
@@ -144,7 +144,7 @@ def test_loader_reads_a_valid_yaml_project(tmp_path: Path) -> None:
     project_path = tmp_path / "project.yaml"
     project_path.write_text(
         """\
-schema_version: 1.5.0
+schema_version: 1.6.0
 analysis_id: dddb2c74-2a57-4561-8afc-2c56e086674b
 preanalysis_reference: osf.io/example
 seed: 7
@@ -180,7 +180,7 @@ def test_schema_export_is_deterministic_and_artifact_headers_are_versioned(
     committed = Path(__file__).parents[1] / "schemas" / "project_spec.schema.json"
     assert first["project"].read_bytes() == committed.read_bytes()
     header = ArtifactHeader(
-        schema_version="1.5.0",
+        schema_version="1.6.0",
         analysis_id="dddb2c74-2a57-4561-8afc-2c56e086674b",
         artifact_type="audit",
     )

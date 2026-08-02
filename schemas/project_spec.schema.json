@@ -272,6 +272,12 @@
           "title": "Forest Trees",
           "type": "integer"
         },
+        "learner_library_version": {
+          "const": "v2_quadratic_ridge",
+          "default": "v2_quadratic_ridge",
+          "title": "Learner Library Version",
+          "type": "string"
+        },
         "ridge_alpha": {
           "default": 1.0,
           "exclusiveMinimum": 0,
@@ -317,7 +323,7 @@
       "type": "string"
     },
     "schema_version": {
-      "const": "1.5.0",
+      "const": "1.6.0",
       "title": "Schema Version",
       "type": "string"
     },

@@ -13,6 +13,8 @@ from scipy.stats import norm
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LogisticRegression, Ridge
 from sklearn.model_selection import KFold
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import PolynomialFeatures
 
 from renca.models import Model, NodeSpec, OutcomeType, VimpSpec
 from renca.screening import SplitManifest
@@ -43,6 +45,8 @@ def _fit_predict(name: str, train: pd.DataFrame, valid: pd.DataFrame, target: st
         return LogisticRegression(C=1 / spec.ridge_alpha, max_iter=500, random_state=seed).fit(train[features], y_train).predict_proba(valid[features])[:, 1]
     if not binary and name == "ridge":
         return Ridge(alpha=spec.ridge_alpha).fit(train[features], y_train).predict(valid[features])
+    if not binary and name == "quadratic_ridge":
+        return make_pipeline(PolynomialFeatures(degree=2, include_bias=False), Ridge(alpha=spec.ridge_alpha)).fit(train[features], y_train).predict(valid[features])
     return RandomForestRegressor(n_estimators=spec.forest_trees, max_depth=spec.forest_max_depth, random_state=seed).fit(train[features], y_train).predict(valid[features])
 
 
@@ -52,7 +56,7 @@ def _predictions(train: pd.DataFrame, valid: pd.DataFrame, target: str, features
         prediction = np.repeat(y_train.mean(), len(valid))
         loss = brier_loss(y_valid, prediction) if binary else squared_loss(y_valid, prediction)
         return prediction, {"intercept": float(loss.mean())}, "intercept"
-    names = ["logistic", "probability_forest"] if binary else ["ridge", "forest"]
+    names = ["logistic", "probability_forest"] if binary else ["ridge", "quadratic_ridge", "forest"]
     loss_fn = brier_loss if binary else squared_loss
     inner_risks: dict[str, float] = {}
     for name in names:

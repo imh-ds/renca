@@ -14,7 +14,7 @@
       "type": "string"
     },
     "schema_version": {
-      "const": "1.5.0",
+      "const": "1.6.0",
       "title": "Schema Version",
       "type": "string"
     }

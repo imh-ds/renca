@@ -77,3 +77,10 @@ def test_small_grid_runner_is_deterministic_and_covers_every_family() -> None:
     first = run_independent_grid(replications=1, sample_size=60, inference_folds=5, delta=.05, critical_value=-2.11, vimp_spec=spec, seed=4, boundary_signals=signals)
     second = run_independent_grid(replications=1, sample_size=60, inference_folds=5, delta=.05, critical_value=-2.11, vimp_spec=spec, seed=4, boundary_signals=signals)
     assert first.equals(second) and set(first.scenario_family) == set(REQUIRED_SCENARIO_FAMILIES)
+
+
+def test_quadratic_ridge_makes_the_interaction_misspecification_fixture_eligible() -> None:
+    family = "learner_misspecification_v1"
+    signal = tune_boundary_signal(family, .05, n=20_000)[0]
+    results = run_independent_grid(replications=5, sample_size=300, inference_folds=5, delta=.05, critical_value=-99, vimp_spec=VimpSpec(forest_trees=10), seed=20260804, scenario_families=(family,), boundary_signals={family: signal})
+    assert set(results.status) == {"success"}
