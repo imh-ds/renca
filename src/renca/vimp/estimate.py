@@ -12,6 +12,7 @@ from pydantic import Field
 from scipy.stats import norm
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LogisticRegression, Ridge
+from sklearn.model_selection import KFold
 
 from renca.models import Model, NodeSpec, OutcomeType, VimpSpec
 from renca.screening import SplitManifest
@@ -36,25 +37,32 @@ class VimpEstimate(Model):
     status: Literal["success", "full_worse_than_reduced", "nonpositive_null_risk", "nonfinite_standard_error", "learner_failure"]
 
 
+def _fit_predict(name: str, train: pd.DataFrame, valid: pd.DataFrame, target: str, features: list[str], binary: bool, spec: VimpSpec, seed: int) -> np.ndarray:
+    y_train = train[target].to_numpy()
+    if binary and name == "logistic":
+        return LogisticRegression(C=1 / spec.ridge_alpha, max_iter=500, random_state=seed).fit(train[features], y_train).predict_proba(valid[features])[:, 1]
+    if not binary and name == "ridge":
+        return Ridge(alpha=spec.ridge_alpha).fit(train[features], y_train).predict(valid[features])
+    return RandomForestRegressor(n_estimators=spec.forest_trees, max_depth=spec.forest_max_depth, random_state=seed).fit(train[features], y_train).predict(valid[features])
+
+
 def _predictions(train: pd.DataFrame, valid: pd.DataFrame, target: str, features: list[str], binary: bool, spec: VimpSpec, seed: int) -> tuple[np.ndarray, dict[str, float], str]:
     y_train, y_valid = train[target].to_numpy(), valid[target].to_numpy()
     if not features:
         prediction = np.repeat(y_train.mean(), len(valid))
         loss = brier_loss(y_valid, prediction) if binary else squared_loss(y_valid, prediction)
         return prediction, {"intercept": float(loss.mean())}, "intercept"
-    if binary:
-        ridge = LogisticRegression(C=1 / spec.ridge_alpha, max_iter=500, random_state=seed).fit(train[features], y_train)
-        forest = RandomForestRegressor(n_estimators=spec.forest_trees, max_depth=spec.forest_max_depth, random_state=seed).fit(train[features], y_train)
-        candidates = {"logistic": ridge.predict_proba(valid[features])[:, 1], "probability_forest": forest.predict(valid[features])}
-        loss_fn = brier_loss
-    else:
-        ridge = Ridge(alpha=spec.ridge_alpha).fit(train[features], y_train)
-        forest = RandomForestRegressor(n_estimators=spec.forest_trees, max_depth=spec.forest_max_depth, random_state=seed).fit(train[features], y_train)
-        candidates = {"ridge": ridge.predict(valid[features]), "forest": forest.predict(valid[features])}
-        loss_fn = squared_loss
-    risks = {name: float(loss_fn(y_valid, prediction).mean()) for name, prediction in candidates.items()}
-    selected = min(risks, key=risks.get)
-    return candidates[selected], risks, selected
+    names = ["logistic", "probability_forest"] if binary else ["ridge", "forest"]
+    loss_fn = brier_loss if binary else squared_loss
+    inner_risks: dict[str, float] = {}
+    for name in names:
+        losses: list[float] = []
+        for fold, (inner_train, inner_valid) in enumerate(KFold(n_splits=3, shuffle=True, random_state=seed).split(train)):
+            prediction = _fit_predict(name, train.iloc[inner_train], train.iloc[inner_valid], target, features, binary, spec, seed + fold)
+            losses.extend(loss_fn(train.iloc[inner_valid][target].to_numpy(), prediction).tolist())
+        inner_risks[name] = float(np.mean(losses))
+    selected = min(inner_risks, key=inner_risks.get)
+    return _fit_predict(selected, train, valid, target, features, binary, spec, seed), inner_risks, selected
 
 
 def fit_crossfitted_vimp(data_infer: pd.DataFrame, target: str, added_variable: str, separator: list[str], node_spec: NodeSpec, folds: SplitManifest, vimp_spec: VimpSpec) -> VimpEstimate:

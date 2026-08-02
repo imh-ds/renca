@@ -1,0 +1,14 @@
+{
+  "n": 300,
+  "replications": 1000,
+  "delta": 0.05,
+  "population_theta_approx": 0.05,
+  "beta": 0.2564945880212885,
+  "successful_estimates": 1000,
+  "status_counts": {"success": 1000},
+  "empirical_rejection_rate": 0.108,
+  "wald_95pct_interval": [0.08876242277208483, 0.12723757722791518],
+  "mean_theta_hat": 0.0486396218581254,
+  "mean_se_theta": 0.01206980503203156,
+  "runtime_seconds": 207.4302356999833
+}
