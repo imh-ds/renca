@@ -1,0 +1,12 @@
+{
+  "calibration_replicates": 1000,
+  "evaluation_replicates": 300,
+  "calibrated_critical_value": -2.1099877626362535,
+  "estimated_theta_bias_correction": 0.0006032063177119143,
+  "rates": {
+    "wald_reject": 0.08333333333333333,
+    "critical_reject": 0.05,
+    "bias_corrected_reject": 0.08333333333333333
+  },
+  "runtime_seconds": 203.20810739998706
+}
