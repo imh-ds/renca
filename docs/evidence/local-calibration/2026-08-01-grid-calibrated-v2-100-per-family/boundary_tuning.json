@@ -1,0 +1,22 @@
+{
+  "bounded_composite_saturated_v1": {
+    "oracle_theta": 0.049999999923705366,
+    "signal": 0.6820979434996843
+  },
+  "bounded_composite_unsaturated_v1": {
+    "oracle_theta": 0.05000000002102863,
+    "signal": 0.3617741297930479
+  },
+  "continuous_linear_boundary_v1": {
+    "oracle_theta": 0.04999999967613748,
+    "signal": 0.32385930605232716
+  },
+  "learner_misspecification_v1": {
+    "oracle_theta": 0.05000000076051498,
+    "signal": 0.1327610220760107
+  },
+  "nonlinear_continuous_v1": {
+    "oracle_theta": 0.049999999730973535,
+    "signal": 0.41693093068897724
+  }
+}
