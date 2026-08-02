@@ -1,0 +1,45 @@
+{
+  "alpha": 0.05,
+  "calibration_replications": 100,
+  "critical_value": -14.613228423782209,
+  "delta_target": 0.05,
+  "distribution_file": "calibration_distribution.parquet",
+  "distribution_sha256": "fb80932fcf31724a8e4ba1b950036b1338bb6a30f6ef4aa18706a4ff80ae6347",
+  "empirical_rejection_rate": 0.0,
+  "evaluation_replications": 100,
+  "grid_rejection_rates": {
+    "bounded_composite_saturated_v1": 0.0,
+    "bounded_composite_unsaturated_v1": 0.0,
+    "continuous_linear_boundary_v1": 0.0,
+    "learner_misspecification_v1": 0.0,
+    "nonlinear_continuous_v1": 0.0
+  },
+  "grid_upper_rejection_bounds": {
+    "bounded_composite_saturated_v1": 0.02951304960703993,
+    "bounded_composite_unsaturated_v1": 0.02951304960703993,
+    "continuous_linear_boundary_v1": 0.02951304960703993,
+    "learner_misspecification_v1": 0.02951304960703993,
+    "nonlinear_continuous_v1": 0.02951304960703993
+  },
+  "inference_folds": 5,
+  "inference_rows": 300,
+  "profile_id": "v1-grid-n300-d005-rehearsal100",
+  "scenario_family": "continuous_linear_boundary_v1",
+  "status": "rejected",
+  "upper_rejection_bound": 0.02951304960703993,
+  "validation_replications_per_family": {
+    "bounded_composite_saturated_v1": 100,
+    "bounded_composite_unsaturated_v1": 100,
+    "continuous_linear_boundary_v1": 100,
+    "learner_misspecification_v1": 100,
+    "nonlinear_continuous_v1": 100
+  },
+  "validation_scenario_families": [
+    "continuous_linear_boundary_v1",
+    "bounded_composite_unsaturated_v1",
+    "bounded_composite_saturated_v1",
+    "nonlinear_continuous_v1",
+    "learner_misspecification_v1"
+  ],
+  "vimp_fingerprint": "fd183bd74c30c6db8fa911f7a09bb2ca45c542939169eb7bfb679ef86a4fa442"
+}
