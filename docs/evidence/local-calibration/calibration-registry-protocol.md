@@ -15,10 +15,12 @@ The independent validation grid must include these five families:
 
 For every family, the gate requires at least 5,000 independent evaluation
 replications and a one-sided 95% binomial upper bound on the false-certification
-rate no larger than 0.05.  It also requires at least 5,000 calibration
-replications used to establish the critical value.  A smaller run is useful
-diagnostic evidence, but is always recorded as `rejected` and cannot mark VIMP
-artifacts `calibrated_success`.
+rate no larger than 0.05. It also requires at least 5,000 successful
+calibration replications used to establish the critical value. A smaller run
+is useful diagnostic evidence, but is always recorded as `rejected` and cannot
+mark VIMP artifacts `calibrated_success`. Full-worse estimates remain unable
+to certify and are reported as an abstention/power diagnostic; their frequency
+does not itself invalidate false-certification calibration.
 
 Every family is first boundary-tuned with an independent oracle Monte Carlo
 calculation before it enters the train/validation ledger. The calibrated

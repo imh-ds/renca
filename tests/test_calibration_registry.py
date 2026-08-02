@@ -12,7 +12,7 @@ from renca.vimp import VimpEstimate
 
 def valid_record(spec: VimpSpec) -> CalibrationRecord:
     families = list(REQUIRED_SCENARIO_FAMILIES)
-    return CalibrationRecord(profile_id="fixture", scenario_family=families[0], delta_target=.05, inference_rows=300, inference_folds=5, vimp_fingerprint=vimp_fingerprint(spec), critical_value=-2, distribution_file="fixture.parquet", distribution_sha256="fixture", calibration_replications=5000, calibration_successful_replications_per_family={family: 5000 for family in families}, evaluation_replications=5000, empirical_rejection_rate=.04, upper_rejection_bound=.049, validation_scenario_families=families, validation_replications_per_family={family: 5000 for family in families}, grid_upper_rejection_bounds={family: .049 for family in families}, grid_ineligibility_rates={family: 0 for family in families}, status="validated")
+    return CalibrationRecord(profile_id="fixture", scenario_family=families[0], delta_target=.05, inference_rows=300, inference_folds=5, vimp_fingerprint=vimp_fingerprint(spec), critical_value=-2, distribution_file="fixture.parquet", distribution_sha256="fixture", calibration_replications=5000, calibration_successful_replications_per_family={family: 5000 for family in families}, evaluation_replications=5000, empirical_rejection_rate=.04, upper_rejection_bound=.049, validation_scenario_families=families, validation_replications_per_family={family: 5000 for family in families}, grid_upper_rejection_bounds={family: .049 for family in families}, grid_ineligibility_rates={family: 1 for family in families}, status="validated")
 
 
 def test_gate_requires_exact_binding_and_formal_evidence() -> None:
@@ -55,7 +55,7 @@ def test_grid_requires_all_families_and_never_validates_a_smoke_run() -> None:
         validate_grid(rows.iloc[:1], profile_id="fixture", scenario_family="continuous_linear_boundary_v1", delta_target=.05, inference_rows=60, inference_folds=5, vimp_fingerprint="fixture", critical_value=-2)
 
 
-def test_grid_records_ineligible_rate_and_rejects_excessive_learner_failures() -> None:
+def test_grid_records_ineligible_rate_as_a_power_diagnostic() -> None:
     rows = pd.DataFrame([{"scenario_family": family, "replicate": index, "reject": False, "status": "full_worse_than_reduced" if family == "learner_misspecification_v1" else "success"} for family in REQUIRED_SCENARIO_FAMILIES for index in range(2)])
     record = validate_grid(rows, profile_id="fixture", scenario_family="continuous_linear_boundary_v1", delta_target=.05, inference_rows=60, inference_folds=5, vimp_fingerprint="fixture", critical_value=-2, calibration_replications=5000, calibration_successful_replications_per_family={family: 5000 for family in REQUIRED_SCENARIO_FAMILIES})
     assert record.grid_ineligibility_rates["learner_misspecification_v1"] == 1 and record.status == "rejected"

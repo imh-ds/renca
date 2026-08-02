@@ -72,11 +72,6 @@
       "title": "Inference Rows",
       "type": "integer"
     },
-    "maximum_ineligibility_rate": {
-      "default": 0.05,
-      "title": "Maximum Ineligibility Rate",
-      "type": "number"
-    },
     "profile_id": {
       "title": "Profile Id",
       "type": "string"

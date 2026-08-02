@@ -34,7 +34,6 @@ class CalibrationRecord(Model):
     validation_replications_per_family: dict[str, int] = Field(default_factory=dict)
     grid_rejection_rates: dict[str, float] = Field(default_factory=dict)
     grid_upper_rejection_bounds: dict[str, float] = Field(default_factory=dict)
-    maximum_ineligibility_rate: float = .05
     grid_ineligibility_rates: dict[str, float] = Field(default_factory=dict)
     status: Literal["validated", "rejected"]
 
@@ -66,7 +65,7 @@ def calibration_status(registry: CalibrationRegistry, *, profile_id: str | None,
     record = matches[0]
     exact = (record.delta_target == delta_target and record.inference_rows == inference_rows and record.inference_folds == inference_folds and record.vimp_fingerprint == vimp_fingerprint(spec) and record.alpha == alpha)
     required = set(record.validation_scenario_families)
-    grid_is_sufficient = bool(required) and all(record.validation_replications_per_family.get(family, 0) >= 5000 and record.calibration_successful_replications_per_family.get(family, 0) >= 5000 and record.grid_upper_rejection_bounds.get(family, float("inf")) <= alpha and record.grid_ineligibility_rates.get(family, float("inf")) <= record.maximum_ineligibility_rate for family in required)
+    grid_is_sufficient = bool(required) and all(record.validation_replications_per_family.get(family, 0) >= 5000 and record.calibration_successful_replications_per_family.get(family, 0) >= 5000 and record.grid_upper_rejection_bounds.get(family, float("inf")) <= alpha for family in required)
     artifact_ok = bool(record.distribution_file and record.distribution_sha256)
     if record.status == "validated" and exact and artifact_ok and record.calibration_replications >= 5000 and record.evaluation_replications >= 5000 and record.upper_rejection_bound <= alpha and grid_is_sufficient:
         return "calibrated_success"
