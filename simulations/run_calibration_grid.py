@@ -25,12 +25,14 @@ def main() -> None:
     signals = {family: tune_boundary_signal(family, delta) for family in REQUIRED_SCENARIO_FAMILIES}
     signal_values = {family: item[0] for family, item in signals.items()}
     training = run_independent_grid(replications=args.training_replications, sample_size=args.sample_size, inference_folds=folds, delta=delta, critical_value=float("-inf"), vimp_spec=spec, seed=args.seed, boundary_signals=signal_values)
-    critical_value = min(training.loc[training.scenario_family == family, "studentized_statistic"].dropna().quantile(.05, interpolation="lower") for family in REQUIRED_SCENARIO_FAMILIES)
+    eligible_training = training.loc[training.status == "success"].copy()
+    critical_value = min(eligible_training.loc[eligible_training.scenario_family == family, "studentized_statistic"].dropna().quantile(.05, interpolation="lower") for family in REQUIRED_SCENARIO_FAMILIES)
     validation = run_independent_grid(replications=args.validation_replications, sample_size=args.sample_size, inference_folds=folds, delta=delta, critical_value=float(critical_value), vimp_spec=spec, seed=args.seed + 1, boundary_signals=signal_values)
     args.output.mkdir(parents=True, exist_ok=True)
-    distribution_path = args.output / "calibration_distribution.parquet"; training.to_parquet(distribution_path, index=False)
+    distribution_path = args.output / "calibration_distribution.parquet"; eligible_training.to_parquet(distribution_path, index=False)
     validation.to_parquet(args.output / "independent_validation.parquet", index=False)
-    record = validate_grid(validation, profile_id=args.profile_id, scenario_family="continuous_linear_boundary_v1", delta_target=delta, inference_rows=args.sample_size, inference_folds=folds, vimp_fingerprint=vimp_fingerprint(spec), critical_value=float(critical_value), distribution_file=distribution_path.name, distribution_sha256=file_sha256(distribution_path), calibration_replications=args.training_replications, alpha=.05)
+    successful = training.groupby("scenario_family").status.apply(lambda values: int((values == "success").sum())).to_dict()
+    record = validate_grid(validation, profile_id=args.profile_id, scenario_family="continuous_linear_boundary_v1", delta_target=delta, inference_rows=args.sample_size, inference_folds=folds, vimp_fingerprint=vimp_fingerprint(spec), critical_value=float(critical_value), distribution_file=distribution_path.name, distribution_sha256=file_sha256(distribution_path), calibration_replications=args.training_replications, calibration_successful_replications_per_family=successful, alpha=.05)
     (args.output / "boundary_tuning.json").write_text(json.dumps({family: {"signal": signal, "oracle_theta": theta} for family, (signal, theta) in signals.items()}, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     (args.output / "calibration_summary.json").write_text(json.dumps(record.model_dump(mode="json"), indent=2, sort_keys=True) + "\n", encoding="utf-8")
 

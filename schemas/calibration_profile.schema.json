@@ -10,6 +10,13 @@
       "title": "Calibration Replications",
       "type": "integer"
     },
+    "calibration_successful_replications_per_family": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Calibration Successful Replications Per Family",
+      "type": "object"
+    },
     "critical_value": {
       "title": "Critical Value",
       "type": "number"
@@ -36,6 +43,13 @@
       "title": "Evaluation Replications",
       "type": "integer"
     },
+    "grid_ineligibility_rates": {
+      "additionalProperties": {
+        "type": "number"
+      },
+      "title": "Grid Ineligibility Rates",
+      "type": "object"
+    },
     "grid_rejection_rates": {
       "additionalProperties": {
         "type": "number"
@@ -57,6 +71,11 @@
     "inference_rows": {
       "title": "Inference Rows",
       "type": "integer"
+    },
+    "maximum_ineligibility_rate": {
+      "default": 0.05,
+      "title": "Maximum Ineligibility Rate",
+      "type": "number"
     },
     "profile_id": {
       "title": "Profile Id",
