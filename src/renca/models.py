@@ -208,13 +208,13 @@ def write_json_schemas(destination: str | Path) -> dict[str, Path]:
         "node": (NodeSpec, "node_spec.schema.json"),
         "artifact_header": (ArtifactHeader, "artifact_header.schema.json"),
     }
-    from renca.artifacts.manifest import AnalysisManifest, RunReceipt
+    from renca.artifacts.manifest import AnalysisManifest, EvidenceBundleManifest, RunReceipt
     from renca.audit import AuditReport
     from renca.screening import SplitManifest
     from renca.screening.separators import SeparatorCandidate
     from renca.vimp import VimpEstimate
     from renca.certification import EdgeCertificate
-    from renca.calibration.registry import CalibrationRecord
+    from renca.calibration.registry import CalibrationEligibility, CalibrationRecord
     contracts.update({
         "audit_report": (AuditReport, "audit_report.schema.json"),
         "analysis_manifest": (AnalysisManifest, "analysis_manifest.schema.json"),
@@ -224,6 +224,8 @@ def write_json_schemas(destination: str | Path) -> dict[str, Path]:
         "vimp_estimate": (VimpEstimate, "vimp_estimate.schema.json"),
         "edge_certificate": (EdgeCertificate, "edge_certificate.schema.json"),
         "calibration_profile": (CalibrationRecord, "calibration_profile.schema.json"),
+        "calibration_eligibility": (CalibrationEligibility, "calibration_eligibility.schema.json"),
+        "evidence_bundle_manifest": (EvidenceBundleManifest, "evidence_bundle_manifest.schema.json"),
     })
     paths: dict[str, Path] = {}
     for contract_name, (model, filename) in contracts.items():
