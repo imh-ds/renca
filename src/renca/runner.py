@@ -10,6 +10,11 @@ from renca.models import ProjectSpec
 from renca.reporting.edge_table import write_edge_report
 from renca.screening import create_outer_split, rank_separators, screen_neighbors, write_separator_candidates, write_split_manifest
 from renca.vimp import fit_crossfitted_vimp, write_vimp_estimates
+
+
+def default_calibration_registry_path() -> Path:
+    """Return the Phase-0 registry shipped with the installed package."""
+    return Path(__file__).parent / "data" / "calibration" / "registry.yml"
 @dataclass(frozen=True)
 class RunArtifacts: output_dir: Path
 def run_analysis(data:pd.DataFrame,project_spec:ProjectSpec,output_dir:str|Path,calibration_registry_path:str|Path|None=None)->RunArtifacts:
@@ -23,7 +28,7 @@ def run_analysis(data:pd.DataFrame,project_spec:ProjectSpec,output_dir:str|Path,
     for c in candidates:
         estimates.extend([fit_crossfitted_vimp(clean,c.node_i,c.node_j,c.separator,nodes[c.node_i],split,project_spec.vimp),fit_crossfitted_vimp(clean,c.node_j,c.node_i,c.separator,nodes[c.node_j],split,project_spec.vimp)])
     if project_spec.calibration.profile_id and calibration_registry_path is None:
-        raise ValueError("A calibration registry is required when calibration.profile_id is declared")
+        calibration_registry_path = default_calibration_registry_path()
     if calibration_registry_path is not None:
         estimates=apply_profile(estimates,registry=CalibrationRegistry.load(calibration_registry_path),registry_path=calibration_registry_path,profile_id=project_spec.calibration.profile_id,inference_rows=len(split.inference_row_positions),inference_folds=split.inference_folds,vimp_spec=project_spec.vimp)
     write_vimp_estimates(estimates,out); certificates=certify_pairs(estimates); write_edge_certificates(certificates,out); write_edge_report(certificates,estimates,out); return RunArtifacts(out)

@@ -29,7 +29,8 @@ def test_cli_runs_csv_config_fixture(tmp_path: Path) -> None:
     assert result.returncode == 0 and (out/"edge_report.parquet").exists()
 
 
-def test_runner_refuses_declared_profile_without_registry(tmp_path: Path) -> None:
+def test_runner_uses_packaged_registry_for_declared_profile(tmp_path: Path) -> None:
     configured = payload(); configured["calibration"] = {"profile_id": "missing"}
-    with pytest.raises(ValueError, match="calibration registry"):
-        run_analysis(data(), ProjectSpec.model_validate(configured), tmp_path / "out")
+    out = tmp_path / "out"; run_analysis(data(), ProjectSpec.model_validate(configured), out)
+    estimates = pd.read_parquet(out / "vimp_estimates.parquet")
+    assert set(estimates.calibration_status) == {"calibration_failed"}

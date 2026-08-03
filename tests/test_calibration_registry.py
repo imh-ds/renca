@@ -7,6 +7,7 @@ from renca.calibration import CalibrationRecord, CalibrationRegistry, REQUIRED_S
 from renca.calibration.registry import file_sha256
 from renca.calibration.scenarios import generate_scenario, oracle_theta, tune_boundary_signal
 from renca.models import VimpSpec
+from renca.runner import default_calibration_registry_path
 from renca.vimp import VimpEstimate
 
 
@@ -22,6 +23,12 @@ def test_gate_requires_exact_binding_and_formal_evidence() -> None:
     assert calibration_status(registry, profile_id=None, delta_target=.05, inference_rows=300, inference_folds=5, spec=spec) == "uncalibrated"
     registry.records[0].upper_rejection_bound = .06
     assert calibration_status(registry, profile_id="fixture", delta_target=.05, inference_rows=300, inference_folds=5, spec=spec) == "calibration_failed"
+
+
+def test_packaged_phase0_profile_is_an_exact_validated_match() -> None:
+    registry = CalibrationRegistry.load(default_calibration_registry_path())
+    status = calibration_status(registry, profile_id="v3-nested-blend-n300-d005-phase0", delta_target=.05, inference_rows=300, inference_folds=5, spec=VimpSpec(forest_trees=10, learner_library_version="v3_nested_blend"))
+    assert status == "calibrated_success"
 
 
 @pytest.mark.parametrize("rows,folds,spec", [(299, 5, VimpSpec()), (300, 4, VimpSpec()), (300, 5, VimpSpec(ridge_alpha=2))])

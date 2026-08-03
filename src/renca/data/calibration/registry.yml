@@ -1,0 +1,48 @@
+schema_version: "2.0"
+records:
+  - profile_id: v3-nested-blend-n300-d005-phase0
+    scenario_family: continuous_linear_boundary_v1
+    delta_target: 0.05
+    inference_rows: 300
+    inference_folds: 5
+    vimp_fingerprint: "60ffacc5a214bfd1ae7e9f1a830de89f8f66a53e1d193f99f857611a8a8ddb29"
+    alpha: 0.05
+    critical_value: -3.0951297162293034
+    distribution_file: v3-nested-blend-n300-d005/calibration_distribution.parquet
+    distribution_sha256: "1a0c562a0957d3ef8bf5d183b6ebb777417946ed1f13d3a9e1f39b4eb6555950"
+    calibration_replications: 6000
+    calibration_successful_replications_per_family:
+      bounded_composite_saturated_v1: 6000
+      bounded_composite_unsaturated_v1: 6000
+      continuous_linear_boundary_v1: 5996
+      learner_misspecification_v1: 5140
+      nonlinear_continuous_v1: 5776
+    evaluation_replications: 5000
+    empirical_rejection_rate: 0.0182
+    upper_rejection_bound: 0.02162726821387168
+    validation_scenario_families: [continuous_linear_boundary_v1, bounded_composite_unsaturated_v1, bounded_composite_saturated_v1, nonlinear_continuous_v1, learner_misspecification_v1]
+    validation_replications_per_family:
+      bounded_composite_saturated_v1: 5000
+      bounded_composite_unsaturated_v1: 5000
+      continuous_linear_boundary_v1: 5000
+      learner_misspecification_v1: 5000
+      nonlinear_continuous_v1: 5000
+    grid_rejection_rates:
+      bounded_composite_saturated_v1: 0.0064
+      bounded_composite_unsaturated_v1: 0.0048
+      continuous_linear_boundary_v1: 0.0182
+      learner_misspecification_v1: 0.0434
+      nonlinear_continuous_v1: 0.0112
+    grid_upper_rejection_bounds:
+      bounded_composite_saturated_v1: 0.008587042382401372
+      bounded_composite_unsaturated_v1: 0.006743894223681335
+      continuous_linear_boundary_v1: 0.02162726821387168
+      learner_misspecification_v1: 0.04844157112945512
+      nonlinear_continuous_v1: 0.013972509794825323
+    grid_ineligibility_rates:
+      bounded_composite_saturated_v1: 0.0
+      bounded_composite_unsaturated_v1: 0.0
+      continuous_linear_boundary_v1: 0.0006
+      learner_misspecification_v1: 0.1432
+      nonlinear_continuous_v1: 0.0362
+    status: validated

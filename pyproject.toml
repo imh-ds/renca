@@ -30,6 +30,9 @@ test = [
     "pytest>=8,<10",
 ]
 
+[tool.setuptools.package-data]
+renca = ["data/**/*.yml", "data/**/*.parquet"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"
