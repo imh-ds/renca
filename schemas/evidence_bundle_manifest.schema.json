@@ -1,0 +1,59 @@
+{
+  "additionalProperties": false,
+  "description": "Stable provenance for a reviewable Phase-1 evidence bundle.",
+  "properties": {
+    "analysis_id": {
+      "title": "Analysis Id",
+      "type": "string"
+    },
+    "config_sha256": {
+      "title": "Config Sha256",
+      "type": "string"
+    },
+    "input_sha256": {
+      "title": "Input Sha256",
+      "type": "string"
+    },
+    "package_version": {
+      "title": "Package Version",
+      "type": "string"
+    },
+    "profile_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Profile Id"
+    },
+    "registry_sha256": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Registry Sha256"
+    },
+    "schema_version": {
+      "default": "1.7.0",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "analysis_id",
+    "package_version",
+    "input_sha256",
+    "config_sha256"
+  ],
+  "title": "EvidenceBundleManifest",
+  "type": "object"
+}

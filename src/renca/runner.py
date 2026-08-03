@@ -5,6 +5,7 @@ import pandas as pd
 from renca.artifacts.manifest import build_analysis_manifest, write_audit_artifacts, write_evidence_bundle_manifest
 from renca.audit import audit_project
 from renca.certification import certify_pairs, write_edge_certificates
+from renca.graph import build_resolution_graph, write_resolution_graph
 from renca.calibration import CalibrationRegistry, apply_profile
 from renca.models import ProjectSpec
 from renca.reporting.edge_table import write_edge_report
@@ -33,4 +34,4 @@ def run_analysis(data:pd.DataFrame,project_spec:ProjectSpec,output_dir:str|Path,
     eligibility=[]
     if calibration_registry_path is not None:
         estimates, eligibility=apply_profile(estimates,registry=CalibrationRegistry.load(calibration_registry_path),registry_path=calibration_registry_path,profile_id=project_spec.calibration.profile_id,inference_rows=len(split.inference_row_positions),inference_folds=split.inference_folds,vimp_spec=project_spec.vimp,return_eligibility=True)
-    write_vimp_estimates(estimates,out); certificates=certify_pairs(estimates); write_edge_certificates(certificates,out); write_edge_report(certificates,estimates,out,eligibility); write_evidence_bundle_manifest(analysis_manifest,out,profile_id=project_spec.calibration.profile_id,registry_path=calibration_registry_path); return RunArtifacts(out)
+    write_vimp_estimates(estimates,out); certificates=certify_pairs(estimates); write_edge_certificates(certificates,out); graph=build_resolution_graph(certificates,project_spec); write_resolution_graph(graph,out); write_edge_report(graph,estimates,out,eligibility); write_evidence_bundle_manifest(analysis_manifest,out,profile_id=project_spec.calibration.profile_id,registry_path=calibration_registry_path); return RunArtifacts(out)

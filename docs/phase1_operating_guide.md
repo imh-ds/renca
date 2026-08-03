@@ -31,8 +31,13 @@ produce exploratory evidence but are outside this calibrated profile.
 ## Read the evidence
 
 The run writes the audit, split, separator candidates, VIMP estimates,
-certificates, edge table, HTML report, `calibration_eligibility.json`, and an
-`evidence_bundle_manifest.json`. The eligibility artifact names the requested
+certificates, `resolution_graph.json`, `resolution_graph.graphml`, edge table,
+HTML report, `calibration_eligibility.json`, and an
+`evidence_bundle_manifest.json`. The HTML report renders the predictive
+ResolutionGraph: solid lines are candidate adjacencies, dashed lines are
+unresolved, and certified practical nonedges are deliberately absent while
+remaining available in the evidence panel and GraphML audit trail. Line width
+encodes directional predictive importance, not a causal effect size. The eligibility artifact names the requested
 profile, matching record, and every blocking field. `certified_nonedge` means
 both directional predictive gains passed calibrated equivalence testing;
 `candidate_adjacency` means no searched separator established practical

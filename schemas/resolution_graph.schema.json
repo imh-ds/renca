@@ -1,0 +1,200 @@
+{
+  "$defs": {
+    "PairState": {
+      "enum": [
+        "certified_nonedge",
+        "candidate_adjacency",
+        "unresolved"
+      ],
+      "title": "PairState",
+      "type": "string"
+    },
+    "ResolutionNode": {
+      "additionalProperties": false,
+      "properties": {
+        "layout_x": {
+          "title": "Layout X",
+          "type": "number"
+        },
+        "layout_y": {
+          "title": "Layout Y",
+          "type": "number"
+        },
+        "measurement_level": {
+          "title": "Measurement Level",
+          "type": "string"
+        },
+        "node_id": {
+          "title": "Node Id",
+          "type": "string"
+        },
+        "outcome_type": {
+          "title": "Outcome Type",
+          "type": "string"
+        },
+        "primary_delta": {
+          "title": "Primary Delta",
+          "type": "number"
+        }
+      },
+      "required": [
+        "node_id",
+        "outcome_type",
+        "measurement_level",
+        "primary_delta",
+        "layout_x",
+        "layout_y"
+      ],
+      "title": "ResolutionNode",
+      "type": "object"
+    },
+    "ResolutionPair": {
+      "additionalProperties": false,
+      "properties": {
+        "adjusted_p": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Adjusted P"
+        },
+        "causal_status": {
+          "const": "not_yet_causal",
+          "default": "not_yet_causal",
+          "title": "Causal Status",
+          "type": "string"
+        },
+        "delta_source": {
+          "title": "Delta Source",
+          "type": "number"
+        },
+        "delta_target": {
+          "title": "Delta Target",
+          "type": "number"
+        },
+        "error_control": {
+          "title": "Error Control",
+          "type": "string"
+        },
+        "pair_id": {
+          "title": "Pair Id",
+          "type": "string"
+        },
+        "predictive_status": {
+          "$ref": "#/$defs/PairState"
+        },
+        "render_visible": {
+          "title": "Render Visible",
+          "type": "boolean"
+        },
+        "separator": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Separator",
+          "type": "array"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/$defs/PairState"
+        },
+        "target": {
+          "title": "Target",
+          "type": "string"
+        },
+        "theta_source_from_target": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Theta Source From Target"
+        },
+        "theta_target_from_source": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Theta Target From Source"
+        }
+      },
+      "required": [
+        "pair_id",
+        "source",
+        "target",
+        "state",
+        "separator",
+        "delta_source",
+        "delta_target",
+        "error_control",
+        "predictive_status",
+        "render_visible"
+      ],
+      "title": "ResolutionPair",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "analysis_id": {
+      "title": "Analysis Id",
+      "type": "string"
+    },
+    "interpretation": {
+      "const": "predictive_not_causal",
+      "default": "predictive_not_causal",
+      "title": "Interpretation",
+      "type": "string"
+    },
+    "nodes": {
+      "items": {
+        "$ref": "#/$defs/ResolutionNode"
+      },
+      "title": "Nodes",
+      "type": "array"
+    },
+    "pairs": {
+      "items": {
+        "$ref": "#/$defs/ResolutionPair"
+      },
+      "title": "Pairs",
+      "type": "array"
+    },
+    "schema_version": {
+      "default": "1.7.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "sensitivity_deltas": {
+      "items": {
+        "type": "number"
+      },
+      "title": "Sensitivity Deltas",
+      "type": "array"
+    }
+  },
+  "required": [
+    "analysis_id",
+    "nodes",
+    "pairs"
+  ],
+  "title": "ResolutionGraph",
+  "type": "object"
+}

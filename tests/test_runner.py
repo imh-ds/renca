@@ -18,12 +18,16 @@ def data() -> pd.DataFrame:
 
 def test_runner_writes_complete_predictive_evidence_ledger(tmp_path: Path) -> None:
     out=tmp_path/"out"; run_analysis(data(),ProjectSpec.model_validate(payload()),out)
-    expected={"audit.json","analysis_manifest.json","run_receipt.json","split_manifest.json","separator_candidates.parquet","vimp_estimates.parquet","edge_certificates.parquet","edge_certificates.json","edge_report.parquet","report.html","calibration_eligibility.json","evidence_bundle_manifest.json"}
+    expected={"audit.json","analysis_manifest.json","run_receipt.json","split_manifest.json","separator_candidates.parquet","vimp_estimates.parquet","edge_certificates.parquet","edge_certificates.json","edge_report.parquet","report.html","calibration_eligibility.json","evidence_bundle_manifest.json","resolution_graph.json","resolution_graph.graphml"}
     assert expected <= {path.name for path in out.iterdir()}
     report=pd.read_parquet(out/"edge_report.parquet")
     assert set(report["state"]) == {"unresolved"} and set(report["causal_status"]) == {"not_yet_causal"}
     assert "predictive" in (out/"report.html").read_text()
     assert "resolution_reason" in report.columns
+    html = (out / "report.html").read_text()
+    assert "Predictive ResolutionGraph" in html and "pair-panel" in html and "stroke-dasharray" in html
+    graph = json.loads((out / "resolution_graph.json").read_text())
+    assert graph["interpretation"] == "predictive_not_causal" and graph["sensitivity_deltas"] == []
     assert read_evidence_bundle_manifest(out / "evidence_bundle_manifest.json").analysis_id == payload()["analysis_id"]
 
 def test_cli_runs_csv_config_fixture(tmp_path: Path) -> None:

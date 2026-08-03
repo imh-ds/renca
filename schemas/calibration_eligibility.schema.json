@@ -1,0 +1,68 @@
+{
+  "additionalProperties": false,
+  "description": "Auditable result of binding an analysis to one calibration profile.",
+  "properties": {
+    "delta_target": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Delta Target"
+    },
+    "matched_profile_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Matched Profile Id"
+    },
+    "message": {
+      "title": "Message",
+      "type": "string"
+    },
+    "mismatch_fields": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Mismatch Fields",
+      "type": "array"
+    },
+    "requested_profile_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Requested Profile Id"
+    },
+    "status": {
+      "enum": [
+        "calibrated_success",
+        "uncalibrated",
+        "calibration_failed"
+      ],
+      "title": "Status",
+      "type": "string"
+    }
+  },
+  "required": [
+    "status",
+    "message"
+  ],
+  "title": "CalibrationEligibility",
+  "type": "object"
+}
