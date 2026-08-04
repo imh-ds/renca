@@ -47,6 +47,17 @@ class CalibrationRegistry(Model):
         return cls.model_validate(yaml.safe_load(Path(path).read_text(encoding="utf-8")))
 
 
+class CalibrationEligibility(Model):
+    """Auditable result of binding an analysis to one calibration profile."""
+
+    requested_profile_id: str | None = None
+    matched_profile_id: str | None = None
+    delta_target: float | None = None
+    status: Literal["calibrated_success", "uncalibrated", "calibration_failed"]
+    mismatch_fields: list[str] = Field(default_factory=list)
+    message: str
+
+
 def vimp_fingerprint(spec: VimpSpec) -> str:
     payload = json.dumps(spec.model_dump(mode="json"), sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(payload.encode()).hexdigest()
@@ -57,19 +68,40 @@ def file_sha256(path: str | Path) -> str:
 
 
 def calibration_status(registry: CalibrationRegistry, *, profile_id: str | None, delta_target: float, inference_rows: int, inference_folds: int, spec: VimpSpec, alpha: float = .05) -> Literal["calibrated_success", "uncalibrated", "calibration_failed"]:
+    return calibration_eligibility(registry, profile_id=profile_id, delta_target=delta_target, inference_rows=inference_rows, inference_folds=inference_folds, spec=spec, alpha=alpha).status
+
+
+def calibration_eligibility(registry: CalibrationRegistry, *, profile_id: str | None, delta_target: float, inference_rows: int, inference_folds: int, spec: VimpSpec, alpha: float = .05, distribution_ok: bool = True) -> CalibrationEligibility:
+    """Explain the strict gate without weakening it or accepting near-matches."""
     if profile_id is None:
-        return "uncalibrated"
+        return CalibrationEligibility(delta_target=delta_target, status="uncalibrated", message="No calibration profile was requested; hard certification is unavailable.")
     matches = [record for record in registry.records if record.profile_id == profile_id]
     if len(matches) != 1:
-        return "calibration_failed"
+        return CalibrationEligibility(requested_profile_id=profile_id, delta_target=delta_target, status="calibration_failed", mismatch_fields=["profile_id"], message="The requested calibration profile is absent or ambiguous in the registry.")
     record = matches[0]
-    exact = (record.delta_target == delta_target and record.inference_rows == inference_rows and record.inference_folds == inference_folds and record.vimp_fingerprint == vimp_fingerprint(spec) and record.alpha == alpha)
+    mismatch_fields: list[str] = []
+    if record.delta_target != delta_target:
+        mismatch_fields.append("delta_target")
+    if record.inference_rows != inference_rows:
+        mismatch_fields.append("inference_rows")
+    if record.inference_folds != inference_folds:
+        mismatch_fields.append("inference_folds")
+    if record.vimp_fingerprint != vimp_fingerprint(spec):
+        mismatch_fields.append("vimp_fingerprint")
+    if record.alpha != alpha:
+        mismatch_fields.append("alpha")
     required = set(record.validation_scenario_families)
-    grid_is_sufficient = bool(required) and all(record.validation_replications_per_family.get(family, 0) >= 5000 and record.calibration_successful_replications_per_family.get(family, 0) >= 5000 and record.grid_upper_rejection_bounds.get(family, float("inf")) <= alpha for family in required)
-    artifact_ok = bool(record.distribution_file and record.distribution_sha256)
-    if record.status == "validated" and exact and artifact_ok and record.calibration_replications >= 5000 and record.evaluation_replications >= 5000 and record.upper_rejection_bound <= alpha and grid_is_sufficient:
-        return "calibrated_success"
-    return "calibration_failed"
+    grid_is_sufficient = bool(required) and all(record.validation_replications_per_family.get(family, 0) >= 5000 and record.calibration_successful_replications_per_family.get(family, 0) >= 5000 and record.grid_upper_rejection_bounds.get(family, float("inf")) <= record.alpha for family in required)
+    artifact_ok = bool(record.distribution_file and record.distribution_sha256) and distribution_ok
+    if not artifact_ok:
+        mismatch_fields.append("distribution_artifact")
+    if record.status != "validated":
+        mismatch_fields.append("profile_status")
+    if record.calibration_replications < 5000 or record.evaluation_replications < 5000 or record.upper_rejection_bound > record.alpha or not grid_is_sufficient:
+        mismatch_fields.append("validation_evidence")
+    if not mismatch_fields:
+        return CalibrationEligibility(requested_profile_id=profile_id, matched_profile_id=record.profile_id, delta_target=delta_target, status="calibrated_success", message="The requested profile exactly matches this analysis; calibrated certification is permitted.")
+    return CalibrationEligibility(requested_profile_id=profile_id, matched_profile_id=record.profile_id, delta_target=delta_target, status="calibration_failed", mismatch_fields=mismatch_fields, message="Calibrated certification is unavailable because: " + ", ".join(mismatch_fields) + ".")
 
 
 def calibrated_p_value(statistic: float, record: CalibrationRecord, distribution: pd.DataFrame) -> float:

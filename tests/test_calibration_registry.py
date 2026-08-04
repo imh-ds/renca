@@ -3,10 +3,11 @@ from __future__ import annotations
 import pandas as pd
 import pytest
 
-from renca.calibration import CalibrationRecord, CalibrationRegistry, REQUIRED_SCENARIO_FAMILIES, apply_profile, calibrated_p_value, calibration_status, run_independent_grid, validate_grid, vimp_fingerprint
+from renca.calibration import CalibrationRecord, CalibrationRegistry, REQUIRED_SCENARIO_FAMILIES, apply_profile, calibrated_p_value, calibration_eligibility, calibration_status, run_independent_grid, validate_grid, vimp_fingerprint
 from renca.calibration.registry import file_sha256
 from renca.calibration.scenarios import generate_scenario, oracle_theta, tune_boundary_signal
 from renca.models import VimpSpec
+from renca.runner import default_calibration_registry_path
 from renca.vimp import VimpEstimate
 
 
@@ -22,6 +23,39 @@ def test_gate_requires_exact_binding_and_formal_evidence() -> None:
     assert calibration_status(registry, profile_id=None, delta_target=.05, inference_rows=300, inference_folds=5, spec=spec) == "uncalibrated"
     registry.records[0].upper_rejection_bound = .06
     assert calibration_status(registry, profile_id="fixture", delta_target=.05, inference_rows=300, inference_folds=5, spec=spec) == "calibration_failed"
+
+
+@pytest.mark.parametrize(
+    ("update", "expected_field"),
+    [
+        ({"delta_target": .04}, "delta_target"),
+        ({"inference_rows": 299}, "inference_rows"),
+        ({"inference_folds": 4}, "inference_folds"),
+        ({"spec": VimpSpec(ridge_alpha=2)}, "vimp_fingerprint"),
+        ({"alpha": .01}, "alpha"),
+    ],
+)
+def test_eligibility_names_every_exact_match_failure(update: dict[str, object], expected_field: str) -> None:
+    spec = VimpSpec()
+    arguments: dict[str, object] = {"profile_id": "fixture", "delta_target": .05, "inference_rows": 300, "inference_folds": 5, "spec": spec}
+    arguments.update(update)
+    result = calibration_eligibility(CalibrationRegistry(records=[valid_record(spec)]), **arguments)
+    assert result.status == "calibration_failed"
+    assert result.matched_profile_id == "fixture"
+    assert result.mismatch_fields == [expected_field]
+
+
+def test_eligibility_reports_profile_and_distribution_failures() -> None:
+    spec = VimpSpec()
+    registry = CalibrationRegistry(records=[valid_record(spec)])
+    assert calibration_eligibility(registry, profile_id="unknown", delta_target=.05, inference_rows=300, inference_folds=5, spec=spec).mismatch_fields == ["profile_id"]
+    assert calibration_eligibility(registry, profile_id="fixture", delta_target=.05, inference_rows=300, inference_folds=5, spec=spec, distribution_ok=False).mismatch_fields == ["distribution_artifact"]
+
+
+def test_packaged_phase0_profile_is_an_exact_validated_match() -> None:
+    registry = CalibrationRegistry.load(default_calibration_registry_path())
+    status = calibration_status(registry, profile_id="v3-nested-blend-n300-d005-phase0", delta_target=.05, inference_rows=300, inference_folds=5, spec=VimpSpec(forest_trees=10, learner_library_version="v3_nested_blend"))
+    assert status == "calibrated_success"
 
 
 @pytest.mark.parametrize("rows,folds,spec", [(299, 5, VimpSpec()), (300, 4, VimpSpec()), (300, 5, VimpSpec(ridge_alpha=2))])

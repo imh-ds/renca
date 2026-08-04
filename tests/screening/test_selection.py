@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -13,6 +14,7 @@ from renca.screening import (
     screen_neighbors,
     write_separator_candidates,
 )
+from renca.screening.separators import _bidirectional_gain, _cv_loss
 
 
 def project_spec(**updates: object) -> ProjectSpec:
@@ -74,7 +76,67 @@ def test_ranked_separator_selection_uses_only_selection_rows_and_is_deterministi
 
     assert first == second
     assert all(candidate.rank == 1 for candidate in first)
-    assert all(candidate.selection_method == "cross_fitted_bidirectional_loss" for candidate in first)
+    assert all(candidate.selection_method == "cross_fitted_bidirectional_gain" for candidate in first)
+
+
+def collider_data() -> pd.DataFrame:
+    """Independent x and y plus a collider w = x + y, which no separator should select."""
+    generator = np.random.default_rng(20260804)
+    x, y = generator.normal(size=400), generator.normal(size=400)
+    return pd.DataFrame({"x": x, "y": y, "w": x + y + 0.01 * generator.normal(size=400)})
+
+
+def collider_spec() -> ProjectSpec:
+    return project_spec(
+        screening={"max_neighbors": 2, "max_separator_size": 1, "separators_per_pair": 1},
+        nodes=[
+            {"node_id": "x", "outcome_type": "continuous", "loss": "squared", "delta": 0.01},
+            {"node_id": "y", "outcome_type": "continuous", "loss": "squared", "delta": 0.01},
+            {"node_id": "w", "outcome_type": "continuous", "loss": "squared", "delta": 0.01},
+        ],
+    )
+
+
+def test_ranking_prefers_least_residual_importance_not_the_best_predicting_set() -> None:
+    """The expanded-model-risk objective selects the collider; the gain objective must not.
+
+    Conditioning on ``w = x + y`` makes the independent pair (x, y) mutually predictive, so it
+    minimises expanded-model risk while maximising residual conditional importance. Ranking on
+    risk therefore manufactures a candidate adjacency out of a true nonedge.
+    """
+    data, spec = collider_data(), collider_spec()
+    neighborhoods = {"x": ["w", "y"], "y": ["w", "x"], "w": ["x", "y"]}
+    candidates = rank_separators(data, spec.nodes, neighborhoods, spec.screening, seed=spec.seed)
+    pair = next(candidate for candidate in candidates if candidate.pair_id == "x--y")
+
+    legacy_score = {
+        separator: _cv_loss(data, "x", list(separator) + ["y"], spec.seed, {})
+        + _cv_loss(data, "y", list(separator) + ["x"], spec.seed, {})
+        for separator in [(), ("w",)]
+    }
+    assert min(legacy_score, key=legacy_score.get) == ("w",)
+    assert pair.separator == []
+    assert pair.selection_score < 0.05
+
+
+def test_ranked_separator_minimises_bidirectional_gain_over_every_candidate() -> None:
+    spec = project_spec()
+    data = selection_data()
+    neighborhoods = screen_neighbors(data, spec.nodes, spec.screening, seed=spec.seed)
+    candidates = rank_separators(data, spec.nodes, neighborhoods, spec.screening, seed=spec.seed)
+    cache: dict[tuple[str, tuple[str, ...]], float] = {}
+    nodes = sorted(node.node_id for node in spec.nodes)
+    null_risk = {node: _cv_loss(data, node, [], spec.seed, cache) for node in nodes}
+
+    for candidate in candidates:
+        pool = sorted((set(neighborhoods[candidate.node_i]) | set(neighborhoods[candidate.node_j])) - {candidate.node_i, candidate.node_j})
+        admissible = [()] + [(member,) for member in pool]
+        scores = {
+            separator: _bidirectional_gain(data, candidate.node_i, candidate.node_j, separator, spec.seed, null_risk, cache)
+            for separator in admissible
+        }
+        assert candidate.selection_score == pytest.approx(min(scores.values()))
+        assert tuple(candidate.separator) == min(scores, key=lambda key: (scores[key], key))
 
 
 def test_separator_artifact_has_required_columns_and_schema(tmp_path: Path) -> None:

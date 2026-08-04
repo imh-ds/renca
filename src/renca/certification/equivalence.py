@@ -27,7 +27,7 @@ def certify_pairs(estimates:list[VimpEstimate], alpha:float=.05)->list[EdgeCerti
         if len(es)!=2 or es[0].separator != es[1].separator: raise ValueError(f"Pair {pair} must contain exactly two matching rank-one directions")
         a,b=es; pa,pb=_p(a),_p(b); raw=max(pa,pb) if pa is not None and pb is not None else None
         lower=lambda e: e.lower_ci is not None and e.lower_ci>e.delta_target
-        state=PairState.CANDIDATE_ADJACENCY if lower(a) and lower(b) else PairState.UNRESOLVED
+        state=PairState.CANDIDATE_ADJACENCY if a.calibration_status == "calibrated_success" and b.calibration_status == "calibrated_success" and lower(a) and lower(b) else PairState.UNRESOLVED
         provisional.append((a,b,raw,state))
     valid=[x[2] for x in provisional if x[2] is not None]; adjusted=multipletests(valid,alpha=alpha,method="holm")[1] if valid else [] ; it=iter(adjusted); out=[]
     for a,b,raw,state in provisional:

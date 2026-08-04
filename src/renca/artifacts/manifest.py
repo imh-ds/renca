@@ -26,6 +26,18 @@ class AnalysisManifest(Model):
     audit_eligible: bool
 
 
+class EvidenceBundleManifest(Model):
+    """Stable provenance for a reviewable Phase-1 evidence bundle."""
+
+    schema_version: str = SCHEMA_VERSION
+    analysis_id: str
+    profile_id: str | None = None
+    registry_sha256: str | None = None
+    package_version: str
+    input_sha256: str
+    config_sha256: str
+
+
 class RunReceipt(Model):
     schema_version: str = SCHEMA_VERSION
     analysis_id: str
@@ -60,3 +72,16 @@ def write_audit_artifacts(report: AuditReport, manifest: AnalysisManifest, outpu
         temporary.write_bytes(_canonical_bytes(value.model_dump(mode="json")))
         temporary.replace(path)
     return paths
+
+
+def write_evidence_bundle_manifest(analysis_manifest: AnalysisManifest, output_dir: str | Path, *, profile_id: str | None, registry_path: str | Path | None) -> Path:
+    registry_hash = hashlib.sha256(Path(registry_path).read_bytes()).hexdigest() if registry_path is not None and Path(registry_path).is_file() else None
+    bundle = EvidenceBundleManifest(analysis_id=analysis_manifest.analysis_id, profile_id=profile_id, registry_sha256=registry_hash, package_version=analysis_manifest.package_version, input_sha256=analysis_manifest.data_sha256, config_sha256=analysis_manifest.config_sha256)
+    path = Path(output_dir) / "evidence_bundle_manifest.json"
+    path.write_bytes(_canonical_bytes(bundle.model_dump(mode="json")))
+    return path
+
+
+def read_evidence_bundle_manifest(path: str | Path) -> EvidenceBundleManifest:
+    """Read and validate a portable evidence-bundle provenance record."""
+    return EvidenceBundleManifest.model_validate_json(Path(path).read_text(encoding="utf-8"))

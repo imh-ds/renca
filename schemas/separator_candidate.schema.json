@@ -25,7 +25,7 @@
       "type": "integer"
     },
     "selection_method": {
-      "const": "cross_fitted_bidirectional_loss",
+      "const": "cross_fitted_bidirectional_gain",
       "title": "Selection Method",
       "type": "string"
     },
