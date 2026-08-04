@@ -1,0 +1,66 @@
+name: Multi-pair FWER study
+
+on:
+  workflow_dispatch:
+    inputs:
+      blocks:
+        description: Independent boundary blocks per replication (3 nodes each)
+        default: '2'
+      replications_per_shard:
+        description: Replications per shard; 20 shards x 250 = 5,000 total
+        default: '250'
+
+permissions:
+  contents: read
+
+jobs:
+  replicate:
+    runs-on: ubuntu-latest
+    # GitHub Free caps a public repository at 20 concurrent jobs, so adding shards past
+    # 20 only queues them. Throughput comes from the worker fan-out inside each shard,
+    # which defaults to the runner's core count.
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: pip install .
+      - name: Report runner capacity
+        run: 'nproc && free -g | head -2'
+      - run: >
+          python simulations/multipair_fwer.py shard
+          --start $(( ${{ matrix.shard }} * ${{ inputs.replications_per_shard }} ))
+          --count ${{ inputs.replications_per_shard }}
+          --blocks ${{ inputs.blocks }}
+          --output out/shard-${{ matrix.shard }}.parquet
+      - uses: actions/upload-artifact@v4
+        with:
+          name: multipair-shard-${{ matrix.shard }}
+          path: out/*.parquet
+          retention-days: 90
+
+  summarize:
+    needs: replicate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: pip install .
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: multipair-shard-*
+          path: downloaded
+      - run: mkdir shards
+      - run: find downloaded -name '*.parquet' -exec cp {} shards/ \;
+      - run: python simulations/multipair_fwer.py summarize --shards shards --output multipair-fwer
+      - uses: actions/upload-artifact@v4
+        with:
+          name: multipair-fwer-evidence
+          path: multipair-fwer
+          retention-days: 90
