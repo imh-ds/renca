@@ -11,9 +11,9 @@ from renca.screening import SplitManifest
 from renca.vimp import fit_crossfitted_vimp
 
 
-def manifest(n: int = 180) -> SplitManifest:
+def manifest(n: int = 180, folds: int = 3) -> SplitManifest:
     positions = list(range(n))
-    return SplitManifest(schema_version="1.7.0", analysis_id="dddb2c74-2a57-4561-8afc-2c56e086674b", seed=11, selection_fraction=0.2, inference_folds=3, sampling_unit="iid", selection_row_positions=[], inference_row_positions=positions, inference_fold_by_row_position={row: row % 3 for row in positions}, stratification_columns=[], input_order_sha256="fixture")
+    return SplitManifest(schema_version="1.7.0", analysis_id="dddb2c74-2a57-4561-8afc-2c56e086674b", seed=11, selection_fraction=0.2, inference_folds=folds, sampling_unit="iid", selection_row_positions=[], inference_row_positions=positions, inference_fold_by_row_position={row: row % folds for row in positions}, stratification_columns=[], input_order_sha256="fixture")
 
 
 def continuous_node() -> NodeSpec:
@@ -43,6 +43,33 @@ def test_continuous_and_binary_signals_are_positive_and_deterministic() -> None:
     node = NodeSpec(node_id="y", outcome_type="binary", loss="brier", delta=.01)
     result = fit_crossfitted_vimp(binary, "y", "x", ["z"], node, manifest(), spec)
     assert result.status in {"success", "full_worse_than_reduced"} and result.theta_hat > 0 and result.se_theta > 0
+
+
+def test_nested_safeguard_needs_material_and_consistent_degradation() -> None:
+    """Section 16.4 asks for degradation that is *material* and holds *across perturbations*.
+
+    An irrelevant added variable drives psi slightly negative in most folds through nothing
+    but extra estimation variance. That is consistent but not material, and it is the
+    strongest evidence of practical irrelevance available -- so it must not abstain. A bare
+    `psi < 0` test cannot tell the two apart, which is what the tightened parameters here
+    reproduce.
+    """
+    rng = np.random.default_rng(2)
+    z = rng.normal(size=300); x = rng.normal(size=300)
+    data = pd.DataFrame({"z": z, "x": x, "y": z + rng.normal(scale=.5, size=300)})
+    node = NodeSpec(node_id="y", outcome_type="continuous", loss="squared", delta=.05)
+    library = {"forest_trees": 10, "learner_library_version": "v3_nested_blend"}
+
+    default = fit_crossfitted_vimp(data, "y", "x", ["z"], node, manifest(300, 5), VimpSpec(**library))
+    safeguard = default.nuisance_diagnostic["nested_safeguard"]
+    assert default.theta_hat < 0
+    assert default.status == "success"
+    assert safeguard["consistently_worse"] is True
+    assert safeguard["materially_worse"] is False
+
+    legacy = fit_crossfitted_vimp(data, "y", "x", ["z"], node, manifest(300, 5), VimpSpec(**library, nested_safeguard_materiality_z=1e-9, nested_safeguard_fold_fraction=.51))
+    assert legacy.status == "full_worse_than_reduced"
+    assert legacy.theta_hat == default.theta_hat
 
 
 def test_nested_blend_is_deterministic_and_records_convex_weights() -> None:

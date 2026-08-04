@@ -1,6 +1,16 @@
 # Phase 1 operating guide
 
-The only profile that can issue a hard `certified_nonedge` is
+> **No profile can currently certify.** The specification section 16.4 nested
+> learner safeguard now requires degradation to be *material* and *consistent
+> across folds* rather than merely `psi < 0`. That changed the decision rule, so
+> the bundled `v3-nested-blend-n300-d005-phase0` profile no longer describes the
+> estimator it was validated against and reports `calibration_failed` on
+> `vimp_fingerprint`. Runs still produce complete audit, screening, VIMP, and
+> unresolved evidence; none of it can become a hard `certified_nonedge` until a
+> Phase-0 rerun publishes a profile carrying the new fingerprint. See
+> [`docs/decision-records/0003-phase1-completion-evidence.md`](decision-records/0003-phase1-completion-evidence.md).
+
+Once revalidated, the only profile that can issue a hard `certified_nonedge` is
 `v3-nested-blend-n300-d005-phase0`. It is a predictive practical-separation
 result, never a causal nonedge or direction claim.
 
@@ -43,6 +53,13 @@ both directional predictive gains passed calibrated equivalence testing;
 `candidate_adjacency` means no searched separator established practical
 separation; `unresolved` means the evidence was insufficient. Abstention and
 `full_worse_than_reduced` are diagnostics, never evidence of a nonedge.
+
+`full_worse_than_reduced` now fires only when the expanded model is worse by more
+than `nested_safeguard_materiality_z` standard errors *and* in at least
+`nested_safeguard_fold_fraction` of folds. Both live in the `vimp` block, so
+changing either invalidates any matched profile. The per-estimate
+`nested_safeguard` diagnostic records the studentized value, the fold fraction,
+and which condition failed, so an abstention can always be traced to its cause.
 
 Archive the complete output directory outside the package. Treat runs without
 `calibrated_success` as exploratory and keep `not_yet_causal` in every
