@@ -185,3 +185,24 @@ def test_schema_export_is_deterministic_and_artifact_headers_are_versioned(
         artifact_type="audit",
     )
     assert header.artifact_type == "audit"
+
+
+def test_every_published_schema_matches_its_model(tmp_path: Path) -> None:
+    """`schemas/` is the cross-language contract R and reviewers read, so it must not drift.
+
+    Only `project_spec.schema.json` was previously compared against its model, which let a
+    changed `Literal` elsewhere leave a published schema silently contradicting the code.
+    """
+    published_directory = Path(__file__).parents[1] / "schemas"
+    regenerated = write_json_schemas(tmp_path / "schemas")
+
+    assert {path.name for path in regenerated.values()} == {
+        path.name for path in published_directory.glob("*.schema.json")
+    }
+    stale = [
+        path.name
+        for path in regenerated.values()
+        if json.loads((published_directory / path.name).read_text(encoding="utf-8"))
+        != json.loads(path.read_text(encoding="utf-8"))
+    ]
+    assert not stale, f"Stale published schemas: {', '.join(sorted(stale))}. Run write_json_schemas('schemas')."
