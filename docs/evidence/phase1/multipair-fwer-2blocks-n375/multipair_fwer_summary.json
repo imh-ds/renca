@@ -1,0 +1,16 @@
+{
+  "abstention_rate": 0.43392,
+  "alpha": 0.05,
+  "blocks": 2,
+  "boundary_false_certifications": 4,
+  "controlled": true,
+  "false_certifications": 4,
+  "familywise_error_rate": 0.0008,
+  "familywise_upper_bound": 0.0018297605084529958,
+  "mean_family_size": 7.2394,
+  "profile_id": "v3-nested-blend-n300-d005-phase0",
+  "replications": 5000,
+  "sample_size": 375,
+  "separator_recovery_rate": 1.0,
+  "true_nonedge_certification_rate": 0.021844444444444444
+}
