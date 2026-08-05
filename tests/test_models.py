@@ -31,7 +31,7 @@ def valid_project_payload() -> dict[str, object]:
         },
         "audit": {"minimum_rows_per_inference_fold": 100, "minimum_clusters": 20},
         "screening": {"max_neighbors": 10, "max_separator_size": 1, "separators_per_pair": 1},
-        "vimp": {"confidence_level": 0.95, "ridge_alpha": 1.0, "forest_trees": 100, "forest_max_depth": 5, "learner_library_version": "v2_quadratic_ridge"},
+        "vimp": {"confidence_level": 0.95, "ridge_alpha": 1.0, "forest_trees": 100, "forest_max_depth": 5, "learner_library_version": "v2_quadratic_ridge", "nested_safeguard_materiality_z": 3.0, "nested_safeguard_fold_fraction": 0.8},
         "calibration": {"profile_id": None},
         "nodes": [
             {

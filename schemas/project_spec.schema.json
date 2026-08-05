@@ -252,6 +252,7 @@
     },
     "VimpSpec": {
       "additionalProperties": false,
+      "description": "Estimator configuration; every field is fingerprinted by the calibration gate.\n\nThe two `nested_safeguard_*` fields govern the specification section 16.4 nested\nlearner safeguard. They belong here rather than in a runtime option precisely because\nthey change the decision rule: altering either one changes `vimp_fingerprint`, which\nmakes every existing calibration profile a visible mismatch until it is revalidated.",
       "properties": {
         "confidence_level": {
           "default": 0.95,
@@ -280,6 +281,19 @@
           ],
           "title": "Learner Library Version",
           "type": "string"
+        },
+        "nested_safeguard_fold_fraction": {
+          "default": 0.8,
+          "exclusiveMinimum": 0.5,
+          "maximum": 1,
+          "title": "Nested Safeguard Fold Fraction",
+          "type": "number"
+        },
+        "nested_safeguard_materiality_z": {
+          "default": 3.0,
+          "exclusiveMinimum": 0,
+          "title": "Nested Safeguard Materiality Z",
+          "type": "number"
         },
         "ridge_alpha": {
           "default": 1.0,

@@ -89,7 +89,7 @@ def fit_crossfitted_vimp(data_infer: pd.DataFrame, target: str, added_variable: 
     binary = node_spec.outcome_type is OutcomeType.BINARY
     try:
         fold_map = inference_folds(folds, len(data_infer))
-        reduced_losses: list[float] = []; full_losses: list[float] = []; null_losses: list[float] = []; diagnostics: dict[str, object] = {"folds": {}, "full_worse_than_reduced": False}
+        reduced_losses: list[float] = []; full_losses: list[float] = []; null_losses: list[float] = []; fold_worse: list[bool] = []; diagnostics: dict[str, object] = {"folds": {}, "full_worse_than_reduced": False}
         for fold, (train_rows, valid_rows) in fold_map.items():
             train, valid = data_infer.iloc[train_rows], data_infer.iloc[valid_rows]
             reduced, reduced_risks, reduced_name = _predictions(train, valid, target, separator, binary, vimp_spec, folds.seed + fold)
@@ -98,7 +98,10 @@ def fit_crossfitted_vimp(data_infer: pd.DataFrame, target: str, added_variable: 
             loss_fn = brier_loss if binary else squared_loss; observed = valid[target].to_numpy()
             reduced_loss, full_loss, null_loss = loss_fn(observed, reduced), loss_fn(observed, full), loss_fn(observed, null)
             reduced_losses.extend(reduced_loss); full_losses.extend(full_loss); null_losses.extend(null_loss)
-            diagnostics["folds"][str(fold)] = {"train_rows": train_rows.tolist(), "validation_rows": valid_rows.tolist(), "reduced_risks": reduced_risks, "full_risks": full_risks, "reduced_selected": reduced_name, "full_selected": full_name}
+            # Each fold trains on a different subset, so fold-level signs are the "repeated
+            # training perturbations" the nested learner safeguard asks to be assessed across.
+            fold_worse.append(float(np.mean(full_loss)) > float(np.mean(reduced_loss)))
+            diagnostics["folds"][str(fold)] = {"train_rows": train_rows.tolist(), "validation_rows": valid_rows.tolist(), "reduced_risks": reduced_risks, "full_risks": full_risks, "reduced_selected": reduced_name, "full_selected": full_name, "full_worse_than_reduced": fold_worse[-1]}
         diff, null = np.asarray(reduced_losses) - np.asarray(full_losses), np.asarray(null_losses)
         psi, risk = float(diff.mean()), float(null.mean())
         diagnostics["null_risk"] = risk
@@ -107,7 +110,18 @@ def fit_crossfitted_vimp(data_infer: pd.DataFrame, target: str, added_variable: 
         if risk <= 0: return VimpEstimate(pair_id="--".join(sorted([target, added_variable])), target=target, added_variable=added_variable, separator=separator, delta_target=node_spec.delta, nuisance_diagnostic=diagnostics, status="nonpositive_null_risk")
         theta = psi / risk; influence = (diff - psi - theta * (null - risk)) / risk; se = float(np.sqrt(np.var(influence, ddof=1) / len(influence)))
         if not np.isfinite(se) or se <= 0: return VimpEstimate(pair_id="--".join(sorted([target, added_variable])), target=target, added_variable=added_variable, separator=separator, psi_hat=psi, theta_hat=theta, delta_target=node_spec.delta, nuisance_diagnostic=diagnostics, status="nonfinite_standard_error")
-        diagnostics["full_worse_than_reduced"] = float(np.mean(full_losses)) > float(np.mean(reduced_losses))
+        # Specification section 16.4: flag the expanded model only when it is *materially*
+        # worse *across repeated training perturbations*. A bare `psi < 0` test conflates a
+        # genuinely inadequate expanded learner with a truly irrelevant added variable, whose
+        # extra estimation variance drives psi slightly negative about half the time. Since a
+        # negative theta is the strongest evidence of practical irrelevance there is, the bare
+        # test suppresses exactly the pairs this method exists to certify.
+        studentized = theta / se
+        fold_fraction = sum(fold_worse) / len(fold_worse)
+        materially_worse = studentized < -vimp_spec.nested_safeguard_materiality_z
+        consistently_worse = fold_fraction >= vimp_spec.nested_safeguard_fold_fraction
+        diagnostics["nested_safeguard"] = {"studentized_psi": studentized, "materiality_z": vimp_spec.nested_safeguard_materiality_z, "materially_worse": materially_worse, "fold_worse_fraction": fold_fraction, "required_fold_fraction": vimp_spec.nested_safeguard_fold_fraction, "consistently_worse": consistently_worse}
+        diagnostics["full_worse_than_reduced"] = materially_worse and consistently_worse
         z = norm.ppf((1 + vimp_spec.confidence_level) / 2); status = "full_worse_than_reduced" if diagnostics["full_worse_than_reduced"] else "success"
         return VimpEstimate(pair_id="--".join(sorted([target, added_variable])), target=target, added_variable=added_variable, separator=separator, psi_hat=psi, theta_hat=theta, se_theta=se, lower_ci=theta-z*se, upper_ci=theta+z*se, delta_target=node_spec.delta, nuisance_diagnostic=diagnostics, status=status)
     except Exception as error:

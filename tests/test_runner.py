@@ -6,8 +6,11 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pytest
-from renca.models import ProjectSpec
-from renca.runner import run_analysis
+import yaml
+from renca.calibration import CalibrationRegistry, vimp_fingerprint
+from renca.calibration.registry import file_sha256
+from renca.models import ProjectSpec, VimpSpec
+from renca.runner import default_calibration_registry_path, run_analysis
 from renca.artifacts.manifest import read_evidence_bundle_manifest
 
 def payload() -> dict[str, object]:
@@ -45,20 +48,60 @@ def test_runner_uses_packaged_registry_for_declared_profile(tmp_path: Path) -> N
     assert eligibility[0]["mismatch_fields"] == ["profile_id"]
 
 
-def test_exact_profile_run_is_eligible_and_near_match_stays_unresolved(tmp_path: Path) -> None:
-    rng = np.random.default_rng(44)
-    shared = rng.normal(size=375)
-    calibrated_data = pd.DataFrame({"x": shared + rng.normal(size=375), "y": shared + rng.normal(size=375), "z": rng.normal(size=375)})
+def calibrated_configuration() -> dict[str, object]:
     configured = payload()
     configured.update({"split": {"selection_fraction": .2, "inference_folds": 5}, "audit": {"minimum_rows_per_inference_fold": 60, "minimum_clusters": 2}, "vimp": {"forest_trees": 10, "forest_max_depth": 5, "ridge_alpha": 1., "confidence_level": .95, "learner_library_version": "v3_nested_blend"}, "calibration": {"profile_id": "v3-nested-blend-n300-d005-phase0"}})
     for node in configured["nodes"]:
         node["delta"] = .05
+    return configured
+
+
+def calibrated_data() -> pd.DataFrame:
+    rng = np.random.default_rng(44)
+    shared = rng.normal(size=375)
+    return pd.DataFrame({"x": shared + rng.normal(size=375), "y": shared + rng.normal(size=375), "z": rng.normal(size=375)})
+
+
+def refingerprinted_registry(tmp_path: Path) -> Path:
+    """A registry rewritten to carry the current estimator fingerprint.
+
+    This exercises the calibrated end-to-end path; it is NOT scientific evidence. Its
+    reference distribution was generated under the pre-materiality safeguard, so it does
+    not describe the current rule. Delete this helper once a real Phase-0 rerun ships a
+    profile with the new fingerprint, and point the test back at the packaged registry.
+    """
+    packaged_path = default_calibration_registry_path()
+    record = CalibrationRegistry.load(packaged_path).records[0]
+    directory = tmp_path / "registry"
+    directory.mkdir(parents=True, exist_ok=True)
+    distribution = directory / "calibration_distribution.parquet"
+    distribution.write_bytes((packaged_path.parent / record.distribution_file).read_bytes())
+    spec = VimpSpec(forest_trees=10, forest_max_depth=5, ridge_alpha=1., confidence_level=.95, learner_library_version="v3_nested_blend")
+    updated = record.model_copy(update={"vimp_fingerprint": vimp_fingerprint(spec), "distribution_file": distribution.name, "distribution_sha256": file_sha256(distribution)})
+    registry_path = directory / "registry.yml"
+    registry_path.write_text(yaml.safe_dump(CalibrationRegistry(records=[updated]).model_dump(mode="json"), sort_keys=True), encoding="utf-8")
+    return registry_path
+
+
+def test_packaged_profile_cannot_certify_until_it_is_revalidated(tmp_path: Path) -> None:
+    """The section 16.4 safeguard changed the decision rule, so the shipped profile is stale."""
+    out = tmp_path / "stale_profile"
+    run_analysis(calibrated_data(), ProjectSpec.model_validate(calibrated_configuration()), out)
+    eligibility = json.loads((out / "calibration_eligibility.json").read_text())
+    assert {row["status"] for row in eligibility} == {"calibration_failed"}
+    assert eligibility[0]["mismatch_fields"] == ["vimp_fingerprint"]
+    assert set(pd.read_parquet(out / "edge_report.parquet").state) == {"unresolved"}
+
+
+def test_exact_profile_run_is_eligible_and_near_match_stays_unresolved(tmp_path: Path) -> None:
+    registry_path = refingerprinted_registry(tmp_path)
+    configured = calibrated_configuration()
     out = tmp_path / "calibrated"
-    run_analysis(calibrated_data, ProjectSpec.model_validate(configured), out)
+    run_analysis(calibrated_data(), ProjectSpec.model_validate(configured), out, registry_path)
     assert {row["status"] for row in json.loads((out / "calibration_eligibility.json").read_text())} == {"calibrated_success"}
     assert "Calibration eligibility" in (out / "report.html").read_text()
     configured["split"] = {"selection_fraction": .2, "inference_folds": 4}
     uncalibrated = tmp_path / "near_match"
-    run_analysis(calibrated_data, ProjectSpec.model_validate(configured), uncalibrated)
+    run_analysis(calibrated_data(), ProjectSpec.model_validate(configured), uncalibrated, registry_path)
     assert set(pd.read_parquet(uncalibrated / "edge_report.parquet").state) == {"unresolved"}
     assert "inference_folds" in json.loads((uncalibrated / "calibration_eligibility.json").read_text())[0]["mismatch_fields"]

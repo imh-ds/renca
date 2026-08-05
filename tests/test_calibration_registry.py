@@ -52,10 +52,19 @@ def test_eligibility_reports_profile_and_distribution_failures() -> None:
     assert calibration_eligibility(registry, profile_id="fixture", delta_target=.05, inference_rows=300, inference_folds=5, spec=spec, distribution_ok=False).mismatch_fields == ["distribution_artifact"]
 
 
-def test_packaged_phase0_profile_is_an_exact_validated_match() -> None:
+def test_packaged_phase0_profile_is_invalidated_by_the_safeguard_change() -> None:
+    """The bundled profile predates the section 16.4 materiality safeguard.
+
+    Its null distribution was generated while `full_worse_than_reduced` fired on any
+    negative psi, so it does not describe the current decision rule. The safeguard
+    parameters live in `VimpSpec` precisely so that this shows up as a fingerprint
+    mismatch rather than a silent reuse. Restore this to `calibrated_success` only
+    after a Phase-0 rerun produces a profile carrying the new fingerprint.
+    """
     registry = CalibrationRegistry.load(default_calibration_registry_path())
-    status = calibration_status(registry, profile_id="v3-nested-blend-n300-d005-phase0", delta_target=.05, inference_rows=300, inference_folds=5, spec=VimpSpec(forest_trees=10, learner_library_version="v3_nested_blend"))
-    assert status == "calibrated_success"
+    eligibility = calibration_eligibility(registry, profile_id="v3-nested-blend-n300-d005-phase0", delta_target=.05, inference_rows=300, inference_folds=5, spec=VimpSpec(forest_trees=10, learner_library_version="v3_nested_blend"))
+    assert eligibility.status == "calibration_failed"
+    assert eligibility.mismatch_fields == ["vimp_fingerprint"]
 
 
 @pytest.mark.parametrize("rows,folds,spec", [(299, 5, VimpSpec()), (300, 4, VimpSpec()), (300, 5, VimpSpec(ridge_alpha=2))])
@@ -111,6 +120,22 @@ def test_small_grid_runner_is_deterministic_and_covers_every_family() -> None:
     first = run_independent_grid(replications=1, sample_size=60, inference_folds=5, delta=.05, critical_value=-2.11, vimp_spec=spec, seed=4, boundary_signals=signals)
     second = run_independent_grid(replications=1, sample_size=60, inference_folds=5, delta=.05, critical_value=-2.11, vimp_spec=spec, seed=4, boundary_signals=signals)
     assert first.equals(second) and set(first.scenario_family) == set(REQUIRED_SCENARIO_FAMILIES)
+
+
+def test_grid_results_do_not_depend_on_the_worker_count() -> None:
+    """Worker count must change throughput only.
+
+    The assembled distribution's SHA-256 is recorded in the registry and checked on every
+    load, so a grid whose output shifted with the host's core count would produce a profile
+    that could not be revalidated elsewhere. Threaded BLAS reductions reorder floating-point
+    summation, which is why the runner pins thread pools rather than only setting the
+    environment variables that worker processes read at start-up.
+    """
+    spec = VimpSpec(forest_trees=10); signals = {family: tune_boundary_signal(family, .05, n=20_000)[0] for family in REQUIRED_SCENARIO_FAMILIES}
+    arguments = {"replications": 2, "sample_size": 60, "inference_folds": 5, "delta": .05, "critical_value": -2.11, "vimp_spec": spec, "seed": 4, "boundary_signals": signals}
+    serial = run_independent_grid(**arguments, workers=1)
+    parallel = run_independent_grid(**arguments, workers=4)
+    assert serial.equals(parallel)
 
 
 def test_quadratic_ridge_produces_eligible_interaction_fixture_estimates() -> None:
