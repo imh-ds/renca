@@ -53,36 +53,86 @@ and which condition failed, so an abstention can always be traced to its cause.
 
 ## Network fit
 
-Every run writes `network_fit.json` and leads the HTML report with two indices,
-computed automatically and requiring no configuration.
+Every run writes `network_fit.json` and leads the HTML report with indices computed
+automatically, requiring no configuration.
 
-**Predictive adequacy** is `1 - R(S) / R(empty)`: the share of a target's baseline
-predictive uncertainty that the conditioning model actually removed. Read it first.
-A dataset of pure noise resolves *every* pair as a certified nonedge, because the
-models explain nothing and so every incremental contribution is near zero. That is
-not a false certification, but it is indistinguishable from a discovery, and the
-same signature appears when the learners fail to fit structure that is really
-there. When adequacy is at or below zero the report says so and nothing else should
-be interpreted.
+Two questions are kept separate throughout, and conflating them is the main way to
+misread this report:
 
-**Resolution floor** is the finest `delta` the analysis could certify at all, for a
-pair whose estimate is exactly zero. It is a precision measure: it combines sample
-size, data quality, and learner performance through the standard error, so a small
-clean sample can resolve more finely than a large noisy one. If the floor is coarser
-than your requested `delta`, most pairs cannot certify regardless of their true
-values, and the report says that explicitly rather than leaving it to appear as an
-unexplained wall of unresolved pairs.
+- **Can I trust this result?** Answered by the calibration profile. Under a matched
+  profile, false pruning is controlled at `alpha`, and that holds whatever the fit
+  indices say.
+- **How much will this analysis resolve?** Answered by the fit indices below. They
+  say nothing about trust.
 
-**Achieved resolution** is the per-pair upper limit on `Theta`. Unlike the floor it
-moves with effect size, so a network of strong genuine relationships shows large
-values; that is a property of the data, not a defect of the analysis. It is reported
-per pair in `edge_report.parquet` and stays meaningful for unresolved pairs, where
-"Theta is at most this" is informative even without a certificate.
+### Predictive adequacy — expected yield, not trustworthiness
 
-Both indices are reported without cut-offs. Conventional thresholds of the kind SEM
-provides came from simulation studies mapping index values to error rates, and that
-work has not been done here; `thresholds_are_validated` is `false` in the artifact
-to keep this visible.
+`1 - R(S) / R(empty)`: the share of a target's baseline predictive uncertainty that
+the conditioning model actually removed.
+
+**This index does not indicate whether results can be believed.** The threshold study
+in `docs/evidence/phase1/fit-index-thresholds-pilot/` measured false-prune rates
+across adequacy bins and found no relationship: 0.015, 0.000, 0.000, 0.000, 0.030,
+0.000, 0.024 from the lowest bin to the highest. Reading high adequacy as "safe"
+would claim a protection the index does not provide.
+
+What it does track, monotonically, is how many genuinely unrelated pairs get
+resolved. Use it to anticipate yield:
+
+| observed predictive adequacy | share of truly unrelated pairs expected to resolve |
+|---|---|
+| 0.40 and above | about three quarters |
+| 0.20 to 0.40 | about two thirds |
+| 0.05 to 0.20 | about half |
+| 0.02 to 0.05 | just under half |
+| above 0 to 0.02 | about a third |
+| at or below 0 | nothing is interpretable; see below |
+
+These are **provisional**, from a 1,200-replication pilot on one synthetic design, and
+they are the scale of the effect rather than precise rates. Your own yield depends on
+the structure actually present. The bands are deliberately not labelled good or
+acceptable: they describe what to expect, and whether that answers your question is
+your judgement, not the software's.
+
+The one hard statement is a degenerate case rather than a cut-off. Adequacy at or
+below zero means the conditioning models explained none of the outcome variance, so
+the contrast underlying every pair state was uninformative. A dataset of pure noise
+resolves *every* pair as a certified nonedge for exactly this reason. That is not a
+false certification, but it is indistinguishable from a discovery, and the report
+says so plainly.
+
+### Resolution floor — the finest question your data can answer
+
+The finest `delta` the analysis could certify at all, for a pair whose estimate is
+exactly zero. It is a precision measure: it combines sample size, data quality, and
+learner performance through the standard error, so a small clean sample can resolve
+more finely than a large noisy one. If the floor is coarser than your requested
+`delta`, most pairs cannot certify regardless of their true values, and the report
+says that explicitly rather than leaving it to appear as an unexplained wall of
+unresolved pairs.
+
+Treat this as the primary planning quantity. Rather than asking whether your sample
+is large enough, run the analysis and read the floor: it tells you the resolution
+your data supports, and `delta` should be set at or above it.
+
+### Achieved resolution — the per-pair bound
+
+The per-pair upper limit on `Theta`. Unlike the floor it moves with effect size, so a
+network of strong genuine relationships shows large values; that is a property of the
+data, not a defect of the analysis. It is reported per pair in `edge_report.parquet`
+and stays meaningful for unresolved pairs, where "Theta is at most this" is
+informative even without a certificate.
+
+### Why there are no cut-offs
+
+The measured relationship between adequacy and yield is a smooth gradient with no
+discontinuity anywhere in it, so any bright line would impose structure the evidence
+does not contain. Conventional cut-offs of the kind SEM provides came from simulation
+studies mapping index values to error rates, and have themselves been criticised for
+being treated as pass marks when the underlying simulations showed continuous
+trade-offs. `thresholds_are_validated` is `false` in the artifact to keep this
+visible. Report the index value and the yield you observed; that is more informative
+than a threshold and easier to defend.
 
 Archive the complete output directory outside the package. Treat runs without
 `calibrated_success` as exploratory and keep `not_yet_causal` in every
