@@ -23,6 +23,7 @@ class CalibrationRecord(Model):
     vimp_fingerprint: str
     alpha: float = .05
     critical_value: float
+    critical_quantile: float = .05  # legacy records predate the field and used alpha
     distribution_file: str = ""
     distribution_sha256: str = ""
     calibration_replications: int

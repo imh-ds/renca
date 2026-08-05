@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from renca.calibration import REQUIRED_SCENARIO_FAMILIES, run_independent_grid, validate_grid, vimp_fingerprint
+from renca.calibration import CRITICAL_QUANTILE, REQUIRED_SCENARIO_FAMILIES, critical_value_from_training, run_independent_grid, validate_grid, vimp_fingerprint
 from renca.calibration.registry import file_sha256
 from renca.calibration.scenarios import tune_boundary_signal
 from renca.models import VimpSpec
@@ -31,16 +31,16 @@ def shard(args: argparse.Namespace) -> None:
 def training_manifest(args: argparse.Namespace) -> None:
     frames = [pd.read_parquet(path) for path in Path(args.shards).glob("*.parquet")]; data = pd.concat(frames, ignore_index=True)
     _validate(data, args.training_replications); eligible = data.loc[data.status == "success"].copy()
-    critical = min(eligible.loc[eligible.scenario_family == family, "studentized_statistic"].quantile(.05, interpolation="lower") for family in REQUIRED_SCENARIO_FAMILIES)
+    critical = critical_value_from_training(eligible)
     args.output.mkdir(parents=True, exist_ok=True); distribution = args.output / "calibration_distribution.parquet"; eligible.to_parquet(distribution, index=False)
-    payload = {"critical_value": float(critical), "distribution_file": distribution.name, "distribution_sha256": file_sha256(distribution), "successful_training": eligible.groupby("scenario_family").size().astype(int).to_dict(), "vimp_fingerprint": vimp_fingerprint(_spec(args.learner_library_version))}
+    payload = {"critical_value": float(critical), "critical_quantile": CRITICAL_QUANTILE, "distribution_file": distribution.name, "distribution_sha256": file_sha256(distribution), "successful_training": eligible.groupby("scenario_family").size().astype(int).to_dict(), "vimp_fingerprint": vimp_fingerprint(_spec(args.learner_library_version))}
     (args.output / "training_manifest.json").write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
 def final(args: argparse.Namespace) -> None:
     output = Path(args.output); manifest = json.loads((Path(args.training) / "training_manifest.json").read_text(encoding="utf-8")); validation = pd.concat([pd.read_parquet(path) for path in Path(args.validation).glob("*.parquet")], ignore_index=True)
     _validate(validation, args.validation_replications)
-    record = validate_grid(validation, profile_id="v3-nested-blend-n300-d005-phase0", scenario_family="continuous_linear_boundary_v1", delta_target=.05, inference_rows=300, inference_folds=5, vimp_fingerprint=manifest["vimp_fingerprint"], critical_value=manifest["critical_value"], distribution_file="calibration_distribution.parquet", distribution_sha256=manifest["distribution_sha256"], calibration_replications=args.training_replications, calibration_successful_replications_per_family=manifest["successful_training"])
+    record = validate_grid(validation, profile_id="v3-nested-blend-n300-d005-phase0", scenario_family="continuous_linear_boundary_v1", delta_target=.05, inference_rows=300, inference_folds=5, vimp_fingerprint=manifest["vimp_fingerprint"], critical_value=manifest["critical_value"], critical_quantile=manifest.get("critical_quantile", .05), distribution_file="calibration_distribution.parquet", distribution_sha256=manifest["distribution_sha256"], calibration_replications=args.training_replications, calibration_successful_replications_per_family=manifest["successful_training"])
     output.mkdir(parents=True, exist_ok=True); shutil.copy2(Path(args.training) / manifest["distribution_file"], output / "calibration_distribution.parquet"); validation.to_parquet(output / "independent_validation.parquet", index=False); (output / "calibration_summary.json").write_text(json.dumps(record.model_dump(mode="json"), indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
