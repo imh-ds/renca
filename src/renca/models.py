@@ -226,6 +226,7 @@ def write_json_schemas(destination: str | Path) -> dict[str, Path]:
     from renca.certification import EdgeCertificate
     from renca.calibration.registry import CalibrationEligibility, CalibrationRecord
     from renca.graph import ResolutionGraph
+    from renca.reporting.fit import NetworkFit
     contracts.update({
         "audit_report": (AuditReport, "audit_report.schema.json"),
         "analysis_manifest": (AnalysisManifest, "analysis_manifest.schema.json"),
@@ -238,6 +239,7 @@ def write_json_schemas(destination: str | Path) -> dict[str, Path]:
         "calibration_eligibility": (CalibrationEligibility, "calibration_eligibility.schema.json"),
         "evidence_bundle_manifest": (EvidenceBundleManifest, "evidence_bundle_manifest.schema.json"),
         "resolution_graph": (ResolutionGraph, "resolution_graph.schema.json"),
+        "network_fit": (NetworkFit, "network_fit.schema.json"),
     })
     paths: dict[str, Path] = {}
     for contract_name, (model, filename) in contracts.items():

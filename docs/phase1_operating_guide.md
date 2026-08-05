@@ -51,6 +51,39 @@ changing either invalidates any matched profile. The per-estimate
 `nested_safeguard` diagnostic records the studentized value, the fold fraction,
 and which condition failed, so an abstention can always be traced to its cause.
 
+## Network fit
+
+Every run writes `network_fit.json` and leads the HTML report with two indices,
+computed automatically and requiring no configuration.
+
+**Predictive adequacy** is `1 - R(S) / R(empty)`: the share of a target's baseline
+predictive uncertainty that the conditioning model actually removed. Read it first.
+A dataset of pure noise resolves *every* pair as a certified nonedge, because the
+models explain nothing and so every incremental contribution is near zero. That is
+not a false certification, but it is indistinguishable from a discovery, and the
+same signature appears when the learners fail to fit structure that is really
+there. When adequacy is at or below zero the report says so and nothing else should
+be interpreted.
+
+**Resolution floor** is the finest `delta` the analysis could certify at all, for a
+pair whose estimate is exactly zero. It is a precision measure: it combines sample
+size, data quality, and learner performance through the standard error, so a small
+clean sample can resolve more finely than a large noisy one. If the floor is coarser
+than your requested `delta`, most pairs cannot certify regardless of their true
+values, and the report says that explicitly rather than leaving it to appear as an
+unexplained wall of unresolved pairs.
+
+**Achieved resolution** is the per-pair upper limit on `Theta`. Unlike the floor it
+moves with effect size, so a network of strong genuine relationships shows large
+values; that is a property of the data, not a defect of the analysis. It is reported
+per pair in `edge_report.parquet` and stays meaningful for unresolved pairs, where
+"Theta is at most this" is informative even without a certificate.
+
+Both indices are reported without cut-offs. Conventional thresholds of the kind SEM
+provides came from simulation studies mapping index values to error rates, and that
+work has not been done here; `thresholds_are_validated` is `false` in the artifact
+to keep this visible.
+
 Archive the complete output directory outside the package. Treat runs without
 `calibrated_success` as exploratory and keep `not_yet_causal` in every
 downstream description.
