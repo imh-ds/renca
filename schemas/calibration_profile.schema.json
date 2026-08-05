@@ -17,6 +17,11 @@
       "title": "Calibration Successful Replications Per Family",
       "type": "object"
     },
+    "critical_quantile": {
+      "default": 0.05,
+      "title": "Critical Quantile",
+      "type": "number"
+    },
     "critical_value": {
       "title": "Critical Value",
       "type": "number"

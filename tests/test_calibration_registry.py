@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import numpy as np
 import pandas as pd
 import pytest
 
-from renca.calibration import CalibrationRecord, CalibrationRegistry, REQUIRED_SCENARIO_FAMILIES, apply_profile, calibrated_p_value, calibration_eligibility, calibration_status, run_independent_grid, validate_grid, vimp_fingerprint
+from renca.calibration import CRITICAL_QUANTILE, CalibrationRecord, critical_value_from_training, CalibrationRegistry, REQUIRED_SCENARIO_FAMILIES, apply_profile, calibrated_p_value, calibration_eligibility, calibration_status, run_independent_grid, validate_grid, vimp_fingerprint
 from renca.calibration.registry import file_sha256
 from renca.calibration.scenarios import generate_scenario, oracle_theta, tune_boundary_signal
 from renca.models import VimpSpec
@@ -143,3 +144,33 @@ def test_quadratic_ridge_produces_eligible_interaction_fixture_estimates() -> No
     signal = tune_boundary_signal(family, .05, n=20_000)[0]
     results = run_independent_grid(replications=5, sample_size=300, inference_folds=5, delta=.05, critical_value=-99, vimp_spec=VimpSpec(forest_trees=10), seed=20260804, scenario_families=(family,), boundary_signals={family: signal})
     assert (results.status == "success").any()
+
+
+def test_critical_value_uses_a_sub_alpha_quantile_and_records_it() -> None:
+    """The family attaining the minimum quantile is validated against that same value.
+
+    Its rejection rate therefore targets the quantile, so setting it at alpha puts the
+    observed rate on alpha and its 95% upper bound above it about half the time. The
+    2026-08-05 Phase-0 rerun failed exactly that way once the section 16.4 safeguard
+    stopped supplying margin through abstention.
+    """
+    assert CRITICAL_QUANTILE < .05
+    generator = np.random.default_rng(0)
+    frame = pd.DataFrame({
+        "scenario_family": np.repeat(list(REQUIRED_SCENARIO_FAMILIES), 2000),
+        "studentized_statistic": np.concatenate([generator.normal(size=2000) for _ in REQUIRED_SCENARIO_FAMILIES]),
+    })
+    assert critical_value_from_training(frame) < critical_value_from_training(frame, quantile=.05)
+
+    results = pd.DataFrame([
+        {"scenario_family": family, "replicate": index, "reject": False, "status": "success"}
+        for family in REQUIRED_SCENARIO_FAMILIES for index in range(5000)
+    ])
+    record = validate_grid(results, profile_id="fixture", scenario_family=REQUIRED_SCENARIO_FAMILIES[0], delta_target=.05, inference_rows=300, inference_folds=5, vimp_fingerprint="x", critical_value=-5.14, calibration_replications=6000, calibration_successful_replications_per_family={family: 6000 for family in REQUIRED_SCENARIO_FAMILIES})
+    assert record.critical_quantile == CRITICAL_QUANTILE
+    assert record.status == "validated"
+
+
+def test_legacy_records_without_the_field_report_the_alpha_quantile() -> None:
+    """The packaged profile predates `critical_quantile`; its default must describe it."""
+    assert CalibrationRegistry.load(default_calibration_registry_path()).records[0].critical_quantile == .05

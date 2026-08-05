@@ -6,7 +6,7 @@ import argparse
 import json
 from pathlib import Path
 
-from renca.calibration import REQUIRED_SCENARIO_FAMILIES, run_independent_grid, validate_grid, vimp_fingerprint
+from renca.calibration import critical_value_from_training, REQUIRED_SCENARIO_FAMILIES, run_independent_grid, validate_grid, vimp_fingerprint
 from renca.calibration.registry import file_sha256
 from renca.calibration.scenarios import tune_boundary_signal
 from renca.models import VimpSpec
@@ -27,7 +27,7 @@ def main() -> None:
     signal_values = {family: item[0] for family, item in signals.items()}
     training = run_independent_grid(replications=args.training_replications, sample_size=args.sample_size, inference_folds=folds, delta=delta, critical_value=float("-inf"), vimp_spec=spec, seed=args.seed, boundary_signals=signal_values)
     eligible_training = training.loc[training.status == "success"].copy()
-    critical_value = min(eligible_training.loc[eligible_training.scenario_family == family, "studentized_statistic"].dropna().quantile(.05, interpolation="lower") for family in REQUIRED_SCENARIO_FAMILIES)
+    critical_value = critical_value_from_training(eligible_training)
     validation = run_independent_grid(replications=args.validation_replications, sample_size=args.sample_size, inference_folds=folds, delta=delta, critical_value=float(critical_value), vimp_spec=spec, seed=args.seed + 1, boundary_signals=signal_values)
     args.output.mkdir(parents=True, exist_ok=True)
     distribution_path = args.output / "calibration_distribution.parquet"; eligible_training.to_parquet(distribution_path, index=False)
