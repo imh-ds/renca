@@ -1,16 +1,6 @@
 # Phase 1 operating guide
 
-> **No profile can currently certify.** The specification section 16.4 nested
-> learner safeguard now requires degradation to be *material* and *consistent
-> across folds* rather than merely `psi < 0`. That changed the decision rule, so
-> the bundled `v3-nested-blend-n300-d005-phase0` profile no longer describes the
-> estimator it was validated against and reports `calibration_failed` on
-> `vimp_fingerprint`. Runs still produce complete audit, screening, VIMP, and
-> unresolved evidence; none of it can become a hard `certified_nonedge` until a
-> Phase-0 rerun publishes a profile carrying the new fingerprint. See
-> [`docs/decision-records/0003-phase1-completion-evidence.md`](decision-records/0003-phase1-completion-evidence.md).
-
-Once revalidated, the only profile that can issue a hard `certified_nonedge` is
+The only profile that can issue a hard `certified_nonedge` is
 `v3-nested-blend-n300-d005-phase0`. It is a predictive practical-separation
 result, never a causal nonedge or direction claim.
 

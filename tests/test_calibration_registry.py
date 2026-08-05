@@ -53,19 +53,21 @@ def test_eligibility_reports_profile_and_distribution_failures() -> None:
     assert calibration_eligibility(registry, profile_id="fixture", delta_target=.05, inference_rows=300, inference_folds=5, spec=spec, distribution_ok=False).mismatch_fields == ["distribution_artifact"]
 
 
-def test_packaged_phase0_profile_is_invalidated_by_the_safeguard_change() -> None:
-    """The bundled profile predates the section 16.4 materiality safeguard.
+def test_packaged_phase0_profile_is_an_exact_validated_match() -> None:
+    """The packaged profile must describe the estimator that is actually shipped.
 
-    Its null distribution was generated while `full_worse_than_reduced` fired on any
-    negative psi, so it does not describe the current decision rule. The safeguard
-    parameters live in `VimpSpec` precisely so that this shows up as a fingerprint
-    mismatch rather than a silent reuse. Restore this to `calibrated_success` only
-    after a Phase-0 rerun produces a profile carrying the new fingerprint.
+    It was regenerated after the section 16.4 materiality safeguard changed the decision
+    rule, and its critical value uses a sub-alpha training quantile so the argmin family's
+    upper bound clears alpha on its own rather than through abstention.
     """
     registry = CalibrationRegistry.load(default_calibration_registry_path())
     eligibility = calibration_eligibility(registry, profile_id="v3-nested-blend-n300-d005-phase0", delta_target=.05, inference_rows=300, inference_folds=5, spec=VimpSpec(forest_trees=10, learner_library_version="v3_nested_blend"))
-    assert eligibility.status == "calibration_failed"
-    assert eligibility.mismatch_fields == ["vimp_fingerprint"]
+    assert eligibility.status == "calibrated_success"
+    assert eligibility.mismatch_fields == []
+    record = registry.records[0]
+    assert record.critical_quantile == CRITICAL_QUANTILE
+    assert max(record.grid_upper_rejection_bounds.values()) <= record.alpha
+    assert max(record.grid_ineligibility_rates.values()) < .01
 
 
 @pytest.mark.parametrize("rows,folds,spec", [(299, 5, VimpSpec()), (300, 4, VimpSpec()), (300, 5, VimpSpec(ridge_alpha=2))])
@@ -171,6 +173,7 @@ def test_critical_value_uses_a_sub_alpha_quantile_and_records_it() -> None:
     assert record.status == "validated"
 
 
-def test_legacy_records_without_the_field_report_the_alpha_quantile() -> None:
-    """The packaged profile predates `critical_quantile`; its default must describe it."""
-    assert CalibrationRegistry.load(default_calibration_registry_path()).records[0].critical_quantile == .05
+def test_records_without_the_field_default_to_the_alpha_quantile() -> None:
+    """Registries written before `critical_quantile` existed were built at alpha."""
+    legacy = {key: value for key, value in valid_record(VimpSpec()).model_dump(mode="json").items() if key != "critical_quantile"}
+    assert CalibrationRecord.model_validate(legacy).critical_quantile == .05

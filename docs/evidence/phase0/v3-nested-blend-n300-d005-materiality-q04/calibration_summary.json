@@ -1,0 +1,60 @@
+{
+  "alpha": 0.05,
+  "calibration_replications": 6000,
+  "calibration_successful_replications_per_family": {
+    "bounded_composite_saturated_v1": 6000,
+    "bounded_composite_unsaturated_v1": 6000,
+    "continuous_linear_boundary_v1": 6000,
+    "learner_misspecification_v1": 5998,
+    "nonlinear_continuous_v1": 6000
+  },
+  "critical_quantile": 0.04,
+  "critical_value": -5.137323402339938,
+  "delta_target": 0.05,
+  "distribution_file": "calibration_distribution.parquet",
+  "distribution_sha256": "70aeff4d7c2180a377b6ca5521bed340dc4cd80d68b0574918d36768527842ec",
+  "empirical_rejection_rate": 0.0018,
+  "evaluation_replications": 5000,
+  "grid_ineligibility_rates": {
+    "bounded_composite_saturated_v1": 0.0,
+    "bounded_composite_unsaturated_v1": 0.0,
+    "continuous_linear_boundary_v1": 0.0,
+    "learner_misspecification_v1": 0.0004,
+    "nonlinear_continuous_v1": 0.0
+  },
+  "grid_rejection_rates": {
+    "bounded_composite_saturated_v1": 0.0,
+    "bounded_composite_unsaturated_v1": 0.0,
+    "continuous_linear_boundary_v1": 0.0018,
+    "learner_misspecification_v1": 0.04,
+    "nonlinear_continuous_v1": 0.0012
+  },
+  "grid_upper_rejection_bounds": {
+    "bounded_composite_saturated_v1": 0.0005989670023149134,
+    "bounded_composite_unsaturated_v1": 0.0005989670023149134,
+    "continuous_linear_boundary_v1": 0.003138937234501829,
+    "learner_misspecification_v1": 0.04486207599715406,
+    "nonlinear_continuous_v1": 0.0023670955423628686
+  },
+  "inference_folds": 5,
+  "inference_rows": 300,
+  "profile_id": "v3-nested-blend-n300-d005-phase0",
+  "scenario_family": "continuous_linear_boundary_v1",
+  "status": "validated",
+  "upper_rejection_bound": 0.003138937234501829,
+  "validation_replications_per_family": {
+    "bounded_composite_saturated_v1": 5000,
+    "bounded_composite_unsaturated_v1": 5000,
+    "continuous_linear_boundary_v1": 5000,
+    "learner_misspecification_v1": 5000,
+    "nonlinear_continuous_v1": 5000
+  },
+  "validation_scenario_families": [
+    "continuous_linear_boundary_v1",
+    "bounded_composite_unsaturated_v1",
+    "bounded_composite_saturated_v1",
+    "nonlinear_continuous_v1",
+    "learner_misspecification_v1"
+  ],
+  "vimp_fingerprint": "28e463837b013a2d7d550a254a89a808ae798de9571d861c1c46611557a9ac71"
+}
