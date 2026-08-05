@@ -20,6 +20,8 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install .
+      - name: Report runner capacity
+        run: 'nproc && free -g | head -2'
       - run: python simulations/phase0_calibration.py shard --phase training --family ${{ matrix.family }} --start ${{ matrix.start }} --count 1000 --output out/${{ matrix.family }}-${{ matrix.start }}.parquet
       - uses: actions/upload-artifact@v4
         with:

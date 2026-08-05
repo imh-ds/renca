@@ -122,6 +122,22 @@ def test_small_grid_runner_is_deterministic_and_covers_every_family() -> None:
     assert first.equals(second) and set(first.scenario_family) == set(REQUIRED_SCENARIO_FAMILIES)
 
 
+def test_grid_results_do_not_depend_on_the_worker_count() -> None:
+    """Worker count must change throughput only.
+
+    The assembled distribution's SHA-256 is recorded in the registry and checked on every
+    load, so a grid whose output shifted with the host's core count would produce a profile
+    that could not be revalidated elsewhere. Threaded BLAS reductions reorder floating-point
+    summation, which is why the runner pins thread pools rather than only setting the
+    environment variables that worker processes read at start-up.
+    """
+    spec = VimpSpec(forest_trees=10); signals = {family: tune_boundary_signal(family, .05, n=20_000)[0] for family in REQUIRED_SCENARIO_FAMILIES}
+    arguments = {"replications": 2, "sample_size": 60, "inference_folds": 5, "delta": .05, "critical_value": -2.11, "vimp_spec": spec, "seed": 4, "boundary_signals": signals}
+    serial = run_independent_grid(**arguments, workers=1)
+    parallel = run_independent_grid(**arguments, workers=4)
+    assert serial.equals(parallel)
+
+
 def test_quadratic_ridge_produces_eligible_interaction_fixture_estimates() -> None:
     family = "learner_misspecification_v1"
     signal = tune_boundary_signal(family, .05, n=20_000)[0]

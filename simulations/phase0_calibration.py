@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shutil
 from pathlib import Path
 
@@ -22,7 +23,8 @@ def _spec(version: str) -> VimpSpec:
 def shard(args: argparse.Namespace) -> None:
     spec = _spec(args.learner_library_version); family = args.family; signal = tune_boundary_signal(family, .05)[0]
     critical = float("-inf") if args.phase == "training" else json.loads(Path(args.training_manifest).read_text(encoding="utf-8"))["critical_value"]
-    frame = run_independent_grid(replications=args.count, replicate_start=args.start, sample_size=300, inference_folds=5, delta=.05, critical_value=critical, vimp_spec=spec, seed=args.seed, scenario_families=(family,), boundary_signals={family: signal})
+    workers = args.workers if args.workers else (os.cpu_count() or 1)
+    frame = run_independent_grid(replications=args.count, replicate_start=args.start, sample_size=300, inference_folds=5, delta=.05, critical_value=critical, vimp_spec=spec, seed=args.seed, scenario_families=(family,), boundary_signals={family: signal}, workers=workers)
     args.output.parent.mkdir(parents=True, exist_ok=True); frame.to_parquet(args.output, index=False)
 
 
@@ -49,7 +51,7 @@ def _validate(data: pd.DataFrame, expected: int) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(); commands = parser.add_subparsers(dest="command", required=True)
-    shard_parser = commands.add_parser("shard"); shard_parser.add_argument("--phase", choices=["training", "validation"], required=True); shard_parser.add_argument("--family", choices=REQUIRED_SCENARIO_FAMILIES, required=True); shard_parser.add_argument("--start", type=int, required=True); shard_parser.add_argument("--count", type=int, required=True); shard_parser.add_argument("--output", type=Path, required=True); shard_parser.add_argument("--seed", type=int, default=20260809); shard_parser.add_argument("--learner-library-version", default="v3_nested_blend"); shard_parser.add_argument("--training-manifest"); shard_parser.set_defaults(func=shard)
+    shard_parser = commands.add_parser("shard"); shard_parser.add_argument("--phase", choices=["training", "validation"], required=True); shard_parser.add_argument("--family", choices=REQUIRED_SCENARIO_FAMILIES, required=True); shard_parser.add_argument("--start", type=int, required=True); shard_parser.add_argument("--count", type=int, required=True); shard_parser.add_argument("--output", type=Path, required=True); shard_parser.add_argument("--seed", type=int, default=20260809); shard_parser.add_argument("--learner-library-version", default="v3_nested_blend"); shard_parser.add_argument("--workers", type=int, help="parallel replications; defaults to the core count"); shard_parser.add_argument("--training-manifest"); shard_parser.set_defaults(func=shard)
     train_parser = commands.add_parser("training-manifest"); train_parser.add_argument("--shards", type=Path, required=True); train_parser.add_argument("--output", type=Path, required=True); train_parser.add_argument("--training-replications", type=int, default=6000); train_parser.add_argument("--learner-library-version", default="v3_nested_blend"); train_parser.set_defaults(func=training_manifest)
     final_parser = commands.add_parser("final"); final_parser.add_argument("--training", type=Path, required=True); final_parser.add_argument("--validation", type=Path, required=True); final_parser.add_argument("--output", type=Path, required=True); final_parser.add_argument("--training-replications", type=int, default=6000); final_parser.add_argument("--validation-replications", type=int, default=5000); final_parser.set_defaults(func=final)
     args = parser.parse_args(); args.func(args)
