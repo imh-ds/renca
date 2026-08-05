@@ -1,0 +1,189 @@
+{
+  "$defs": {
+    "PairFit": {
+      "additionalProperties": false,
+      "properties": {
+        "achieved_resolution": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Achieved Resolution"
+        },
+        "pair_id": {
+          "title": "Pair Id",
+          "type": "string"
+        },
+        "predictive_adequacy": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Predictive Adequacy"
+        },
+        "resolution_basis": {
+          "enum": [
+            "calibrated",
+            "normal_approximation",
+            "unavailable"
+          ],
+          "title": "Resolution Basis",
+          "type": "string"
+        },
+        "resolution_floor": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Resolution Floor"
+        }
+      },
+      "required": [
+        "pair_id",
+        "resolution_basis"
+      ],
+      "title": "PairFit",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Automatically computed indices describing how much the analysis could resolve.",
+  "properties": {
+    "achieved_resolution_median": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Achieved Resolution Median"
+    },
+    "achieved_resolution_p90": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Achieved Resolution P90"
+    },
+    "analysis_id": {
+      "title": "Analysis Id",
+      "type": "string"
+    },
+    "interpretation": {
+      "title": "Interpretation",
+      "type": "string"
+    },
+    "pairs": {
+      "items": {
+        "$ref": "#/$defs/PairFit"
+      },
+      "title": "Pairs",
+      "type": "array"
+    },
+    "predictive_adequacy_median": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Predictive Adequacy Median"
+    },
+    "predictive_adequacy_minimum": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Predictive Adequacy Minimum"
+    },
+    "primary_delta_range": {
+      "items": {
+        "type": "number"
+      },
+      "title": "Primary Delta Range",
+      "type": "array"
+    },
+    "resolution_basis": {
+      "enum": [
+        "calibrated",
+        "normal_approximation",
+        "unavailable"
+      ],
+      "title": "Resolution Basis",
+      "type": "string"
+    },
+    "resolution_floor_median": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Resolution Floor Median"
+    },
+    "resolution_floor_p90": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Resolution Floor P90"
+    },
+    "schema_version": {
+      "default": "1.7.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "thresholds_are_validated": {
+      "const": false,
+      "default": false,
+      "title": "Thresholds Are Validated",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "analysis_id",
+    "resolution_basis",
+    "interpretation"
+  ],
+  "title": "NetworkFit",
+  "type": "object"
+}

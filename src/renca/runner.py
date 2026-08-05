@@ -9,6 +9,7 @@ from renca.graph import build_resolution_graph, write_resolution_graph
 from renca.calibration import CalibrationRegistry, apply_profile
 from renca.models import ProjectSpec
 from renca.reporting.edge_table import write_edge_report
+from renca.reporting.fit import build_network_fit, write_network_fit
 from renca.screening import create_outer_split, rank_separators, screen_neighbors, write_separator_candidates, write_split_manifest
 from renca.vimp import fit_crossfitted_vimp, write_vimp_estimates
 
@@ -31,7 +32,13 @@ def run_analysis(data:pd.DataFrame,project_spec:ProjectSpec,output_dir:str|Path,
         estimates.extend([fit_crossfitted_vimp(clean,c.node_i,c.node_j,c.separator,nodes[c.node_i],split,project_spec.vimp),fit_crossfitted_vimp(clean,c.node_j,c.node_i,c.separator,nodes[c.node_j],split,project_spec.vimp)])
     if project_spec.calibration.profile_id and calibration_registry_path is None:
         calibration_registry_path = default_calibration_registry_path()
-    eligibility=[]
+    eligibility=[]; critical_value=None
     if calibration_registry_path is not None:
-        estimates, eligibility=apply_profile(estimates,registry=CalibrationRegistry.load(calibration_registry_path),registry_path=calibration_registry_path,profile_id=project_spec.calibration.profile_id,inference_rows=len(split.inference_row_positions),inference_folds=split.inference_folds,vimp_spec=project_spec.vimp,return_eligibility=True)
-    write_vimp_estimates(estimates,out); certificates=certify_pairs(estimates); write_edge_certificates(certificates,out); graph=build_resolution_graph(certificates,project_spec); write_resolution_graph(graph,out); write_edge_report(graph,estimates,out,eligibility); write_evidence_bundle_manifest(analysis_manifest,out,profile_id=project_spec.calibration.profile_id,registry_path=calibration_registry_path); return RunArtifacts(out)
+        registry=CalibrationRegistry.load(calibration_registry_path)
+        estimates, eligibility=apply_profile(estimates,registry=registry,registry_path=calibration_registry_path,profile_id=project_spec.calibration.profile_id,inference_rows=len(split.inference_row_positions),inference_folds=split.inference_folds,vimp_spec=project_spec.vimp,return_eligibility=True)
+        # Achieved resolution is only on the calibrated scale when the profile actually matched.
+        if eligibility and all(item.status == "calibrated_success" for item in eligibility):
+            critical_value=next((record.critical_value for record in registry.records if record.profile_id == project_spec.calibration.profile_id), None)
+    write_vimp_estimates(estimates,out); certificates=certify_pairs(estimates); write_edge_certificates(certificates,out); graph=build_resolution_graph(certificates,project_spec); write_resolution_graph(graph,out)
+    fit=build_network_fit(estimates,project_spec,critical_value); write_network_fit(fit,out)
+    write_edge_report(graph,estimates,out,eligibility,fit); write_evidence_bundle_manifest(analysis_manifest,out,profile_id=project_spec.calibration.profile_id,registry_path=calibration_registry_path); return RunArtifacts(out)

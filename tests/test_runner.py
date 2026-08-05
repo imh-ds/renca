@@ -18,7 +18,7 @@ def data() -> pd.DataFrame:
 
 def test_runner_writes_complete_predictive_evidence_ledger(tmp_path: Path) -> None:
     out=tmp_path/"out"; run_analysis(data(),ProjectSpec.model_validate(payload()),out)
-    expected={"audit.json","analysis_manifest.json","run_receipt.json","split_manifest.json","separator_candidates.parquet","vimp_estimates.parquet","edge_certificates.parquet","edge_certificates.json","edge_report.parquet","report.html","calibration_eligibility.json","evidence_bundle_manifest.json","resolution_graph.json","resolution_graph.graphml"}
+    expected={"audit.json","analysis_manifest.json","run_receipt.json","split_manifest.json","separator_candidates.parquet","vimp_estimates.parquet","edge_certificates.parquet","edge_certificates.json","edge_report.parquet","report.html","calibration_eligibility.json","evidence_bundle_manifest.json","resolution_graph.json","resolution_graph.graphml","network_fit.json"}
     assert expected <= {path.name for path in out.iterdir()}
     report=pd.read_parquet(out/"edge_report.parquet")
     assert set(report["state"]) == {"unresolved"} and set(report["causal_status"]) == {"not_yet_causal"}
@@ -29,6 +29,10 @@ def test_runner_writes_complete_predictive_evidence_ledger(tmp_path: Path) -> No
     graph = json.loads((out / "resolution_graph.json").read_text())
     assert graph["interpretation"] == "predictive_not_causal" and graph["sensitivity_deltas"] == []
     assert read_evidence_bundle_manifest(out / "evidence_bundle_manifest.json").analysis_id == payload()["analysis_id"]
+    fit = json.loads((out / "network_fit.json").read_text())
+    assert fit["thresholds_are_validated"] is False and fit["interpretation"]
+    assert {"achieved_resolution", "resolution_floor", "predictive_adequacy"} <= set(report.columns)
+    assert "Network fit" in html
 
 def test_cli_runs_csv_config_fixture(tmp_path: Path) -> None:
     config=tmp_path/"project.json"; csv=tmp_path/"data.csv"; out=tmp_path/"cli"; config.write_text(json.dumps(payload())); data().to_csv(csv,index=False)
