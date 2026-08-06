@@ -8,6 +8,7 @@ invented. Mirrors the sharding layout of `phase0_calibration.py` and `multipair_
 from __future__ import annotations
 
 import argparse
+import hashlib
 import itertools
 import json
 import os
@@ -26,7 +27,7 @@ from renca.runner import default_calibration_registry_path
 DEFAULT_PROFILE_ID = "v3-nested-blend-n300-d005-phase0"
 TRUE_ADEQUACY = (0.0, 0.05, 0.15, 0.35, 0.60)
 TRUE_THETA = (0.0, 0.02, 0.15)          # delta is 0.05, so only 0.15 is a true edge
-FORMS = (("linear", "linear"), ("linear", "oscillatory"))
+FORMS = (("linear", "linear"), ("linear", "cubic"), ("linear", "oscillatory"))
 
 _WORKER: dict[str, object] = {}
 
@@ -60,6 +61,16 @@ def _resolve_profile(args: argparse.Namespace, spec: VimpSpec) -> tuple[str, flo
     return record.profile_id, record.critical_value
 
 
+def cell_seed(seed: int, cell: tuple[float, float, str, str], replicate: int) -> int:
+    """Seed from the cell's identity rather than its index in the grid.
+
+    Indexing by position means inserting a form reseeds every existing cell, so prior
+    evidence stops being reproducible for reasons that have nothing to do with the change.
+    """
+    digest = int(hashlib.sha256("|".join(str(part) for part in cell).encode()).hexdigest()[:8], 16)
+    return int(np.random.SeedSequence([seed, digest, replicate]).generate_state(1)[0])
+
+
 def cells() -> list[tuple[float, float, str, str]]:
     return [(a, t, sf, af) for a, t in itertools.product(TRUE_ADEQUACY, TRUE_THETA) for sf, af in FORMS]
 
@@ -82,8 +93,8 @@ def shard(args: argparse.Namespace) -> None:
     spec = _spec(args.learner_library_version)
     profile_id, critical_value = _resolve_profile(args, spec)
     items = [
-        (a, t, sf, af, args.start + offset, int(np.random.SeedSequence([args.seed, index, args.start + offset]).generate_state(1)[0]))
-        for index, (a, t, sf, af) in enumerate(cells())
+        (a, t, sf, af, args.start + offset, cell_seed(args.seed, (a, t, sf, af), args.start + offset))
+        for (a, t, sf, af) in cells()
         for offset in range(args.count)
     ]
     workers = args.workers if args.workers else (os.cpu_count() or 1)

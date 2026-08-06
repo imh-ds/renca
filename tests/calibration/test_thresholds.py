@@ -16,14 +16,26 @@ from renca.calibration.thresholds import (
 from renca.models import VimpSpec
 
 
-def test_both_forms_are_unit_variance_so_the_targets_stay_exact() -> None:
+# The cubic needs a looser tolerance than the others: He_3 has very heavy tails, so its
+# sample variance converges slowly. Measured across six seeds at this size it spans
+# 0.979-1.029, against 0.996-1.003 for the other two. The population value is exactly 1 by
+# construction, so this guards the normalising constant rather than the estimate.
+@pytest.mark.parametrize("form,tolerance", [("linear", .01), ("cubic", .04), ("oscillatory", .01)])
+def test_every_form_is_unit_variance_so_the_targets_stay_exact(form: str, tolerance: float) -> None:
     values = np.random.default_rng(1).normal(size=400_000)
-    assert _standardised(values, "linear").var() == pytest.approx(1, abs=.01)
-    assert _standardised(values, "oscillatory").var() == pytest.approx(1, abs=.01)
+    assert _standardised(values, form).var() == pytest.approx(1, abs=tolerance)
+
+
+def test_cubic_form_is_invisible_to_the_degree_two_members() -> None:
+    """The whole point of the cell: a Hermite cubic has no linear or quadratic component."""
+    values = np.random.default_rng(1).normal(size=400_000)
+    cubic = _standardised(values, "cubic")
+    assert abs(np.corrcoef(cubic, values)[0, 1]) < .01
+    assert abs(np.corrcoef(cubic, values**2)[0, 1]) < .01
 
 
 @pytest.mark.parametrize("adequacy,theta", [(0., 0.), (.35, .15), (.6, .02), (.05, .15)])
-@pytest.mark.parametrize("added_form", ["linear", "oscillatory"])
+@pytest.mark.parametrize("added_form", ["linear", "cubic", "oscillatory"])
 def test_scenario_realises_the_requested_adequacy_and_theta(adequacy: float, theta: float, added_form: str) -> None:
     """The study reads cut-offs off these axes, so they must be set rather than approximated."""
     data = generate_threshold_scenario(adequacy=adequacy, theta=theta, separator_form="linear", added_form=added_form, n=300_000, seed=3)

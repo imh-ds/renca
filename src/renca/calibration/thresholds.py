@@ -39,14 +39,23 @@ from renca.models import NodeSpec, VimpSpec
 from renca.screening import SplitManifest
 from renca.vimp import fit_crossfitted_vimp
 
-LearnableForm = Literal["linear", "oscillatory"]
+LearnableForm = Literal["linear", "cubic", "oscillatory"]
 OSCILLATION = 4.0
 
 
 def _standardised(values: np.ndarray, form: LearnableForm) -> np.ndarray:
-    """Unit-variance transform; the oscillatory form is outside the learner library's reach."""
+    """Unit-variance transforms spanning what the learner library can and cannot represent.
+
+    `cubic` is the third Hermite polynomial, orthogonal to both `x` and `x**2`, so the
+    degree-2 members express none of it while a degree-3 member expresses it exactly. It is
+    the shape `v4_cubic_blend` exists to cover, and it is within the normal range of social
+    and behavioural research. `oscillatory` is beyond any polynomial member.
+    """
     if form == "linear":
         return values
+    if form == "cubic":
+        # Var(He_3(Z)) = 3! = 6 for standard normal Z.
+        return (values**3 - 3 * values) / math.sqrt(6)
     # Var(sin(k Z)) = (1 - exp(-2k^2)) / 2 for standard normal Z.
     return np.sin(OSCILLATION * values) / math.sqrt((1 - math.exp(-2 * OSCILLATION**2)) / 2)
 
