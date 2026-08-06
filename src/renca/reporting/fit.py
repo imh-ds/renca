@@ -106,7 +106,7 @@ def _interpret(adequacy_median: float | None, adequacy_minimum: float | None, fl
         return "Predictive adequacy could not be computed; inspect the estimator diagnostics before reading any pair state."
     if adequacy_median <= 0:
         return f"Predictive adequacy is {adequacy_median:.3f}: the conditioning models explained none of the outcome variance, so these results do not support conclusions about network structure, including apparent nonedges."
-    parts = [f"Predictive adequacy is {adequacy_median:.3f} (minimum {adequacy_minimum:.3f} across directions)."]
+    parts = [f"Predictive adequacy is {adequacy_median:.3f} (minimum {adequacy_minimum:.3f} across directions), which anticipates how many unrelated pairs will resolve and is not a measure of whether results can be trusted."]
     if floor_median is not None:
         qualifier = "under the matched calibration profile" if basis == "calibrated" else "under an unvalidated normal approximation"
         parts.append(f"The finest delta this analysis could certify for a typical pair is {floor_median:.3f} {qualifier}.")
@@ -115,7 +115,7 @@ def _interpret(adequacy_median: float | None, adequacy_minimum: float | None, fl
         # unexplained wall of unresolved pairs.
         if deltas and floor_median > max(deltas):
             parts.append(f"That is coarser than every requested delta (up to {max(deltas):.3f}), so most pairs cannot certify at the resolution asked of them regardless of their true values.")
-    parts.append("No validated thresholds exist for these indices; read them alongside the estimator diagnostics rather than as pass or fail.")
+    parts.append("These indices have no validated cut-offs and none should be applied; false pruning is controlled by the calibration profile, not by them.")
     return " ".join(parts)
 
 

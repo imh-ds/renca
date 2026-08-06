@@ -78,6 +78,23 @@ def test_verdict_flags_a_delta_finer_than_the_data_can_deliver() -> None:
     assert "coarser than every requested delta" not in fine.interpretation
 
 
+def test_verdict_never_presents_adequacy_as_a_trust_signal() -> None:
+    """The threshold study found no relationship between adequacy and false pruning.
+
+    Wording that implies otherwise would claim a protection the index does not provide,
+    so the verdict must say what adequacy anticipates and where safety actually comes
+    from. This is a wording contract, deliberately pinned.
+    """
+    fit = build_network_fit([estimate("y", "x", .01, .01), estimate("x", "y", .01, .01)], spec(), CRITICAL)
+    verdict = fit.interpretation.lower()
+
+    assert "not a measure of whether results can be trusted" in verdict
+    assert "controlled by the calibration profile" in verdict
+    assert "no validated cut-offs" in verdict
+    for forbidden in ("reliable", "trustworthy", "acceptable", "good fit", "passes"):
+        assert forbidden not in verdict
+
+
 def test_uncalibrated_runs_fall_back_to_a_labelled_normal_approximation() -> None:
     fit = build_network_fit([estimate("y", "x", .01, .01), estimate("x", "y", .01, .01)], spec(), critical_value=None)
     assert fit.resolution_basis == "normal_approximation"

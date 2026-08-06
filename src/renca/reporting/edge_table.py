@@ -81,11 +81,12 @@ def _fit_block(fit: NetworkFit | None) -> str:
         f'<tr><th>Achieved resolution (median)</th><td>{show(fit.achieved_resolution_median)}</td>'
         f'<th>Achieved resolution (90th pct)</th><td>{show(fit.achieved_resolution_p90)}</td></tr>'
         f'<tr><th>Resolution basis</th><td colspan="3">{html.escape(fit.resolution_basis)}</td></tr></table>'
-        '<p class="fit-note">Predictive adequacy is the share of baseline predictive uncertainty the conditioning models removed; '
-        'near zero means the contrast underlying every pair state was uninformative. Achieved resolution is the smallest delta at '
-        'which a pair would certify, so it reports how fine a claim the data supports even where a pair is unresolved. '
-        'The resolution floor strips out effect size and reports precision alone: the finest delta this analysis could certify at all. '
-        'No validated thresholds exist for either index.</p></section>'
+        '<p class="fit-note">Predictive adequacy is the share of baseline predictive uncertainty the conditioning models removed. It anticipates '
+        'how many unrelated pairs will resolve; it is <strong>not</strong> a measure of trustworthiness, and a threshold study found no relationship '
+        'between it and false pruning. False pruning is controlled by the calibration profile instead. Adequacy at or below zero is the one hard case: '
+        'the contrast underlying every pair state was uninformative. The resolution floor reports precision alone, the finest delta this analysis could '
+        'certify at all, while achieved resolution is the per-pair upper limit on Theta and stays meaningful where a pair is unresolved. '
+        'Neither index has validated cut-offs and none should be applied.</p></section>'
     )
 
 
