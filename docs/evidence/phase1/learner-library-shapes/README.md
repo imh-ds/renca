@@ -67,8 +67,33 @@ ridge penalty spread across more correlated columns shrinks the squared coeffici
 harder. The parabola is still representable, just estimated less precisely.
 
 The implied design is to **add** a degree-3 member rather than substitute it, leaving the
-cross-validated blend to weight degree 2 for parabolas and degree 3 for cubics. That is
-untested here; the blend currently hardwires three members.
+cross-validated blend to choose.
+
+## Finding 4 — adding the member works; substituting was the error
+
+`v4_cubic_blend` offers ridge, quadratic, cubic and forest. Raw output in
+`v4_test_results.parquet`, produced by `v4_test.py`.
+
+| library | linear | parabola | cubic | sin(2x) | se vs v3 | compute |
+|---|---|---|---|---|---|---|
+| v3, three members | 102% | 77% | **-4%** | 23% | 100% | 1.0x |
+| **v4, cubic added** | 106% | **78%** | **46%** | 34% | **119%** | 1.4x |
+| degree 2 *replaced* by degree 3 | 104% | **53%** | 47% | 32% | 111% | 1.2x |
+
+Adding recovers the cubic without the parabola cost that substituting incurred, confirming
+the regression came from removing the pure-quadratic option rather than from the cubic
+terms themselves.
+
+Median blend weights select by shape: a parabola takes quadratic 0.744 and cubic 0.000, a
+cubic takes cubic 0.546 and quadratic 0.000. This is a distribution, not a rule. Individual
+datasets sometimes fit a parabola with the cubic member, unsurprising since a cubic basis
+contains the quadratic one, so recovered `theta` rather than the weights is the stable
+property.
+
+The precision cost is **19%** on the standard error, above the 5-12% predicted before the
+run. Whether that reduces power overall cannot be read from this table: a library that
+represents cubics should also shrink the bias-driven left tail that currently sets the
+critical value, which pushes the other way. Only a recalibration settles it.
 
 ## Status
 
