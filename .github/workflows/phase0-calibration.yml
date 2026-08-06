@@ -2,6 +2,15 @@ name: Phase-0 VIMP calibration
 
 on:
   workflow_dispatch:
+    inputs:
+      learner_library_version:
+        description: Learner library to calibrate
+        default: v3_nested_blend
+        type: choice
+        options: [v3_nested_blend, v4_cubic_blend]
+      profile_id:
+        description: Profile id recorded on the resulting record
+        default: v3-nested-blend-n300-d005-phase0
 
 permissions:
   contents: read
@@ -22,7 +31,7 @@ jobs:
       - run: pip install .
       - name: Report runner capacity
         run: 'nproc && free -g | head -2'
-      - run: python simulations/phase0_calibration.py shard --phase training --family ${{ matrix.family }} --start ${{ matrix.start }} --count 1000 --output out/${{ matrix.family }}-${{ matrix.start }}.parquet
+      - run: python simulations/phase0_calibration.py shard --phase training --family ${{ matrix.family }} --start ${{ matrix.start }} --count 1000 --learner-library-version ${{ inputs.learner_library_version }} --output out/${{ matrix.family }}-${{ matrix.start }}.parquet
       - uses: actions/upload-artifact@v4
         with:
           name: training-${{ matrix.family }}-${{ matrix.start }}
@@ -44,7 +53,7 @@ jobs:
           path: downloaded
       - run: mkdir shards
       - run: find downloaded -name '*.parquet' -exec cp {} shards/ \;
-      - run: python simulations/phase0_calibration.py training-manifest --shards shards --output training --training-replications 6000
+      - run: python simulations/phase0_calibration.py training-manifest --shards shards --output training --training-replications 6000 --learner-library-version ${{ inputs.learner_library_version }}
       - uses: actions/upload-artifact@v4
         with:
           name: phase0-training-manifest
@@ -69,7 +78,7 @@ jobs:
         with:
           name: phase0-training-manifest
           path: training
-      - run: python simulations/phase0_calibration.py shard --phase validation --family ${{ matrix.family }} --start ${{ matrix.start }} --count 1000 --training-manifest training/training_manifest.json --output out/${{ matrix.family }}-${{ matrix.start }}.parquet
+      - run: python simulations/phase0_calibration.py shard --phase validation --family ${{ matrix.family }} --start ${{ matrix.start }} --count 1000 --learner-library-version ${{ inputs.learner_library_version }} --training-manifest training/training_manifest.json --output out/${{ matrix.family }}-${{ matrix.start }}.parquet
       - uses: actions/upload-artifact@v4
         with:
           name: validation-${{ matrix.family }}-${{ matrix.start }}
@@ -95,7 +104,7 @@ jobs:
           path: downloaded
       - run: mkdir validation
       - run: find downloaded -name '*.parquet' -exec cp {} validation/ \;
-      - run: python simulations/phase0_calibration.py final --training training --validation validation --output phase0
+      - run: python simulations/phase0_calibration.py final --training training --validation validation --output phase0 --profile-id ${{ inputs.profile_id }}
       - uses: actions/upload-artifact@v4
         with:
           name: phase0-calibration-evidence
