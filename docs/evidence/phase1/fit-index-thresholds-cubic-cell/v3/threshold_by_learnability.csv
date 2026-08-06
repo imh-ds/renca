@@ -1,0 +1,4 @@
+separator_form,added_form,replications,median_observed_adequacy,median_theta_bias,false_prune_rate,correct_prune_rate
+linear,cubic,15000,0.14171666820835122,-0.02325194514584611,0.0524,0.6806
+linear,linear,15000,0.14215758235301568,-0.0037053867149235194,0.0,0.4201
+linear,oscillatory,15000,0.14258131558304893,-0.022915814492060167,0.0418,0.7041
