@@ -6,6 +6,14 @@ on:
       replications_per_cell_per_shard:
         description: Replications per cell per shard; 20 shards x 30 cells
         default: '50'
+      learner_library_version:
+        description: Learner library under study
+        default: v3_nested_blend
+        type: choice
+        options: [v3_nested_blend, v4_cubic_blend]
+      profile_summary:
+        description: Archived Phase-0 calibration_summary.json; blank uses the shipped registry
+        default: ''
 
 permissions:
   contents: read
@@ -31,6 +39,8 @@ jobs:
           python simulations/threshold_study.py shard
           --start $(( ${{ matrix.shard }} * ${{ inputs.replications_per_cell_per_shard }} ))
           --count ${{ inputs.replications_per_cell_per_shard }}
+          --learner-library-version ${{ inputs.learner_library_version }}
+          ${{ inputs.profile_summary && format('--profile-summary {0}', inputs.profile_summary) || '' }}
           --output out/shard-${{ matrix.shard }}.parquet
       - uses: actions/upload-artifact@v4
         with:
