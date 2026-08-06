@@ -1,4 +1,12 @@
-# Fit-index threshold study — local pilot
+# Fit-index threshold study — local pilot (SUPERSEDED)
+
+> **This pilot's headline reading is wrong.** It reported no relationship between
+> predictive adequacy and false pruning. At 30,000 replications the relationship is
+> monotone and increasing, and its upper bound exceeds `alpha` in the two highest
+> adequacy cells when the added variable is unlearnable. See
+> [`../fit-index-thresholds/`](../fit-index-thresholds/README.md). Retained only as the
+> record of what 1,200 replications supported.
+
 
 **Pilot only: 40 replications per cell, 1,200 total.** Cell-level rates rest on small
 counts and the full run supersedes this. Retained because its two findings are large enough

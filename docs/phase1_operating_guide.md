@@ -70,29 +70,35 @@ misread this report:
 `1 - R(S) / R(empty)`: the share of a target's baseline predictive uncertainty that
 the conditioning model actually removed.
 
-**This index does not indicate whether results can be believed.** The threshold study
-in `docs/evidence/phase1/fit-index-thresholds-pilot/` measured false-prune rates
-across adequacy bins and found no relationship: 0.015, 0.000, 0.000, 0.000, 0.030,
-0.000, 0.024 from the lowest bin to the highest. Reading high adequacy as "safe"
-would claim a protection the index does not provide.
+**This index does not indicate whether results can be believed, and with respect to
+one failure mode it points the wrong way.** The 30,000-replication threshold study in
+`docs/evidence/phase1/fit-index-thresholds/` measured both rates across adequacy bins:
 
-What it does track, monotonically, is how many genuinely unrelated pairs get
-resolved. Use it to anticipate yield:
+| observed predictive adequacy | truly unrelated pairs resolved | false prunes, unlearnable added variable |
+|---|---|---|
+| 0.40 and above | 0.771 | 0.047 |
+| 0.20 to 0.40 | 0.652 | 0.029 |
+| 0.10 to 0.20 | 0.537 | 0.013 |
+| 0.05 to 0.10 | 0.487 | 0.009 |
+| 0.02 to 0.05 | 0.451 | 0.006 |
+| above 0 to 0.02 | 0.427 | 0.004 |
+| at or below 0 | 0.398 | 0.002 |
 
-| observed predictive adequacy | share of truly unrelated pairs expected to resolve |
-|---|---|
-| 0.40 and above | about three quarters |
-| 0.20 to 0.40 | about two thirds |
-| 0.05 to 0.20 | about half |
-| 0.02 to 0.05 | just under half |
-| above 0 to 0.02 | about a third |
-| at or below 0 | nothing is interpretable; see below |
+Both columns rise together. Higher adequacy means more of the structure resolves **and**
+more exposure to the one failure mode that produces false prunes. Read it as expected
+yield; reading it as a quality mark inverts its meaning with respect to safety.
 
-These are **provisional**, from a 1,200-replication pilot on one synthetic design, and
-they are the scale of the effect rather than precise rates. Your own yield depends on
-the structure actually present. The bands are deliberately not labelled good or
-acceptable: they describe what to expect, and whether that answers your question is
-your judgement, not the software's.
+The reason is worth understanding. When the added variable's contribution cannot be
+represented by the learner library, `theta_hat` is biased sharply downward and stays
+biased regardless of adequacy. What adequacy buys is a smaller standard error. Precision
+applied to a biased estimate produces a confident wrong answer, so the better your
+separator, the more readily that bias clears the certification threshold. In cells where
+the added variable was learnable the study saw **zero** false prunes in 5,000
+replications, so this is specifically a learner-adequacy exposure, not a general one.
+
+Yield figures come from one synthetic design; your own depend on the structure actually
+present. The bands are deliberately not labelled good or acceptable: they describe what
+to expect, and whether that answers your question is your judgement, not the software's.
 
 The one hard statement is a degenerate case rather than a cut-off. Adequacy at or
 below zero means the conditioning models explained none of the outcome variance, so

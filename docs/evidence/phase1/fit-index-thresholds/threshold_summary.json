@@ -1,0 +1,99 @@
+{
+  "by_adequacy": [
+    {
+      "abstention_rate": 0.0033255086,
+      "adequacy_bin": "(-inf, 0.0]",
+      "correct_prune_rate": 0.3984786425,
+      "false_prune_rate": 0.0017709563,
+      "median_theta_bias": -0.0116230118,
+      "replications": 5112,
+      "true_edges": 1694,
+      "true_nonedges": 3418
+    },
+    {
+      "abstention_rate": 0.0104961832,
+      "adequacy_bin": "(0.0, 0.02]",
+      "correct_prune_rate": 0.4265025344,
+      "false_prune_rate": 0.0041958042,
+      "median_theta_bias": -0.0143446863,
+      "replications": 2096,
+      "true_edges": 715,
+      "true_nonedges": 1381
+    },
+    {
+      "abstention_rate": 0.003989844,
+      "adequacy_bin": "(0.02, 0.05]",
+      "correct_prune_rate": 0.4511525796,
+      "false_prune_rate": 0.0064171123,
+      "median_theta_bias": -0.0131558754,
+      "replications": 2757,
+      "true_edges": 935,
+      "true_nonedges": 1822
+    },
+    {
+      "abstention_rate": 0.006305638,
+      "adequacy_bin": "(0.05, 0.1]",
+      "correct_prune_rate": 0.4872351983,
+      "false_prune_rate": 0.0093567251,
+      "median_theta_bias": -0.0136745282,
+      "replications": 2696,
+      "true_edges": 855,
+      "true_nonedges": 1841
+    },
+    {
+      "abstention_rate": 0.0057084608,
+      "adequacy_bin": "(0.1, 0.2]",
+      "correct_prune_rate": 0.5372356727,
+      "false_prune_rate": 0.0133982948,
+      "median_theta_bias": -0.012255866,
+      "replications": 4905,
+      "true_edges": 1642,
+      "true_nonedges": 3263
+    },
+    {
+      "abstention_rate": 0.0063269494,
+      "adequacy_bin": "(0.2, 0.4]",
+      "correct_prune_rate": 0.6519721578,
+      "false_prune_rate": 0.0289487049,
+      "median_theta_bias": -0.0102230436,
+      "replications": 5848,
+      "true_edges": 1969,
+      "true_nonedges": 3879
+    },
+    {
+      "abstention_rate": 0.0068326754,
+      "adequacy_bin": "(0.4, inf]",
+      "correct_prune_rate": 0.7707006369,
+      "false_prune_rate": 0.0465753425,
+      "median_theta_bias": -0.0071656491,
+      "replications": 6586,
+      "true_edges": 2190,
+      "true_nonedges": 4396
+    }
+  ],
+  "by_learnability": [
+    {
+      "added_form": "linear",
+      "correct_prune_rate": 0.4262,
+      "false_prune_rate": 0.0,
+      "median_observed_adequacy": 0.1391285423,
+      "median_theta_bias": -0.0037625486,
+      "replications": 15000,
+      "separator_form": "linear"
+    },
+    {
+      "added_form": "oscillatory",
+      "correct_prune_rate": 0.7078,
+      "false_prune_rate": 0.0402,
+      "median_observed_adequacy": 0.1422895769,
+      "median_theta_bias": -0.0232656118,
+      "replications": 15000,
+      "separator_form": "linear"
+    }
+  ],
+  "cells": 30,
+  "overall_correct_prune_rate": 0.567,
+  "overall_false_prune_rate": 0.0201,
+  "profile_id": "v3-nested-blend-n300-d005-phase0",
+  "replications": 30000
+}
