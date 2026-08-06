@@ -40,6 +40,25 @@ class VimpEstimate(Model):
     status: Literal["success", "full_worse_than_reduced", "nonpositive_null_risk", "nonfinite_standard_error", "learner_failure"]
 
 
+_BLENDED_LIBRARIES = frozenset({"v3_nested_blend", "v4_cubic_blend"})
+
+
+def _library_members(binary: bool, spec: VimpSpec) -> list[str]:
+    """Members offered to the blend.
+
+    `v4_cubic_blend` adds a degree-3 member rather than raising the degree of the existing
+    one. Substituting would remove the pure-quadratic option from the blend, and a fixed
+    ridge penalty spread over a degree-3 basis shrinks the squared coefficient harder, so a
+    parabola would be recovered less well than before. Offering both lets the
+    cross-validated weights pick per dataset.
+    """
+    if binary:
+        return ["logistic", "probability_forest"]
+    if spec.learner_library_version == "v4_cubic_blend":
+        return ["ridge", "quadratic_ridge", "cubic_ridge", "forest"]
+    return ["ridge", "quadratic_ridge", "forest"]
+
+
 def _fit_predict(name: str, train: pd.DataFrame, valid: pd.DataFrame, target: str, features: list[str], binary: bool, spec: VimpSpec, seed: int) -> np.ndarray:
     y_train = train[target].to_numpy()
     if binary and name == "logistic":
@@ -48,6 +67,8 @@ def _fit_predict(name: str, train: pd.DataFrame, valid: pd.DataFrame, target: st
         return Ridge(alpha=spec.ridge_alpha).fit(train[features], y_train).predict(valid[features])
     if not binary and name == "quadratic_ridge":
         return make_pipeline(PolynomialFeatures(degree=2, include_bias=False), Ridge(alpha=spec.ridge_alpha)).fit(train[features], y_train).predict(valid[features])
+    if not binary and name == "cubic_ridge":
+        return make_pipeline(PolynomialFeatures(degree=3, include_bias=False), Ridge(alpha=spec.ridge_alpha)).fit(train[features], y_train).predict(valid[features])
     return RandomForestRegressor(n_estimators=spec.forest_trees, max_depth=spec.forest_max_depth, random_state=seed).fit(train[features], y_train).predict(valid[features])
 
 
@@ -57,7 +78,7 @@ def _predictions(train: pd.DataFrame, valid: pd.DataFrame, target: str, features
         prediction = np.repeat(y_train.mean(), len(valid))
         loss = brier_loss(y_valid, prediction) if binary else squared_loss(y_valid, prediction)
         return prediction, {"intercept": float(loss.mean())}, "intercept"
-    names = ["logistic", "probability_forest"] if binary else ["ridge", "quadratic_ridge", "forest"]
+    names = _library_members(binary, spec)
     loss_fn = brier_loss if binary else squared_loss
     inner_risks: dict[str, float] = {}
     for name in names:
@@ -66,7 +87,7 @@ def _predictions(train: pd.DataFrame, valid: pd.DataFrame, target: str, features
             prediction = _fit_predict(name, train.iloc[inner_train], train.iloc[inner_valid], target, features, binary, spec, seed + fold)
             losses.extend(loss_fn(train.iloc[inner_valid][target].to_numpy(), prediction).tolist())
         inner_risks[name] = float(np.mean(losses))
-    if not binary and spec.learner_library_version == "v3_nested_blend":
+    if not binary and spec.learner_library_version in _BLENDED_LIBRARIES:
         matrix = np.empty((len(train), len(names)))
         for column, name in enumerate(names):
             for inner_train, inner_valid in KFold(n_splits=3, shuffle=True, random_state=seed).split(train):
@@ -74,9 +95,8 @@ def _predictions(train: pd.DataFrame, valid: pd.DataFrame, target: str, features
         result = minimize(lambda weights: float(np.mean((y_train - matrix @ weights) ** 2)), np.repeat(1 / len(names), len(names)), bounds=[(0, 1)] * len(names), constraints={"type": "eq", "fun": lambda weights: weights.sum() - 1})
         weights = result.x if result.success else np.array([1.0, *([0.0] * (len(names) - 1))])
         prediction = sum(weight * _fit_predict(name, train, valid, target, features, binary, spec, seed) for weight, name in zip(weights, names))
-        inner_risks["blend_weight_ridge"] = float(weights[0])
-        inner_risks["blend_weight_quadratic_ridge"] = float(weights[1])
-        inner_risks["blend_weight_forest"] = float(weights[2])
+        for weight, member in zip(weights, names):
+            inner_risks[f"blend_weight_{member}"] = float(weight)
         return prediction, inner_risks, "nested_convex_blend"
     selected = min(inner_risks, key=inner_risks.get)
     return _fit_predict(selected, train, valid, target, features, binary, spec, seed), inner_risks, selected

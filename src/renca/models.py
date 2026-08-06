@@ -92,7 +92,7 @@ class VimpSpec(Model):
     ridge_alpha: Annotated[float, Field(gt=0)] = 1.0
     forest_trees: Annotated[int, Field(ge=10)] = 100
     forest_max_depth: Annotated[int, Field(ge=1)] = 5
-    learner_library_version: Literal["v2_quadratic_ridge", "v3_nested_blend"] = "v2_quadratic_ridge"
+    learner_library_version: Literal["v2_quadratic_ridge", "v3_nested_blend", "v4_cubic_blend"] = "v2_quadratic_ridge"
     nested_safeguard_materiality_z: Annotated[float, Field(gt=0)] = 3.0
     nested_safeguard_fold_fraction: Annotated[float, Field(gt=0.5, le=1)] = 0.8
 

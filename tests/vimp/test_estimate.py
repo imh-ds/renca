@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+import statistics
 
 import numpy as np
 import pandas as pd
@@ -70,6 +71,46 @@ def test_nested_safeguard_needs_material_and_consistent_degradation() -> None:
     legacy = fit_crossfitted_vimp(data, "y", "x", ["z"], node, manifest(300, 5), VimpSpec(**library, nested_safeguard_materiality_z=1e-9, nested_safeguard_fold_fraction=.51))
     assert legacy.status == "full_worse_than_reduced"
     assert legacy.theta_hat == default.theta_hat
+
+
+def _blend_weights(estimate) -> dict[str, float]:
+    risks = estimate.nuisance_diagnostic["folds"]["0"]["full_risks"]
+    return {key.removeprefix("blend_weight_"): value for key, value in risks.items() if key.startswith("blend_weight_")}
+
+
+def test_v4_adds_a_cubic_member_and_leaves_v3_untouched() -> None:
+    """v3 must stay bit-identical: the shipped calibration profile is bound to it."""
+    rng = np.random.default_rng(3)
+    z, x = rng.normal(size=180), rng.normal(size=180)
+    data = pd.DataFrame({"z": z, "x": x, "y": z + x + rng.normal(scale=.3, size=180)})
+    three = fit_crossfitted_vimp(data, "y", "x", ["z"], continuous_node(), manifest(), VimpSpec(forest_trees=10, learner_library_version="v3_nested_blend"))
+    four = fit_crossfitted_vimp(data, "y", "x", ["z"], continuous_node(), manifest(), VimpSpec(forest_trees=10, learner_library_version="v4_cubic_blend"))
+
+    assert set(_blend_weights(three)) == {"ridge", "quadratic_ridge", "forest"}
+    assert set(_blend_weights(four)) == {"ridge", "quadratic_ridge", "cubic_ridge", "forest"}
+    assert sum(_blend_weights(four).values()) == pytest.approx(1)
+
+
+def test_v4_recovers_a_cubic_that_v3_cannot_see() -> None:
+    """The capability the fourth member exists to add.
+
+    Which member the blend weights is a per-dataset outcome and noisy -- on individual
+    draws it will sometimes fit a parabola with the cubic member, since a cubic basis
+    contains the quadratic one. Recovered `theta` is the stable contract, so that is what
+    is asserted here; the weight distribution is recorded in
+    `docs/evidence/phase1/learner-library-shapes/` instead.
+    """
+    spec = {version: VimpSpec(forest_trees=10, learner_library_version=version) for version in ("v3_nested_blend", "v4_cubic_blend")}
+    recovered: dict[str, list[float]] = {"v3_nested_blend": [], "v4_cubic_blend": []}
+    for seed in range(4):
+        rng = np.random.default_rng(seed)
+        z, x = rng.normal(size=240), rng.normal(size=240)
+        cubic = pd.DataFrame({"z": z, "x": x, "y": z + (x**3 - 3 * x) / math.sqrt(6) + rng.normal(scale=.5, size=240)})
+        for version in recovered:
+            recovered[version].append(fit_crossfitted_vimp(cubic, "y", "x", ["z"], continuous_node(), manifest(240, 4), spec[version]).theta_hat)
+
+    assert statistics.median(recovered["v4_cubic_blend"]) > 2 * statistics.median(recovered["v3_nested_blend"])
+    assert statistics.median(recovered["v4_cubic_blend"]) > .05
 
 
 def test_nested_blend_is_deterministic_and_records_convex_weights() -> None:
