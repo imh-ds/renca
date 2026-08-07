@@ -74,3 +74,17 @@ def test_exact_profile_run_is_eligible_and_near_match_stays_unresolved(tmp_path:
     run_analysis(calibrated_data(), ProjectSpec.model_validate(configured), uncalibrated)
     assert set(pd.read_parquet(uncalibrated / "edge_report.parquet").state) == {"unresolved"}
     assert "inference_folds" in json.loads((uncalibrated / "calibration_eligibility.json").read_text())[0]["mismatch_fields"]
+
+
+def test_bundled_example_declares_the_default_profile_and_certifies(tmp_path: Path) -> None:
+    """The example is the documented entry point, so it must run the profile we recommend."""
+    from renca.models import load_project_spec
+
+    spec = load_project_spec("examples/phase1_calibrated/project.yaml")
+    assert spec.calibration.profile_id == "v4-cubic-blend-n300-d005-phase0"
+    assert spec.vimp.learner_library_version == "v4_cubic_blend"
+
+    out = tmp_path / "example"
+    run_analysis(pd.read_csv("examples/phase1_calibrated/phase1_calibrated_data.csv"), spec, out)
+    assert {row["status"] for row in json.loads((out / "calibration_eligibility.json").read_text())} == {"calibrated_success"}
+    assert "certified_nonedge" in set(pd.read_parquet(out / "edge_report.parquet").state)
