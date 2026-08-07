@@ -1,0 +1,16 @@
+{
+  "abstention_rate": 0.00996,
+  "alpha": 0.05,
+  "blocks": 2,
+  "boundary_false_certifications": 0,
+  "controlled": true,
+  "false_certifications": 0,
+  "familywise_error_rate": 0.0,
+  "familywise_upper_bound": 0.0005989670023149134,
+  "mean_family_size": 14.7272,
+  "profile_id": "v4-cubic-blend-n300-d005-phase0",
+  "replications": 5000,
+  "sample_size": 375,
+  "separator_recovery_rate": 1.0,
+  "true_nonedge_certification_rate": 0.09157777777777777
+}
