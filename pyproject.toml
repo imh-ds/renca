@@ -30,6 +30,14 @@ test = [
     "jsonschema>=4.22,<5",
     "pytest>=8,<10",
 ]
+# Structural baselines for the section 13.4 comparative gate. Kept out of the runtime
+# dependencies deliberately: the package must not require a causal-discovery stack to
+# certify a nonedge, and `renca.benchmark.comparators` imports these lazily so the rest of
+# the package still imports without them.
+comparators = [
+    "renca[test]",
+    "causal-learn>=0.1.3,<1",
+]
 
 [tool.setuptools.package-data]
 renca = ["data/**/*.yml", "data/**/*.parquet"]
