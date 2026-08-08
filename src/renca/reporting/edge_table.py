@@ -12,6 +12,7 @@ from renca.calibration import CalibrationEligibility
 from renca.certification import PairState
 from renca.graph import ResolutionGraph, ResolutionPair
 from renca.reporting.fit import NetworkFit
+from renca.reporting.resolution_path import ResolutionPath
 from renca.vimp import VimpEstimate
 
 
@@ -90,7 +91,28 @@ def _fit_block(fit: NetworkFit | None) -> str:
     )
 
 
-def write_edge_report(graph: ResolutionGraph, estimates: list[VimpEstimate], output_dir: str | Path, eligibility: list[CalibrationEligibility] | None = None, fit: "NetworkFit | None" = None) -> tuple[Path, Path]:
+def _path_block(path: "ResolutionPath | None") -> str:
+    """How much each candidate resolution could settle, so unresolved pairs are explicable."""
+    if path is None or not path.rows:
+        return ""
+    rows = "".join(
+        f'<tr class="{"path-primary" if row.is_primary else ""}"><td>{row.delta:.3f}</td>'
+        f'<td>{row.resolvable_pairs} of {row.measurable_pairs}</td>'
+        f'<td>{"primary, calibrated" if row.calibrated else ("primary" if row.is_primary else "descriptive")}</td></tr>'
+        for row in path.rows
+    )
+    return (
+        '<section class="path"><h2>Resolution path</h2>'
+        f'<p class="fit-verdict">{html.escape(path.interpretation)}</p>'
+        '<table><tr><th>delta</th><th>pairs the data could place below it</th><th>status</th></tr>'
+        f'{rows}</table>'
+        '<p class="fit-note">Rows other than the primary delta have no calibration profile and are not certificates. '
+        'Counts ignore multiplicity adjustment, so they bound how many pairs could certify rather than predicting it. '
+        'Selecting a primary resolution after reading this path invalidates the error control.</p></section>'
+    )
+
+
+def write_edge_report(graph: ResolutionGraph, estimates: list[VimpEstimate], output_dir: str | Path, eligibility: list[CalibrationEligibility] | None = None, fit: "NetworkFit | None" = None, path: "ResolutionPath | None" = None) -> tuple[Path, Path]:
     destination = Path(output_dir)
     destination.mkdir(parents=True, exist_ok=True)
     rows = []
@@ -112,7 +134,7 @@ def write_edge_report(graph: ResolutionGraph, estimates: list[VimpEstimate], out
     (destination / "calibration_eligibility.json").write_text(json.dumps([item.model_dump(mode="json") for item in (eligibility or [])], sort_keys=True, separators=(",", ":")) + "\n", encoding="utf-8")
     eligibility_frame = pd.DataFrame([item.model_dump() for item in (eligibility or [])])
     eligibility_html = eligibility_frame.to_html(index=False) if not eligibility_frame.empty else "<p>No calibration profile was requested; hard certification is unavailable.</p>"
-    report = f'<html><head><meta charset="utf-8"><style>body{{font-family:system-ui,sans-serif;margin:2rem;color:#172033}}.warning{{font-weight:600}}.fit{{border:1px solid #cbd5e1;border-left:6px solid #0f766e;padding:.6rem 1rem;margin:1rem 0;border-radius:6px}}.fit-degenerate{{border-left-color:#b91c1c;background:#fef2f2}}.fit-verdict{{font-weight:600}}.fit-note{{font-size:.85rem;color:#475569}}.legend{{display:flex;gap:1rem;flex-wrap:wrap;font-size:.9rem}}.legend-candidate::before{{content:"";display:inline-block;width:2rem;border-top:3px solid #334155;margin-right:.3rem}}.legend-unresolved::before{{content:"";display:inline-block;width:2rem;border-top:3px dashed #64748b;margin-right:.3rem}}.graph-layout{{display:flex;gap:2rem;align-items:flex-start;flex-wrap:wrap}}svg{{width:min(500px,100%);border:1px solid #cbd5e1;border-radius:8px;background:#f8fafc}}.resolution-edge{{cursor:pointer}}.resolution-edge:focus{{outline:4px solid #f59e0b}}.node{{fill:#fff;stroke:#0f172a;stroke-width:2}}.node-label{{font-size:12px;text-anchor:middle;pointer-events:none}}.graph-details{{max-width:42rem}}.pair-controls{{display:grid;gap:.4rem}}.pair-control{{text-align:left}}table{{border-collapse:collapse}}th,td{{border:1px solid #cbd5e1;padding:.4rem;vertical-align:top}}</style></head><body><h1>renca predictive evidence report</h1><p>All conclusions are predictive, not causal. Every result retains <code>not_yet_causal</code>.</p>{_fit_block(fit)}{_svg(graph, payloads)}<h2>Calibration eligibility</h2>{eligibility_html}<h2>Pair evidence table</h2>{frame.to_html(index=False)}</body></html>'
+    report = f'<html><head><meta charset="utf-8"><style>body{{font-family:system-ui,sans-serif;margin:2rem;color:#172033}}.warning{{font-weight:600}}.fit{{border:1px solid #cbd5e1;border-left:6px solid #0f766e;padding:.6rem 1rem;margin:1rem 0;border-radius:6px}}.fit-degenerate{{border-left-color:#b91c1c;background:#fef2f2}}.fit-verdict{{font-weight:600}}.fit-note{{font-size:.85rem;color:#475569}}.path{{border:1px solid #cbd5e1;border-left:6px solid #4338ca;padding:.6rem 1rem;margin:1rem 0;border-radius:6px}}.path-primary{{font-weight:700;background:#eef2ff}}.legend{{display:flex;gap:1rem;flex-wrap:wrap;font-size:.9rem}}.legend-candidate::before{{content:"";display:inline-block;width:2rem;border-top:3px solid #334155;margin-right:.3rem}}.legend-unresolved::before{{content:"";display:inline-block;width:2rem;border-top:3px dashed #64748b;margin-right:.3rem}}.graph-layout{{display:flex;gap:2rem;align-items:flex-start;flex-wrap:wrap}}svg{{width:min(500px,100%);border:1px solid #cbd5e1;border-radius:8px;background:#f8fafc}}.resolution-edge{{cursor:pointer}}.resolution-edge:focus{{outline:4px solid #f59e0b}}.node{{fill:#fff;stroke:#0f172a;stroke-width:2}}.node-label{{font-size:12px;text-anchor:middle;pointer-events:none}}.graph-details{{max-width:42rem}}.pair-controls{{display:grid;gap:.4rem}}.pair-control{{text-align:left}}table{{border-collapse:collapse}}th,td{{border:1px solid #cbd5e1;padding:.4rem;vertical-align:top}}</style></head><body><h1>renca predictive evidence report</h1><p>All conclusions are predictive, not causal. Every result retains <code>not_yet_causal</code>.</p>{_fit_block(fit)}{_path_block(path)}{_svg(graph, payloads)}<h2>Calibration eligibility</h2>{eligibility_html}<h2>Pair evidence table</h2>{frame.to_html(index=False)}</body></html>'
     html_path = destination / "report.html"
     html_path.write_text(report, encoding="utf-8")
     return parquet, html_path

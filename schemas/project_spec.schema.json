@@ -340,6 +340,14 @@
       "title": "Preanalysis Reference",
       "type": "string"
     },
+    "resolution_grid": {
+      "items": {
+        "exclusiveMinimum": 0,
+        "type": "number"
+      },
+      "title": "Resolution Grid",
+      "type": "array"
+    },
     "schema_version": {
       "const": "1.7.0",
       "title": "Schema Version",

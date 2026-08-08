@@ -175,6 +175,10 @@ class ProjectSpec(Model):
     screening: ScreeningSpec = Field(default_factory=ScreeningSpec)
     vimp: VimpSpec = Field(default_factory=VimpSpec)
     calibration: CalibrationSpec = Field(default_factory=CalibrationSpec)
+    # Specification section 27. Descriptive only: a resolution other than a node's own
+    # delta has no matched profile, so the path reports what the data could support at
+    # each value rather than a second set of certificates.
+    resolution_grid: list[Annotated[float, Field(gt=0)]] = Field(default_factory=list)
     nodes: Annotated[list[NodeSpec], Field(min_length=2)]
 
     @model_validator(mode="after")
@@ -227,6 +231,7 @@ def write_json_schemas(destination: str | Path) -> dict[str, Path]:
     from renca.calibration.registry import CalibrationEligibility, CalibrationRecord
     from renca.graph import ResolutionGraph
     from renca.reporting.fit import NetworkFit
+    from renca.reporting.resolution_path import ResolutionPath
     contracts.update({
         "audit_report": (AuditReport, "audit_report.schema.json"),
         "analysis_manifest": (AnalysisManifest, "analysis_manifest.schema.json"),
@@ -240,6 +245,7 @@ def write_json_schemas(destination: str | Path) -> dict[str, Path]:
         "evidence_bundle_manifest": (EvidenceBundleManifest, "evidence_bundle_manifest.schema.json"),
         "resolution_graph": (ResolutionGraph, "resolution_graph.schema.json"),
         "network_fit": (NetworkFit, "network_fit.schema.json"),
+        "resolution_path": (ResolutionPath, "resolution_path.schema.json"),
     })
     paths: dict[str, Path] = {}
     for contract_name, (model, filename) in contracts.items():
