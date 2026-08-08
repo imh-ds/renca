@@ -277,7 +277,8 @@
           "default": "v2_quadratic_ridge",
           "enum": [
             "v2_quadratic_ridge",
-            "v3_nested_blend"
+            "v3_nested_blend",
+            "v4_cubic_blend"
           ],
           "title": "Learner Library Version",
           "type": "string"

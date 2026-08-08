@@ -1,8 +1,45 @@
 # Phase 1 operating guide
 
-The only profile that can issue a hard `certified_nonedge` is
-`v3-nested-blend-n300-d005-phase0`. It is a predictive practical-separation
-result, never a causal nonedge or direction claim.
+Two profiles can issue a hard `certified_nonedge`. **Use
+`v4-cubic-blend-n300-d005-phase0`**, which the bundled example declares;
+`v3-nested-blend-n300-d005-phase0` remains valid for analyses already bound to
+it. Either way the result is predictive practical separation, never a causal
+nonedge or direction claim.
+
+## What the estimator can and cannot see
+
+The estimator decides that a variable does not matter by failing to predict better
+with it. A relationship whose *shape* the learner library cannot represent is
+therefore invisible, and the tool reports absence rather than uncertainty.
+
+v4 offers a linear, a quadratic, a cubic, and a forest member, blended by
+cross-validation. Measured recovery of a relationship worth `Theta = 0.05`:
+
+| shape | v3 | v4 |
+|---|---|---|
+| linear | 102% | 106% |
+| exponential decay | 57% | — |
+| parabola | 77% | 78% |
+| **cubic** | **−4%** | **46%** |
+| four or more turning points | 23% | 34% |
+
+v3 recovered *nothing* of a cubic and false-pruned true cubic edges at up to 9.7%,
+against `alpha = 0.05`. Under v4 that falls to at most 0.2%. Since social and
+behavioural research reports non-linearity mainly as exponential change,
+parabolas, and occasionally cubics, v4 covers the usual range and v3 did not.
+
+**The boundary, stated plainly.** For relationships with four or more genuine
+turning points, both libraries remain biased and false pruning can exceed `alpha`
+— measured at 7.5% and 9.9% in the two highest-adequacy cells under v4, slightly
+worse than v3 because v4's critical value is less extreme. Shah and Peters (2020)
+show no method can be valid against every functional form without assumptions, so
+every method has such a boundary; this is where ours sits.
+
+**Unlike the other scope limits, this one cannot be checked.** You can count your
+sample, inspect your outcome type, and confirm your design. You cannot inspect a
+dataset and determine whether the true relationship has four turning points — if
+you could see it, the estimator could too. Treat "no relationship past cubic" as
+an assumption the analysis rests on, and say so when reporting.
 
 ## Run the bundled calibrated pilot
 
@@ -16,7 +53,7 @@ renca run --config examples/phase1_calibrated/project.yaml --data examples/phase
 The generator writes 375 complete cases. With the default 20/80 split this
 creates exactly 75 selection rows and 300 inference rows, as required by the
 validated profile. The configuration fixes 5 folds, `delta: 0.05`,
-`v3_nested_blend`, and 10 forest trees. Changing any of those settings,
+`v4_cubic_blend`, and 10 forest trees. Changing any of those settings,
 including a node-specific delta, makes certification unavailable.
 
 ## Eligible inputs

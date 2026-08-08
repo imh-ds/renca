@@ -8,6 +8,7 @@ invented. Mirrors the sharding layout of `phase0_calibration.py` and `multipair_
 from __future__ import annotations
 
 import argparse
+import hashlib
 import itertools
 import json
 import os
@@ -18,29 +19,64 @@ import numpy as np
 import pandas as pd
 from threadpoolctl import threadpool_limits
 
-from renca.calibration.registry import CalibrationRegistry
+from renca.calibration.registry import CalibrationRegistry, vimp_fingerprint
 from renca.calibration.thresholds import run_threshold_replication, summarize_learnability, summarize_threshold_grid
 from renca.models import VimpSpec
 from renca.runner import default_calibration_registry_path
 
-PROFILE_ID = "v3-nested-blend-n300-d005-phase0"
+DEFAULT_PROFILE_ID = "v3-nested-blend-n300-d005-phase0"
 TRUE_ADEQUACY = (0.0, 0.05, 0.15, 0.35, 0.60)
 TRUE_THETA = (0.0, 0.02, 0.15)          # delta is 0.05, so only 0.15 is a true edge
-FORMS = (("linear", "linear"), ("linear", "oscillatory"))
+FORMS = (("linear", "linear"), ("linear", "cubic"), ("linear", "oscillatory"))
 
 _WORKER: dict[str, object] = {}
 
 
-def _spec() -> VimpSpec:
-    return VimpSpec(forest_trees=10, learner_library_version="v3_nested_blend")
+def _spec(version: str) -> VimpSpec:
+    return VimpSpec(forest_trees=10, learner_library_version=version)
+
+
+def _resolve_profile(args: argparse.Namespace, spec: VimpSpec) -> tuple[str, float]:
+    """Take the critical value from an archived Phase-0 summary or from the registry.
+
+    A summary directory lets a profile be studied before it is shipped, which is the only
+    way to evaluate a candidate library. The fingerprint is still checked, so the critical
+    value cannot be paired with an estimator it was not calibrated against.
+    """
+    if args.profile_summary:
+        summary = json.loads(Path(args.profile_summary).read_text(encoding="utf-8"))
+        if summary["vimp_fingerprint"] != vimp_fingerprint(spec):
+            raise ValueError(f"summary {summary['profile_id']} was calibrated against a different estimator")
+        if summary["inference_rows"] != args.n or summary["delta_target"] != args.delta:
+            raise ValueError(f"summary is calibrated at n={summary['inference_rows']}, delta={summary['delta_target']}")
+        if summary["status"] != "validated":
+            raise ValueError(f"summary {summary['profile_id']} is not validated")
+        return summary["profile_id"], float(summary["critical_value"])
+    registry = CalibrationRegistry.load(args.calibration_registry or default_calibration_registry_path())
+    record = next(item for item in registry.records if item.profile_id == args.profile_id)
+    if record.inference_rows != args.n or record.delta_target != args.delta:
+        raise ValueError(f"profile {record.profile_id} is calibrated at n={record.inference_rows}, delta={record.delta_target}")
+    if record.vimp_fingerprint != vimp_fingerprint(spec):
+        raise ValueError(f"profile {record.profile_id} was calibrated against a different estimator")
+    return record.profile_id, record.critical_value
+
+
+def cell_seed(seed: int, cell: tuple[float, float, str, str], replicate: int) -> int:
+    """Seed from the cell's identity rather than its index in the grid.
+
+    Indexing by position means inserting a form reseeds every existing cell, so prior
+    evidence stops being reproducible for reasons that have nothing to do with the change.
+    """
+    digest = int(hashlib.sha256("|".join(str(part) for part in cell).encode()).hexdigest()[:8], 16)
+    return int(np.random.SeedSequence([seed, digest, replicate]).generate_state(1)[0])
 
 
 def cells() -> list[tuple[float, float, str, str]]:
     return [(a, t, sf, af) for a, t in itertools.product(TRUE_ADEQUACY, TRUE_THETA) for sf, af in FORMS]
 
 
-def _initialize(critical_value: float, delta: float, n: int) -> None:
-    _WORKER.update(critical_value=critical_value, delta=delta, n=n, vimp_spec=_spec())
+def _initialize(critical_value: float, delta: float, n: int, version: str) -> None:
+    _WORKER.update(critical_value=critical_value, delta=delta, n=n, vimp_spec=_spec(version))
 
 
 def _run(item: tuple[float, float, str, str, int, int]) -> dict[str, object]:
@@ -54,13 +90,11 @@ def _run(item: tuple[float, float, str, str, int, int]) -> dict[str, object]:
 
 
 def shard(args: argparse.Namespace) -> None:
-    registry = CalibrationRegistry.load(args.calibration_registry or default_calibration_registry_path())
-    record = next(item for item in registry.records if item.profile_id == PROFILE_ID)
-    if record.inference_rows != args.n or record.delta_target != args.delta:
-        raise ValueError(f"profile {PROFILE_ID} is calibrated at n={record.inference_rows}, delta={record.delta_target}")
+    spec = _spec(args.learner_library_version)
+    profile_id, critical_value = _resolve_profile(args, spec)
     items = [
-        (a, t, sf, af, args.start + offset, int(np.random.SeedSequence([args.seed, index, args.start + offset]).generate_state(1)[0]))
-        for index, (a, t, sf, af) in enumerate(cells())
+        (a, t, sf, af, args.start + offset, cell_seed(args.seed, (a, t, sf, af), args.start + offset))
+        for (a, t, sf, af) in cells()
         for offset in range(args.count)
     ]
     workers = args.workers if args.workers else (os.cpu_count() or 1)
@@ -68,13 +102,13 @@ def shard(args: argparse.Namespace) -> None:
         os.environ[variable] = "1"
     with threadpool_limits(limits=1):
         if workers > 1:
-            with ProcessPoolExecutor(max_workers=workers, initializer=_initialize, initargs=(record.critical_value, args.delta, args.n)) as pool:
+            with ProcessPoolExecutor(max_workers=workers, initializer=_initialize, initargs=(critical_value, args.delta, args.n, args.learner_library_version)) as pool:
                 rows = list(pool.map(_run, items, chunksize=1))
         else:
-            _initialize(record.critical_value, args.delta, args.n)
+            _initialize(critical_value, args.delta, args.n, args.learner_library_version)
             rows = [_run(item) for item in items]
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    pd.DataFrame(rows).to_parquet(args.output, index=False)
+    pd.DataFrame(rows).assign(profile_id=profile_id).to_parquet(args.output, index=False)
 
 
 def summarize(args: argparse.Namespace) -> None:
@@ -91,7 +125,7 @@ def summarize(args: argparse.Namespace) -> None:
     by_adequacy.to_csv(args.output / "threshold_by_adequacy.csv", index=False)
     by_learnability.to_csv(args.output / "threshold_by_learnability.csv", index=False)
     summary = {
-        "profile_id": PROFILE_ID,
+        "profile_id": sorted(set(data.profile_id))[0] if "profile_id" in data else DEFAULT_PROFILE_ID,
         "replications": int(len(data)),
         "cells": int(len(cells())),
         "overall_false_prune_rate": float(data[data.true_edge].false_prune.mean()),
@@ -117,6 +151,9 @@ def main() -> None:
     shard_parser.add_argument("--seed", type=int, default=20260806)
     shard_parser.add_argument("--workers", type=int)
     shard_parser.add_argument("--calibration-registry", type=Path)
+    shard_parser.add_argument("--learner-library-version", default="v3_nested_blend")
+    shard_parser.add_argument("--profile-id", default=DEFAULT_PROFILE_ID)
+    shard_parser.add_argument("--profile-summary", type=Path, help="archived Phase-0 calibration_summary.json to study instead of a shipped profile")
     shard_parser.set_defaults(func=shard)
     summarize_parser = commands.add_parser("summarize", help="assemble shards into evidence")
     summarize_parser.add_argument("--shards", type=Path, required=True)

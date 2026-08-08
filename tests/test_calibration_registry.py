@@ -53,21 +53,34 @@ def test_eligibility_reports_profile_and_distribution_failures() -> None:
     assert calibration_eligibility(registry, profile_id="fixture", delta_target=.05, inference_rows=300, inference_folds=5, spec=spec, distribution_ok=False).mismatch_fields == ["distribution_artifact"]
 
 
-def test_packaged_phase0_profile_is_an_exact_validated_match() -> None:
-    """The packaged profile must describe the estimator that is actually shipped.
+@pytest.mark.parametrize(
+    ("profile_id", "library"),
+    [
+        ("v3-nested-blend-n300-d005-phase0", "v3_nested_blend"),
+        ("v4-cubic-blend-n300-d005-phase0", "v4_cubic_blend"),
+    ],
+)
+def test_every_packaged_profile_is_an_exact_validated_match(profile_id: str, library: str) -> None:
+    """Both profiles ship: v4 is the default, v3 stays valid for analyses bound to it.
 
-    It was regenerated after the section 16.4 materiality safeguard changed the decision
-    rule, and its critical value uses a sub-alpha training quantile so the argmin family's
-    upper bound clears alpha on its own rather than through abstention.
+    Each must describe the estimator it is paired with, cover every required scenario
+    family, and clear alpha on its own rather than through abstention.
     """
     registry = CalibrationRegistry.load(default_calibration_registry_path())
-    eligibility = calibration_eligibility(registry, profile_id="v3-nested-blend-n300-d005-phase0", delta_target=.05, inference_rows=300, inference_folds=5, spec=VimpSpec(forest_trees=10, learner_library_version="v3_nested_blend"))
+    eligibility = calibration_eligibility(registry, profile_id=profile_id, delta_target=.05, inference_rows=300, inference_folds=5, spec=VimpSpec(forest_trees=10, learner_library_version=library))
     assert eligibility.status == "calibrated_success"
     assert eligibility.mismatch_fields == []
-    record = registry.records[0]
+    record = next(item for item in registry.records if item.profile_id == profile_id)
     assert record.critical_quantile == CRITICAL_QUANTILE
     assert max(record.grid_upper_rejection_bounds.values()) <= record.alpha
     assert max(record.grid_ineligibility_rates.values()) < .01
+
+
+def test_a_profile_cannot_be_paired_with_a_different_library() -> None:
+    """The fingerprint is what stops v4's critical value being used with v3's estimator."""
+    registry = CalibrationRegistry.load(default_calibration_registry_path())
+    crossed = calibration_eligibility(registry, profile_id="v4-cubic-blend-n300-d005-phase0", delta_target=.05, inference_rows=300, inference_folds=5, spec=VimpSpec(forest_trees=10, learner_library_version="v3_nested_blend"))
+    assert crossed.mismatch_fields == ["vimp_fingerprint"]
 
 
 @pytest.mark.parametrize("rows,folds,spec", [(299, 5, VimpSpec()), (300, 4, VimpSpec()), (300, 5, VimpSpec(ridge_alpha=2))])

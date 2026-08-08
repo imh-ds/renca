@@ -9,6 +9,14 @@ on:
       replications_per_shard:
         description: Replications per shard; 20 shards x 250 = 5,000 total
         default: '250'
+      learner_library_version:
+        description: Learner library under study
+        default: v3_nested_blend
+        type: choice
+        options: [v3_nested_blend, v4_cubic_blend]
+      profile_id:
+        description: Calibration profile to bind the analysis to
+        default: v3-nested-blend-n300-d005-phase0
 
 permissions:
   contents: read
@@ -36,6 +44,8 @@ jobs:
           --start $(( ${{ matrix.shard }} * ${{ inputs.replications_per_shard }} ))
           --count ${{ inputs.replications_per_shard }}
           --blocks ${{ inputs.blocks }}
+          --learner-library-version ${{ inputs.learner_library_version }}
+          --profile-id ${{ inputs.profile_id }}
           --output out/shard-${{ matrix.shard }}.parquet
       - uses: actions/upload-artifact@v4
         with:

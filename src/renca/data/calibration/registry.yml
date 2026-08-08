@@ -52,3 +52,55 @@ records:
     learner_misspecification_v1: 0.0004
     nonlinear_continuous_v1: 0.0
   status: validated
+- profile_id: v4-cubic-blend-n300-d005-phase0
+  scenario_family: continuous_linear_boundary_v1
+  delta_target: 0.05
+  inference_rows: 300
+  inference_folds: 5
+  vimp_fingerprint: 271bcb55a001e4f0ab42948685363775836b7c3a1a3c4cd40cd6ee22b25c4a32
+  alpha: 0.05
+  critical_value: -4.751278791632941
+  critical_quantile: 0.04
+  distribution_file: v4-cubic-blend-n300-d005/calibration_distribution.parquet
+  distribution_sha256: 9337f8d50359b2c7fcaab3355651f0e4bc8b3f26ea4683cdea39032128ec9f30
+  calibration_replications: 6000
+  calibration_successful_replications_per_family:
+    bounded_composite_saturated_v1: 6000
+    bounded_composite_unsaturated_v1: 6000
+    continuous_linear_boundary_v1: 6000
+    learner_misspecification_v1: 5998
+    nonlinear_continuous_v1: 6000
+  evaluation_replications: 5000
+  empirical_rejection_rate: 0.0022
+  upper_rejection_bound: 0.0036388781822236575
+  validation_scenario_families:
+  - continuous_linear_boundary_v1
+  - bounded_composite_unsaturated_v1
+  - bounded_composite_saturated_v1
+  - nonlinear_continuous_v1
+  - learner_misspecification_v1
+  validation_replications_per_family:
+    bounded_composite_saturated_v1: 5000
+    bounded_composite_unsaturated_v1: 5000
+    continuous_linear_boundary_v1: 5000
+    learner_misspecification_v1: 5000
+    nonlinear_continuous_v1: 5000
+  grid_rejection_rates:
+    bounded_composite_saturated_v1: 0.0
+    bounded_composite_unsaturated_v1: 0.0002
+    continuous_linear_boundary_v1: 0.0022
+    learner_misspecification_v1: 0.0408
+    nonlinear_continuous_v1: 0.003
+  grid_upper_rejection_bounds:
+    bounded_composite_saturated_v1: 0.0005989670023149134
+    bounded_composite_unsaturated_v1: 0.000948417770004379
+    continuous_linear_boundary_v1: 0.0036388781822236575
+    learner_misspecification_v1: 0.045705071377302196
+    nonlinear_continuous_v1: 0.004615684985634328
+  grid_ineligibility_rates:
+    bounded_composite_saturated_v1: 0.0
+    bounded_composite_unsaturated_v1: 0.0
+    continuous_linear_boundary_v1: 0.0
+    learner_misspecification_v1: 0.0004
+    nonlinear_continuous_v1: 0.0
+  status: validated

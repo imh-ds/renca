@@ -22,14 +22,14 @@ from renca.calibration.registry import CalibrationRegistry
 from renca.models import VimpSpec
 from renca.runner import default_calibration_registry_path
 
-PROFILE_ID = "v3-nested-blend-n300-d005-phase0"
+DEFAULT_PROFILE_ID = "v3-nested-blend-n300-d005-phase0"
 
 _WORKER: dict[str, object] = {}
 
 
-def _spec() -> VimpSpec:
+def _spec(version: str) -> VimpSpec:
     """The exact learner configuration fingerprinted by the validated profile."""
-    return VimpSpec(forest_trees=10, learner_library_version="v3_nested_blend")
+    return VimpSpec(forest_trees=10, learner_library_version=version)
 
 
 def replicate_seed(seed: int, replicate: int) -> int:
@@ -37,8 +37,8 @@ def replicate_seed(seed: int, replicate: int) -> int:
     return int(np.random.SeedSequence([seed, replicate]).generate_state(1)[0])
 
 
-def _initialize_worker(registry_path: str, blocks: int, sample_size: int, delta: float, alpha: float) -> None:
-    _WORKER.update(registry=CalibrationRegistry.load(registry_path), registry_path=registry_path, blocks=blocks, sample_size=sample_size, delta=delta, alpha=alpha, vimp_spec=_spec())
+def _initialize_worker(registry_path: str, blocks: int, sample_size: int, delta: float, alpha: float, version: str, profile_id: str) -> None:
+    _WORKER.update(registry=CalibrationRegistry.load(registry_path), registry_path=registry_path, blocks=blocks, sample_size=sample_size, delta=delta, alpha=alpha, vimp_spec=_spec(version), profile_id=profile_id)
 
 
 def _run_replication(item: tuple[int, int]) -> dict[str, object]:
@@ -51,7 +51,7 @@ def _run_replication(item: tuple[int, int]) -> dict[str, object]:
         vimp_spec=_WORKER["vimp_spec"],
         registry=_WORKER["registry"],
         registry_path=_WORKER["registry_path"],
-        profile_id=PROFILE_ID,
+        profile_id=_WORKER["profile_id"],
         alpha=_WORKER["alpha"],
     )
     return {**result, "replicate": replicate, "seed": seed}
@@ -66,7 +66,7 @@ def shard(args: argparse.Namespace) -> None:
     registry_path = str(args.calibration_registry or default_calibration_registry_path())
     items = [(args.start + offset, replicate_seed(args.seed, args.start + offset)) for offset in range(args.count)]
     workers = args.workers if args.workers else (os.cpu_count() or 1)
-    initializer_args = (registry_path, args.blocks, args.sample_size, args.delta, args.alpha)
+    initializer_args = (registry_path, args.blocks, args.sample_size, args.delta, args.alpha, args.learner_library_version, args.profile_id)
     # One BLAS/OpenMP thread per worker; the learners are tiny, so oversubscribed threads
     # cost far more than they return. Set before forking so workers inherit it.
     for variable in ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS"):
@@ -78,7 +78,7 @@ def shard(args: argparse.Namespace) -> None:
         _initialize_worker(*initializer_args)
         rows = [_run_replication(item) for item in items]
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    pd.DataFrame(sorted(rows, key=lambda row: row["replicate"])).to_parquet(args.output, index=False)
+    pd.DataFrame(sorted(rows, key=lambda row: row["replicate"])).assign(profile_id=args.profile_id).to_parquet(args.output, index=False)
 
 
 def summarize(args: argparse.Namespace) -> None:
@@ -89,7 +89,7 @@ def summarize(args: argparse.Namespace) -> None:
     if data.replicate.duplicated().any():
         raise ValueError("replicates must be unique across shards")
     summary = summarize_multipair_grid(data, alpha=args.alpha)
-    summary["profile_id"] = PROFILE_ID
+    summary["profile_id"] = sorted(set(data.profile_id))[0] if "profile_id" in data else DEFAULT_PROFILE_ID
     summary["blocks"] = int(data.blocks.iloc[0])
     summary["sample_size"] = args.sample_size
     args.output.mkdir(parents=True, exist_ok=True)
@@ -113,6 +113,8 @@ def main() -> None:
     shard_parser.add_argument("--seed", type=int, default=20260804)
     shard_parser.add_argument("--workers", type=int, help="parallel replications; defaults to the core count")
     shard_parser.add_argument("--calibration-registry", type=Path)
+    shard_parser.add_argument("--learner-library-version", default="v3_nested_blend")
+    shard_parser.add_argument("--profile-id", default=DEFAULT_PROFILE_ID)
     shard_parser.set_defaults(func=shard)
 
     summarize_parser = commands.add_parser("summarize", help="assemble shards into evidence")

@@ -20,9 +20,9 @@ vimp:
   ridge_alpha: 1.0
   forest_trees: 10
   forest_max_depth: 5
-  learner_library_version: v3_nested_blend
+  learner_library_version: v4_cubic_blend
 calibration:
-  profile_id: v3-nested-blend-n300-d005-phase0
+  profile_id: v4-cubic-blend-n300-d005-phase0
 nodes:
   - {node_id: engagement, outcome_type: continuous, loss: squared, delta: 0.05}
   - {node_id: satisfaction, outcome_type: continuous, loss: squared, delta: 0.05}

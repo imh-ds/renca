@@ -1,0 +1,108 @@
+{
+  "by_adequacy": [
+    {
+      "abstention_rate": 0.0060271865,
+      "adequacy_bin": "(-inf, 0.0]",
+      "correct_prune_rate": 0.4211755547,
+      "false_prune_rate": 0.007518797,
+      "median_theta_bias": -0.0155611904,
+      "replications": 7798,
+      "true_edges": 2660,
+      "true_nonedges": 5138
+    },
+    {
+      "abstention_rate": 0.0062335958,
+      "adequacy_bin": "(0.0, 0.02]",
+      "correct_prune_rate": 0.4391179291,
+      "false_prune_rate": 0.0083160083,
+      "median_theta_bias": -0.0162824101,
+      "replications": 3048,
+      "true_edges": 962,
+      "true_nonedges": 2086
+    },
+    {
+      "abstention_rate": 0.0093434964,
+      "adequacy_bin": "(0.02, 0.05]",
+      "correct_prune_rate": 0.4725800515,
+      "false_prune_rate": 0.0088888889,
+      "median_theta_bias": -0.0165434313,
+      "replications": 4067,
+      "true_edges": 1350,
+      "true_nonedges": 2717
+    },
+    {
+      "abstention_rate": 0.0086684325,
+      "adequacy_bin": "(0.05, 0.1]",
+      "correct_prune_rate": 0.5092357841,
+      "false_prune_rate": 0.0186781609,
+      "median_theta_bias": -0.0163533678,
+      "replications": 4153,
+      "true_edges": 1392,
+      "true_nonedges": 2761
+    },
+    {
+      "abstention_rate": 0.0068794717,
+      "adequacy_bin": "(0.1, 0.2]",
+      "correct_prune_rate": 0.5718711276,
+      "false_prune_rate": 0.0300906843,
+      "median_theta_bias": -0.0157574971,
+      "replications": 7268,
+      "true_edges": 2426,
+      "true_nonedges": 4842
+    },
+    {
+      "abstention_rate": 0.0092208391,
+      "adequacy_bin": "(0.2, 0.4]",
+      "correct_prune_rate": 0.6925193465,
+      "false_prune_rate": 0.0367004544,
+      "median_theta_bias": -0.0143615432,
+      "replications": 8676,
+      "true_edges": 2861,
+      "true_nonedges": 5815
+    },
+    {
+      "abstention_rate": 0.0084084084,
+      "adequacy_bin": "(0.4, inf]",
+      "correct_prune_rate": 0.8254780906,
+      "false_prune_rate": 0.0677814273,
+      "median_theta_bias": -0.0124824576,
+      "replications": 9990,
+      "true_edges": 3349,
+      "true_nonedges": 6641
+    }
+  ],
+  "by_learnability": [
+    {
+      "added_form": "cubic",
+      "correct_prune_rate": 0.6806,
+      "false_prune_rate": 0.0524,
+      "median_observed_adequacy": 0.1417166682,
+      "median_theta_bias": -0.0232519451,
+      "replications": 15000,
+      "separator_form": "linear"
+    },
+    {
+      "added_form": "linear",
+      "correct_prune_rate": 0.4201,
+      "false_prune_rate": 0.0,
+      "median_observed_adequacy": 0.1421575824,
+      "median_theta_bias": -0.0037053867,
+      "replications": 15000,
+      "separator_form": "linear"
+    },
+    {
+      "added_form": "oscillatory",
+      "correct_prune_rate": 0.7041,
+      "false_prune_rate": 0.0418,
+      "median_observed_adequacy": 0.1425813156,
+      "median_theta_bias": -0.0229158145,
+      "replications": 15000,
+      "separator_form": "linear"
+    }
+  ],
+  "cells": 45,
+  "overall_correct_prune_rate": 0.6016,
+  "overall_false_prune_rate": 0.0314,
+  "profile_id": "v3-nested-blend-n300-d005-phase0",
+  "replications": 45000
+}
