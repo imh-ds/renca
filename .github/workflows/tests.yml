@@ -35,5 +35,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
           cache-dependency-path: pyproject.toml
-      - run: pip install -e ".[test]"
+      # The comparator extra pulls in causal-learn so the section 13.4 baseline adapters
+      # are exercised rather than skipped. It is not a runtime dependency; see pyproject.
+      - run: pip install -e ".[comparators]"
       - run: pytest -q

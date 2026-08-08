@@ -1,0 +1,82 @@
+name: Comparator gate study
+
+on:
+  workflow_dispatch:
+    inputs:
+      replications_per_shard:
+        description: Replications per shard; 4 conditions x 5 shards x this = total
+        default: '20'
+      max_separator_size:
+        description: Conditioning-set limit for both this method and the baselines
+        default: '1'
+      indep_test:
+        description: Conditional-independence test used by PC and FCI
+        default: fisherz
+        type: choice
+        options: [fisherz, kci]
+      learner_library_version:
+        description: Learner library under study
+        default: v4_cubic_blend
+        type: choice
+        options: [v3_nested_blend, v4_cubic_blend]
+
+permissions:
+  contents: read
+
+jobs:
+  replicate:
+    runs-on: ubuntu-latest
+    # Two families x two edge strengths x five shards fills the 20-concurrent-job cap on a
+    # free public repository exactly; more shards would only queue. Throughput past that
+    # comes from the worker fan-out inside each shard, which defaults to the core count.
+    strategy:
+      fail-fast: false
+      matrix:
+        family: [linear_gaussian, additive_nonlinear]
+        edge_strength: [realistic, strong]
+        shard: [0, 1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: pip install ".[comparators]"
+      - name: Report runner capacity
+        run: 'nproc && free -g | head -2'
+      - run: >
+          python simulations/comparator_gate.py shard
+          --start $(( ${{ matrix.shard }} * ${{ inputs.replications_per_shard }} ))
+          --count ${{ inputs.replications_per_shard }}
+          --family ${{ matrix.family }}
+          --edge-strength ${{ matrix.edge_strength }}
+          --max-separator-size ${{ inputs.max_separator_size }}
+          --indep-test ${{ inputs.indep_test }}
+          --learner-library-version ${{ inputs.learner_library_version }}
+          --output out/${{ matrix.family }}-${{ matrix.edge_strength }}-${{ matrix.shard }}.parquet
+      - uses: actions/upload-artifact@v4
+        with:
+          name: comparator-shard-${{ matrix.family }}-${{ matrix.edge_strength }}-${{ matrix.shard }}
+          path: out/*.parquet
+          retention-days: 90
+
+  summarize:
+    needs: replicate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: pip install ".[comparators]"
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: comparator-shard-*
+          path: downloaded
+      - run: mkdir shards
+      - run: find downloaded -name '*.parquet' -exec cp {} shards/ \;
+      - run: python simulations/comparator_gate.py summarize --shards shards --output comparator-gate
+      - uses: actions/upload-artifact@v4
+        with:
+          name: comparator-gate-evidence
+          path: comparator-gate
+          retention-days: 90
