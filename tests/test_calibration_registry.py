@@ -53,27 +53,59 @@ def test_eligibility_reports_profile_and_distribution_failures() -> None:
     assert calibration_eligibility(registry, profile_id="fixture", delta_target=.05, inference_rows=300, inference_folds=5, spec=spec, distribution_ok=False).mismatch_fields == ["distribution_artifact"]
 
 
-@pytest.mark.parametrize(
-    ("profile_id", "library"),
-    [
-        ("v3-nested-blend-n300-d005-phase0", "v3_nested_blend"),
-        ("v4-cubic-blend-n300-d005-phase0", "v4_cubic_blend"),
-    ],
-)
-def test_every_packaged_profile_is_an_exact_validated_match(profile_id: str, library: str) -> None:
-    """Both profiles ship: v4 is the default, v3 stays valid for analyses bound to it.
+PACKAGED_PROFILES = [
+    ("v3-nested-blend-n300-d005-phase0", "v3_nested_blend", .05),
+    ("v4-cubic-blend-n300-d005-phase0", "v4_cubic_blend", .05),
+    ("v4-cubic-blend-n300-d010-phase0", "v4_cubic_blend", .10),
+    ("v4-cubic-blend-n300-d020-phase0", "v4_cubic_blend", .20),
+]
+
+
+@pytest.mark.parametrize(("profile_id", "library", "delta"), PACKAGED_PROFILES)
+def test_every_packaged_profile_is_an_exact_validated_match(profile_id: str, library: str, delta: float) -> None:
+    """Four profiles ship: v4 at three resolutions, plus v3 for analyses bound to it.
 
     Each must describe the estimator it is paired with, cover every required scenario
     family, and clear alpha on its own rather than through abstention.
     """
     registry = CalibrationRegistry.load(default_calibration_registry_path())
-    eligibility = calibration_eligibility(registry, profile_id=profile_id, delta_target=.05, inference_rows=300, inference_folds=5, spec=VimpSpec(forest_trees=10, learner_library_version=library))
+    eligibility = calibration_eligibility(registry, profile_id=profile_id, delta_target=delta, inference_rows=300, inference_folds=5, spec=VimpSpec(forest_trees=10, learner_library_version=library))
     assert eligibility.status == "calibrated_success"
     assert eligibility.mismatch_fields == []
     record = next(item for item in registry.records if item.profile_id == profile_id)
     assert record.critical_quantile == CRITICAL_QUANTILE
     assert max(record.grid_upper_rejection_bounds.values()) <= record.alpha
     assert max(record.grid_ineligibility_rates.values()) < .01
+
+
+@pytest.mark.parametrize(("profile_id", "library", "delta"), PACKAGED_PROFILES)
+def test_a_profile_is_bound_to_the_delta_it_was_calibrated_at(profile_id: str, library: str, delta: float) -> None:
+    """The delta profiles differ only in resolution, so nothing else stops them crossing.
+
+    A critical value calibrated at 0.20 used to test a 0.05 hypothesis would certify at a
+    left tail that was never validated there, and every other exact-match field would agree.
+    """
+    registry = CalibrationRegistry.load(default_calibration_registry_path())
+    other = next(value for _, _, value in PACKAGED_PROFILES if value != delta)
+    crossed = calibration_eligibility(registry, profile_id=profile_id, delta_target=other, inference_rows=300, inference_folds=5, spec=VimpSpec(forest_trees=10, learner_library_version=library))
+    assert crossed.mismatch_fields == ["delta_target"]
+
+
+def test_a_coarser_resolution_tolerates_a_larger_standard_error() -> None:
+    """Why the delta profiles exist: certifying needs `se < delta / |critical|`.
+
+    The critical value shrinks with delta as well, so the tolerated standard error rises
+    faster than delta does. That is the whole payoff for a dataset whose resolution floor
+    sits above 0.05, and it would be silently lost if a future recalibration inverted it.
+    """
+    registry = CalibrationRegistry.load(default_calibration_registry_path())
+    tolerated = {
+        record.delta_target: record.delta_target / abs(record.critical_value)
+        for record in registry.records
+        if record.profile_id.startswith("v4-cubic-blend")
+    }
+    assert tolerated[.05] < tolerated[.10] < tolerated[.20]
+    assert tolerated[.10] / tolerated[.05] > 2
 
 
 def test_a_profile_cannot_be_paired_with_a_different_library() -> None:

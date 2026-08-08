@@ -1,9 +1,10 @@
 # Phase 1 operating guide
 
-Two profiles can issue a hard `certified_nonedge`. **Use
-`v4-cubic-blend-n300-d005-phase0`**, which the bundled example declares;
-`v3-nested-blend-n300-d005-phase0` remains valid for analyses already bound to
-it. Either way the result is predictive practical separation, never a causal
+Four profiles can issue a hard `certified_nonedge`. **Use
+`v4-cubic-blend-n300-d005-phase0`**, which the bundled example declares, unless your
+data cannot resolve 0.05 — see [Choosing delta](#choosing-delta) for the 0.10 and
+0.20 profiles. `v3-nested-blend-n300-d005-phase0` remains valid for analyses already
+bound to it. Either way the result is predictive practical separation, never a causal
 nonedge or direction claim.
 
 ## What the estimator can and cannot see
@@ -61,9 +62,13 @@ including a node-specific delta, makes certification unavailable.
 Use independent rows and continuous squared-loss targets only. Bounded
 composites may be declared with `measurement_level: bounded_composite`, scale
 bounds, and `continuous_approximation: true`; the audit must approve their
-resolution and boundary mass. Raw ordinal items are ineligible. Binary,
-clustered, other sample-size, fold, delta, and learner configurations may
-produce exploratory evidence but are outside this calibrated profile.
+resolution and boundary mass. Raw ordinal items are ineligible.
+
+The calibrated profiles match **exactly**, not approximately: 300 inference rows,
+5 folds, `alpha = 0.05`, a declared `delta` of 0.05, 0.10, or 0.20, and the library
+the profile was built against. Binary targets, clustered designs, and any other
+sample size, fold count, `delta`, or learner still produce evidence, but it is
+exploratory and the report says `calibration_failed` rather than certifying.
 
 ## Read the evidence
 
@@ -191,11 +196,28 @@ that is selecting a hypothesis after seeing the answer. Specification section 27
 the primary `delta` to be fixed before analysis, and the path exists to inform the *next*
 study's design, or to explain the present one, not to reselect within it.
 
-**Raising `delta` needs a profile at that value.** Only `delta = 0.05` is calibrated today.
-A study needing 0.10 or 0.20 requires its own Phase-0 run before it can certify anything;
-until then such a configuration produces evidence but reports `calibration_failed`. If the
-path repeatedly shows your data supports only coarser resolutions, that is the argument for
-calibrating one.
+**Raising `delta` needs a profile at that value**, and three are calibrated for `n=300`
+with the v4 library. A profile is bound to its resolution: declaring `delta = 0.10` against
+the 0.05 profile reports `calibration_failed` rather than silently reusing the wrong
+critical value.
+
+| profile | `delta` | critical | largest `se` that can still certify |
+|---|---|---|---|
+| `v4-cubic-blend-n300-d005-phase0` | 0.05 | 4.7513 | 0.0105 |
+| `v4-cubic-blend-n300-d010-phase0` | 0.10 | 4.0736 | 0.0245 |
+| `v4-cubic-blend-n300-d020-phase0` | 0.20 | 3.0841 | 0.0648 |
+
+Certifying needs `se < delta / |critical|`, and the critical value shrinks as `delta`
+coarsens, so tolerance grows faster than `delta` itself: 0.10 accepts 2.3x the standard
+error of 0.05, and 0.20 accepts 6.2x. **If your resolution floor lands above your requested
+`delta`, the coarser profile is the fix**, and it is the intended use of the path.
+
+This is a change of question, not a relaxation. All three hold familywise error to the same
+`alpha`; what differs is the strength of the claim. A nonedge certified at 0.20 says the
+variable contributes at most a fifth of the outcome's predictable variation, which for many
+behavioural outcomes is not "practically nothing". Choose the finest resolution your data
+supports and report it alongside every nonedge claim. Any other `delta`, and any inference
+row count other than exactly 300, still needs its own Phase-0 run.
 
 ### Achieved resolution — the per-pair bound
 

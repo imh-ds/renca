@@ -7,32 +7,7 @@ what changed recently and what is still open.
 
 ## In flight right now
 
-Two Phase-0 calibrations dispatched from branch `feat/calibrate-additional-deltas`
-(PR not yet opened):
-
-| run | delta | profile id |
-|---|---|---|
-| [31245842503](https://github.com/imh-ds/renca/actions/runs/31245842503) | 0.10 | `v4-cubic-blend-n300-d010-phase0` |
-| [31245856537](https://github.com/imh-ds/renca/actions/runs/31245856537) | 0.20 | `v4-cubic-blend-n300-d020-phase0` |
-
-Each is ~50 minutes; they queue against the 20-concurrent-job cap, so expect ~2 hours
-total. Both use `v4_cubic_blend` at `n=300`, five scenario families, `critical_quantile`
-0.04.
-
-**When they finish:** download `phase0-calibration-evidence`, check
-`calibration_summary.json` says `"status": "validated"`, archive to
-`docs/evidence/phase0/v4-cubic-blend-n300-d0{10,20}/` with a README, add the records to
-`src/renca/data/calibration/registry.yml` alongside the existing two, copy each
-distribution parquet into `src/renca/data/calibration/<profile-dir>/`, and extend the
-parametrised test in `tests/test_calibration_registry.py` that asserts every packaged
-profile is an exact validated match. The v4 adoption commit (`284d571`) is the pattern to
-copy.
-
-**If either is rejected:** the likely cause is the same one that failed the first v4
-attempt — `learner_misspecification_v1` sets the critical value and its upper bound lands
-above `alpha`. See
-[`docs/evidence/phase0/v4-cubic-blend-n300-d005/README.md`](evidence/phase0/v4-cubic-blend-n300-d005/README.md)
-for the mechanism and the sub-alpha quantile fix already in place.
+Nothing. Branch `feat/calibrate-additional-deltas` is ready for a PR.
 
 ## What is settled
 
@@ -47,6 +22,13 @@ cubic at all.
 bound over 5,000 replications, 100% separator recovery, and the cubic false-prune breach
 removed (v3 up to 9.7% against `alpha = 0.05`; v4 at or below 0.2%). Costs about a tenth
 of pruning power. Evidence in `docs/evidence/phase1/`.
+
+**Three resolutions are calibrated** for v4 at `n=300`: 0.05, 0.10, and 0.20, with critical
+values −4.7513, −4.0736, and −3.0841, all validated. Because the critical value shrinks as
+`delta` coarsens, the tolerated standard error grows faster than `delta` does — 0.10 accepts
+2.3x the `se` of 0.05, and 0.20 accepts 6.2x. That is the fix for a dataset whose resolution
+floor sits above its requested `delta`. Evidence in
+`docs/evidence/phase0/v4-cubic-blend-n300-d0{10,20}/`.
 
 **Reporting.** Network fit indices (predictive adequacy, resolution floor, achieved
 resolution) and the section 27 resolution path, both with their limits enforced in the
@@ -73,21 +55,19 @@ artifacts rather than only in prose.
 
 ## Open, in the order I would take them
 
-1. **Finish the two delta profiles** (above). Converts "unresolved with an explanation"
-   into certificates for datasets whose floor is coarser than 0.05.
-2. **Comparator baselines — the formal Phase 1 blocker.** Specification section 41 requires
+1. **Comparator baselines — the formal Phase 1 blocker.** Specification section 41 requires
    PC, conservative PC, FCI/RFCI, and EBICglasso; none exist in the repository. Section 44
    criterion 3 asks whether the method is "materially better than at least one standard
    comparator", and that is currently unevaluable in either direction. This has been open
    since the first assessment and is the single thing standing between the present evidence
    and a defensible Phase 1 exit.
-3. **A representative pilot.** Phase 1B still rests on a three-node synthetic smoke test.
+2. **A representative pilot.** Phase 1B still rests on a three-node synthetic smoke test.
    Needs a public or authorised tabular dataset.
-4. **Shard sizing.** Multi-pair shards run ~100 minutes, long enough that one lost runner
+3. **Shard sizing.** Multi-pair shards run ~100 minutes, long enough that one lost runner
    costs a whole run because `summarize` needs every shard. Halving
    `replications_per_shard` and doubling the matrix leaves compute and wall clock unchanged
    under the 20-job cap.
-5. **Oscillatory shapes.** Deliberately deferred. Fixing them costs power to protect
+4. **Oscillatory shapes.** Deliberately deferred. Fixing them costs power to protect
    against relationships past cubic, which behavioural research reports as rare. Revisit
    only if an application demands it.
 
@@ -101,8 +81,9 @@ roughly 7,000 cases to certify anything. The v4 work partly supersedes the quest
 
 ## Operating notes
 
-- Tests: `pytest`, 131 passing. CI runs them on Python 3.11–3.14 plus one Windows job.
-- Local Python is 3.14 with no editable install; a virtualenv is needed to run the suite.
+- Tests: `pytest`, 138 passing. CI runs them on Python 3.11–3.14 plus one Windows job.
+- Local Python is 3.14 with no editable install. Create `.venv` and
+  `pip install -e ".[test]"` — the extra is `test`, not `dev`.
 - All studies shard on GitHub Actions. The public repo is capped at 20 concurrent jobs, so
   throughput past that comes from the per-runner worker fan-out, which defaults to the core
   count (4 on standard runners).
