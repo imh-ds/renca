@@ -10,6 +10,7 @@ from renca.calibration import CalibrationRegistry, apply_profile
 from renca.models import ProjectSpec
 from renca.reporting.edge_table import write_edge_report
 from renca.reporting.fit import build_network_fit, write_network_fit
+from renca.reporting.resolution_path import build_resolution_path, write_resolution_path
 from renca.screening import create_outer_split, rank_separators, screen_neighbors, write_separator_candidates, write_split_manifest
 from renca.vimp import fit_crossfitted_vimp, write_vimp_estimates
 
@@ -41,4 +42,5 @@ def run_analysis(data:pd.DataFrame,project_spec:ProjectSpec,output_dir:str|Path,
             critical_value=next((record.critical_value for record in registry.records if record.profile_id == project_spec.calibration.profile_id), None)
     write_vimp_estimates(estimates,out); certificates=certify_pairs(estimates); write_edge_certificates(certificates,out); graph=build_resolution_graph(certificates,project_spec); write_resolution_graph(graph,out)
     fit=build_network_fit(estimates,project_spec,critical_value); write_network_fit(fit,out)
-    write_edge_report(graph,estimates,out,eligibility,fit); write_evidence_bundle_manifest(analysis_manifest,out,profile_id=project_spec.calibration.profile_id,registry_path=calibration_registry_path); return RunArtifacts(out)
+    path=build_resolution_path(fit,project_spec); write_resolution_path(path,out)
+    write_edge_report(graph,estimates,out,eligibility,fit,path); write_evidence_bundle_manifest(analysis_manifest,out,profile_id=project_spec.calibration.profile_id,registry_path=calibration_registry_path); return RunArtifacts(out)

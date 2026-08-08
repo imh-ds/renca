@@ -158,6 +158,45 @@ Treat this as the primary planning quantity. Rather than asking whether your sam
 is large enough, run the analysis and read the floor: it tells you the resolution
 your data supports, and `delta` should be set at or above it.
 
+### Choosing delta
+
+`delta` is the question you are asking: how small a contribution counts as practically
+nothing. Set it too fine and pairs come back `unresolved` regardless of the truth, which
+looks like a failed analysis but is a mismatch between the question and the data.
+
+**Do not set `delta` from sample size.** It is tempting to reach for a rule like "n=300, so
+use 0.17", and it is wrong. Resolution is governed by the standard error, which combines
+sample size *and* how cleanly the separator predicts the target. The same `n=300` gave a
+resolution floor of **0.024** in a study of near-independent variables and **0.165** on the
+bundled example, where the variables are genuinely related and residual variance is
+therefore larger. A clean small sample can out-resolve a noisy large one.
+
+**Read the floor from your own run instead.** Every analysis reports the resolution floor
+and a resolution path:
+
+| delta | pairs the data could place below it | status |
+|---|---|---|
+| 0.020 | 0 of 3 | descriptive |
+| **0.050** | **1 of 3** | **primary, calibrated** |
+| 0.100 | 1 of 3 | descriptive |
+| 0.400 | 3 of 3 | descriptive |
+
+That is the bundled example. It says plainly that two of its three pairs are unresolved
+because 0.05 is finer than this data supports, not because the variables are related.
+
+**A caution that matters more than it looks.** The path is descriptive. Only the primary
+`delta` has a calibrated profile, so the other rows carry no error guarantee, and reading
+the path and *then* choosing a primary resolution destroys the error control entirely --
+that is selecting a hypothesis after seeing the answer. Specification section 27 requires
+the primary `delta` to be fixed before analysis, and the path exists to inform the *next*
+study's design, or to explain the present one, not to reselect within it.
+
+**Raising `delta` needs a profile at that value.** Only `delta = 0.05` is calibrated today.
+A study needing 0.10 or 0.20 requires its own Phase-0 run before it can certify anything;
+until then such a configuration produces evidence but reports `calibration_failed`. If the
+path repeatedly shows your data supports only coarser resolutions, that is the argument for
+calibrating one.
+
 ### Achieved resolution — the per-pair bound
 
 The per-pair upper limit on `Theta`. Unlike the floor it moves with effect size, so a

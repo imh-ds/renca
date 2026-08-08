@@ -1,0 +1,85 @@
+{
+  "$defs": {
+    "ResolutionPathRow": {
+      "additionalProperties": false,
+      "properties": {
+        "calibrated": {
+          "title": "Calibrated",
+          "type": "boolean"
+        },
+        "delta": {
+          "title": "Delta",
+          "type": "number"
+        },
+        "is_primary": {
+          "title": "Is Primary",
+          "type": "boolean"
+        },
+        "measurable_pairs": {
+          "title": "Measurable Pairs",
+          "type": "integer"
+        },
+        "resolvable_pairs": {
+          "title": "Resolvable Pairs",
+          "type": "integer"
+        },
+        "total_pairs": {
+          "title": "Total Pairs",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "delta",
+        "is_primary",
+        "calibrated",
+        "resolvable_pairs",
+        "measurable_pairs",
+        "total_pairs"
+      ],
+      "title": "ResolutionPathRow",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "How much of the network each candidate resolution could settle.",
+  "properties": {
+    "analysis_id": {
+      "title": "Analysis Id",
+      "type": "string"
+    },
+    "certificates_apply_only_at_primary_delta": {
+      "default": true,
+      "title": "Certificates Apply Only At Primary Delta",
+      "type": "boolean"
+    },
+    "interpretation": {
+      "title": "Interpretation",
+      "type": "string"
+    },
+    "primary_deltas": {
+      "items": {
+        "type": "number"
+      },
+      "title": "Primary Deltas",
+      "type": "array"
+    },
+    "rows": {
+      "items": {
+        "$ref": "#/$defs/ResolutionPathRow"
+      },
+      "title": "Rows",
+      "type": "array"
+    },
+    "schema_version": {
+      "default": "1.7.0",
+      "title": "Schema Version",
+      "type": "string"
+    }
+  },
+  "required": [
+    "analysis_id",
+    "interpretation"
+  ],
+  "title": "ResolutionPath",
+  "type": "object"
+}
