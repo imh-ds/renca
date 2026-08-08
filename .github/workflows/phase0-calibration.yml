@@ -11,6 +11,9 @@ on:
       profile_id:
         description: Profile id recorded on the resulting record
         default: v3-nested-blend-n300-d005-phase0
+      delta:
+        description: Practical-resolution threshold to calibrate
+        default: '0.05'
 
 permissions:
   contents: read
@@ -31,7 +34,7 @@ jobs:
       - run: pip install .
       - name: Report runner capacity
         run: 'nproc && free -g | head -2'
-      - run: python simulations/phase0_calibration.py shard --phase training --family ${{ matrix.family }} --start ${{ matrix.start }} --count 1000 --learner-library-version ${{ inputs.learner_library_version }} --output out/${{ matrix.family }}-${{ matrix.start }}.parquet
+      - run: python simulations/phase0_calibration.py shard --phase training --family ${{ matrix.family }} --start ${{ matrix.start }} --count 1000 --delta ${{ inputs.delta }} --learner-library-version ${{ inputs.learner_library_version }} --output out/${{ matrix.family }}-${{ matrix.start }}.parquet
       - uses: actions/upload-artifact@v4
         with:
           name: training-${{ matrix.family }}-${{ matrix.start }}
@@ -78,7 +81,7 @@ jobs:
         with:
           name: phase0-training-manifest
           path: training
-      - run: python simulations/phase0_calibration.py shard --phase validation --family ${{ matrix.family }} --start ${{ matrix.start }} --count 1000 --learner-library-version ${{ inputs.learner_library_version }} --training-manifest training/training_manifest.json --output out/${{ matrix.family }}-${{ matrix.start }}.parquet
+      - run: python simulations/phase0_calibration.py shard --phase validation --family ${{ matrix.family }} --start ${{ matrix.start }} --count 1000 --delta ${{ inputs.delta }} --learner-library-version ${{ inputs.learner_library_version }} --training-manifest training/training_manifest.json --output out/${{ matrix.family }}-${{ matrix.start }}.parquet
       - uses: actions/upload-artifact@v4
         with:
           name: validation-${{ matrix.family }}-${{ matrix.start }}
