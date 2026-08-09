@@ -1,0 +1,1241 @@
+{
+  "alpha": 0.05,
+  "graphical_reason": "error is controlled but no region pruned 10% of true nonedges, so the output is mostly unresolved",
+  "graphical_regions": [
+    {
+      "beats_a_baseline_on_the_spec_criterion": false,
+      "best_baseline_true_prune_rate": {
+        "conservative_pc": 0.9699015793087663,
+        "ebicglasso": 0.9686427100022889,
+        "fci": 0.9924467841611353,
+        "ges": 0.9977111467154955,
+        "pc": 0.9919890135042344
+      },
+      "delta": 0.05,
+      "dominated_baseline_arms": [],
+      "dominates_a_baseline": false,
+      "edge_strength": "realistic",
+      "false_prune_rate": 0.0,
+      "family": "additive_nonlinear",
+      "familywise_controlled": true,
+      "familywise_error_rate": 0.0,
+      "familywise_upper_bound": 0.02922515353903906,
+      "graphical_false_prune_rate": 0.0,
+      "graphical_true_prune_rate": 0.004921034561684596,
+      "matched_power_comparison": {
+        "baseline_false_prune_rate": 0.27695800227014755,
+        "baseline_true_prune_rate": 0.9063859006637675,
+        "exists": true,
+        "method": "pc",
+        "renca_is_better": true,
+        "setting": 0.2
+      },
+      "n": 375,
+      "prunes_a_useful_fraction": false,
+      "scoring": "graphical",
+      "spec_criterion_baseline_arms": [],
+      "true_prune_rate": 0.004921034561684596
+    },
+    {
+      "beats_a_baseline_on_the_spec_criterion": false,
+      "best_baseline_true_prune_rate": {
+        "conservative_pc": 0.9699015793087663,
+        "ebicglasso": 0.9686427100022889,
+        "fci": 0.9924467841611353,
+        "ges": 0.9977111467154955,
+        "pc": 0.9919890135042344
+      },
+      "delta": 0.1,
+      "dominated_baseline_arms": [],
+      "dominates_a_baseline": false,
+      "edge_strength": "realistic",
+      "false_prune_rate": 0.0005675368898978433,
+      "family": "additive_nonlinear",
+      "familywise_controlled": true,
+      "familywise_error_rate": 0.01,
+      "familywise_upper_bound": 0.0461073499248891,
+      "graphical_false_prune_rate": 0.0005675368898978433,
+      "graphical_true_prune_rate": 0.09304188601510643,
+      "matched_power_comparison": {
+        "baseline_false_prune_rate": 0.27695800227014755,
+        "baseline_true_prune_rate": 0.9063859006637675,
+        "exists": true,
+        "method": "pc",
+        "renca_is_better": true,
+        "setting": 0.2
+      },
+      "n": 375,
+      "prunes_a_useful_fraction": false,
+      "scoring": "graphical",
+      "spec_criterion_baseline_arms": [],
+      "true_prune_rate": 0.09304188601510643
+    },
+    {
+      "beats_a_baseline_on_the_spec_criterion": true,
+      "best_baseline_true_prune_rate": {
+        "conservative_pc": 0.9699015793087663,
+        "ebicglasso": 0.9686427100022889,
+        "fci": 0.9924467841611353,
+        "ges": 0.9977111467154955,
+        "pc": 0.9919890135042344
+      },
+      "delta": 0.2,
+      "dominated_baseline_arms": [],
+      "dominates_a_baseline": false,
+      "edge_strength": "realistic",
+      "false_prune_rate": 0.07548240635641316,
+      "family": "additive_nonlinear",
+      "familywise_controlled": false,
+      "familywise_error_rate": 0.71,
+      "familywise_upper_bound": 0.7774032632918011,
+      "graphical_false_prune_rate": 0.07548240635641316,
+      "graphical_true_prune_rate": 0.8259327077134355,
+      "matched_power_comparison": {
+        "baseline_false_prune_rate": 0.27695800227014755,
+        "baseline_true_prune_rate": 0.9063859006637675,
+        "exists": true,
+        "method": "pc",
+        "renca_is_better": true,
+        "setting": 0.2
+      },
+      "n": 375,
+      "prunes_a_useful_fraction": true,
+      "scoring": "graphical",
+      "spec_criterion_baseline_arms": [
+        {
+          "baseline_false_prune_rate": 0.3206583427922815,
+          "baseline_true_prune_rate": 0.9699015793087663,
+          "false_prune_reduction": 0.24517593643586832,
+          "method": "conservative_pc",
+          "pruning_retained": 0.8515634218289085,
+          "setting": 0.05
+        },
+        {
+          "baseline_false_prune_rate": 0.28433598183881953,
+          "baseline_true_prune_rate": 0.8814373998626688,
+          "false_prune_reduction": 0.20885357548240635,
+          "method": "ebicglasso",
+          "pruning_retained": 0.937029343027785,
+          "setting": 0.0
+        },
+        {
+          "baseline_false_prune_rate": 0.3076049943246311,
+          "baseline_true_prune_rate": 0.9220645456626231,
+          "false_prune_reduction": 0.23212258796821794,
+          "method": "ebicglasso",
+          "pruning_retained": 0.8957428323197218,
+          "setting": 0.25
+        },
+        {
+          "baseline_false_prune_rate": 0.32349602724177073,
+          "baseline_true_prune_rate": 0.9447241931792172,
+          "false_prune_reduction": 0.24801362088535756,
+          "method": "ebicglasso",
+          "pruning_retained": 0.8742580254391278,
+          "setting": 0.5
+        },
+        {
+          "baseline_false_prune_rate": 0.3530079455164586,
+          "baseline_true_prune_rate": 0.9686427100022889,
+          "false_prune_reduction": 0.2775255391600454,
+          "method": "ebicglasso",
+          "pruning_retained": 0.8526701323251418,
+          "setting": 1.0
+        },
+        {
+          "baseline_false_prune_rate": 0.35414301929625425,
+          "baseline_true_prune_rate": 0.9924467841611353,
+          "false_prune_reduction": 0.27866061293984107,
+          "method": "fci",
+          "pruning_retained": 0.8322186346863468,
+          "setting": 0.001
+        },
+        {
+          "baseline_false_prune_rate": 0.3427922814982974,
+          "baseline_true_prune_rate": 0.98970016021973,
+          "false_prune_reduction": 0.2673098751418842,
+          "method": "fci",
+          "pruning_retained": 0.8345282146160962,
+          "setting": 0.005
+        },
+        {
+          "baseline_false_prune_rate": 0.33938706015891035,
+          "baseline_true_prune_rate": 0.987182421606775,
+          "false_prune_reduction": 0.26390465380249717,
+          "method": "fci",
+          "pruning_retained": 0.8366566195223741,
+          "setting": 0.01
+        },
+        {
+          "baseline_false_prune_rate": 0.32179341657207716,
+          "baseline_true_prune_rate": 0.9725337605859464,
+          "false_prune_reduction": 0.24631101021566398,
+          "method": "fci",
+          "pruning_retained": 0.8492586490939044,
+          "setting": 0.05
+        },
+        {
+          "baseline_false_prune_rate": 0.3036322360953462,
+          "baseline_true_prune_rate": 0.9547951476310369,
+          "false_prune_reduction": 0.228149829738933,
+          "method": "fci",
+          "pruning_retained": 0.8650365575931918,
+          "setting": 0.1
+        },
+        {
+          "baseline_false_prune_rate": 0.28376844494892167,
+          "baseline_true_prune_rate": 0.9216067750057221,
+          "false_prune_reduction": 0.2082860385925085,
+          "method": "fci",
+          "pruning_retained": 0.8961877561157333,
+          "setting": 0.2
+        },
+        {
+          "baseline_false_prune_rate": 0.3104426787741203,
+          "baseline_true_prune_rate": 0.9630350194552529,
+          "false_prune_reduction": 0.23496027241770712,
+          "method": "ges",
+          "pruning_retained": 0.857635175282234,
+          "setting": 0.5
+        },
+        {
+          "baseline_false_prune_rate": 0.3325766174801362,
+          "baseline_true_prune_rate": 0.9875257495994507,
+          "false_prune_reduction": 0.25709421112372305,
+          "method": "ges",
+          "pruning_retained": 0.8363657434233398,
+          "setting": 1.0
+        },
+        {
+          "baseline_false_prune_rate": 0.3535754824063564,
+          "baseline_true_prune_rate": 0.9939345387960632,
+          "false_prune_reduction": 0.2780930760499432,
+          "method": "ges",
+          "pruning_retained": 0.8309729418537708,
+          "setting": 2.0
+        },
+        {
+          "baseline_false_prune_rate": 0.4284903518728717,
+          "baseline_true_prune_rate": 0.9977111467154955,
+          "false_prune_reduction": 0.35300794551645853,
+          "method": "ges",
+          "pruning_retained": 0.8278274833677448,
+          "setting": 4.0
+        },
+        {
+          "baseline_false_prune_rate": 0.35414301929625425,
+          "baseline_true_prune_rate": 0.9919890135042344,
+          "false_prune_reduction": 0.27866061293984107,
+          "method": "pc",
+          "pruning_retained": 0.8326026765113059,
+          "setting": 0.001
+        },
+        {
+          "baseline_false_prune_rate": 0.3422247446083995,
+          "baseline_true_prune_rate": 0.9892423895628291,
+          "false_prune_reduction": 0.26674233825198634,
+          "method": "pc",
+          "pruning_retained": 0.8349143914854233,
+          "setting": 0.005
+        },
+        {
+          "baseline_false_prune_rate": 0.33825198637911463,
+          "baseline_true_prune_rate": 0.9862668802929733,
+          "false_prune_reduction": 0.26276958002270145,
+          "method": "pc",
+          "pruning_retained": 0.8374332791831051,
+          "setting": 0.01
+        },
+        {
+          "baseline_false_prune_rate": 0.3206583427922815,
+          "baseline_true_prune_rate": 0.9699015793087663,
+          "false_prune_reduction": 0.24517593643586832,
+          "method": "pc",
+          "pruning_retained": 0.8515634218289085,
+          "setting": 0.05
+        },
+        {
+          "baseline_false_prune_rate": 0.2996594778660613,
+          "baseline_true_prune_rate": 0.9488441290913252,
+          "false_prune_reduction": 0.2241770715096481,
+          "method": "pc",
+          "pruning_retained": 0.870461946689181,
+          "setting": 0.1
+        },
+        {
+          "baseline_false_prune_rate": 0.27695800227014755,
+          "baseline_true_prune_rate": 0.9063859006637675,
+          "false_prune_reduction": 0.20147559591373437,
+          "method": "pc",
+          "pruning_retained": 0.9112373737373737,
+          "setting": 0.2
+        }
+      ],
+      "true_prune_rate": 0.8259327077134355
+    },
+    {
+      "beats_a_baseline_on_the_spec_criterion": false,
+      "best_baseline_true_prune_rate": {
+        "conservative_pc": 0.9566556404699441,
+        "ebicglasso": 0.8133911258127068,
+        "fci": 0.9812934869396601,
+        "ges": 0.9840310254362952,
+        "pc": 0.9787840766510779
+      },
+      "delta": 0.05,
+      "dominated_baseline_arms": [],
+      "dominates_a_baseline": false,
+      "edge_strength": "strong",
+      "false_prune_rate": 0.0,
+      "family": "additive_nonlinear",
+      "familywise_controlled": true,
+      "familywise_error_rate": 0.0,
+      "familywise_upper_bound": 0.02922515353903906,
+      "graphical_false_prune_rate": 0.0,
+      "graphical_true_prune_rate": 0.018022128436181135,
+      "matched_power_comparison": {
+        "baseline_false_prune_rate": 0.2267743796884016,
+        "baseline_true_prune_rate": 0.7743812022356564,
+        "exists": true,
+        "method": "ebicglasso",
+        "renca_is_better": true,
+        "setting": 0.0
+      },
+      "n": 375,
+      "prunes_a_useful_fraction": false,
+      "scoring": "graphical",
+      "spec_criterion_baseline_arms": [],
+      "true_prune_rate": 0.018022128436181135
+    },
+    {
+      "beats_a_baseline_on_the_spec_criterion": false,
+      "best_baseline_true_prune_rate": {
+        "conservative_pc": 0.9566556404699441,
+        "ebicglasso": 0.8133911258127068,
+        "fci": 0.9812934869396601,
+        "ges": 0.9840310254362952,
+        "pc": 0.9787840766510779
+      },
+      "delta": 0.1,
+      "dominated_baseline_arms": [],
+      "dominates_a_baseline": false,
+      "edge_strength": "strong",
+      "false_prune_rate": 0.0017311021350259665,
+      "family": "additive_nonlinear",
+      "familywise_controlled": false,
+      "familywise_error_rate": 0.03,
+      "familywise_upper_bound": 0.07497891525910351,
+      "graphical_false_prune_rate": 0.0017311021350259665,
+      "graphical_true_prune_rate": 0.1081327706170868,
+      "matched_power_comparison": {
+        "baseline_false_prune_rate": 0.2267743796884016,
+        "baseline_true_prune_rate": 0.7743812022356564,
+        "exists": true,
+        "method": "ebicglasso",
+        "renca_is_better": true,
+        "setting": 0.0
+      },
+      "n": 375,
+      "prunes_a_useful_fraction": true,
+      "scoring": "graphical",
+      "spec_criterion_baseline_arms": [],
+      "true_prune_rate": 0.1081327706170868
+    },
+    {
+      "beats_a_baseline_on_the_spec_criterion": true,
+      "best_baseline_true_prune_rate": {
+        "conservative_pc": 0.9566556404699441,
+        "ebicglasso": 0.8133911258127068,
+        "fci": 0.9812934869396601,
+        "ges": 0.9840310254362952,
+        "pc": 0.9787840766510779
+      },
+      "delta": 0.2,
+      "dominated_baseline_arms": [],
+      "dominates_a_baseline": false,
+      "edge_strength": "strong",
+      "false_prune_rate": 0.06289671090594345,
+      "family": "additive_nonlinear",
+      "familywise_controlled": false,
+      "familywise_error_rate": 0.6,
+      "familywise_upper_bound": 0.6764425674353025,
+      "graphical_false_prune_rate": 0.06289671090594345,
+      "graphical_true_prune_rate": 0.6677312649709136,
+      "matched_power_comparison": {
+        "baseline_false_prune_rate": 0.2267743796884016,
+        "baseline_true_prune_rate": 0.7743812022356564,
+        "exists": true,
+        "method": "ebicglasso",
+        "renca_is_better": true,
+        "setting": 0.0
+      },
+      "n": 375,
+      "prunes_a_useful_fraction": true,
+      "scoring": "graphical",
+      "spec_criterion_baseline_arms": [
+        {
+          "baseline_false_prune_rate": 0.2267743796884016,
+          "baseline_true_prune_rate": 0.7743812022356564,
+          "false_prune_reduction": 0.16387766878245816,
+          "method": "ebicglasso",
+          "pruning_retained": 0.8622772131389012,
+          "setting": 0.0
+        },
+        {
+          "baseline_false_prune_rate": 0.23946912867859205,
+          "baseline_true_prune_rate": 0.7885251511349378,
+          "false_prune_reduction": 0.1765724177726486,
+          "method": "ebicglasso",
+          "pruning_retained": 0.8468103572978446,
+          "setting": 0.25
+        },
+        {
+          "baseline_false_prune_rate": 0.2463935372186959,
+          "baseline_true_prune_rate": 0.8011862666818752,
+          "false_prune_reduction": 0.18349682631275244,
+          "method": "ebicglasso",
+          "pruning_retained": 0.8334282460136674,
+          "setting": 0.5
+        },
+        {
+          "baseline_false_prune_rate": 0.2573571840738604,
+          "baseline_true_prune_rate": 0.8133911258127068,
+          "false_prune_reduction": 0.19446047316791693,
+          "method": "ebicglasso",
+          "pruning_retained": 0.8209227317346794,
+          "setting": 1.0
+        }
+      ],
+      "true_prune_rate": 0.6677312649709136
+    },
+    {
+      "beats_a_baseline_on_the_spec_criterion": false,
+      "best_baseline_true_prune_rate": {
+        "conservative_pc": 0.9716182192721446,
+        "ebicglasso": 0.9341954680704967,
+        "fci": 0.9950789654383154,
+        "ges": 0.9985122453650721,
+        "pc": 0.9932478828107119
+      },
+      "delta": 0.05,
+      "dominated_baseline_arms": [],
+      "dominates_a_baseline": false,
+      "edge_strength": "realistic",
+      "false_prune_rate": 0.0,
+      "family": "linear_gaussian",
+      "familywise_controlled": true,
+      "familywise_error_rate": 0.0,
+      "familywise_upper_bound": 0.02922515353903906,
+      "graphical_false_prune_rate": 0.0,
+      "graphical_true_prune_rate": 0.012588693064774548,
+      "matched_power_comparison": {
+        "baseline_false_prune_rate": 0.00340522133938706,
+        "baseline_true_prune_rate": 0.7976653696498055,
+        "exists": true,
+        "method": "ebicglasso",
+        "renca_is_better": true,
+        "setting": 0.0
+      },
+      "n": 375,
+      "prunes_a_useful_fraction": false,
+      "scoring": "graphical",
+      "spec_criterion_baseline_arms": [],
+      "true_prune_rate": 0.012588693064774548
+    },
+    {
+      "beats_a_baseline_on_the_spec_criterion": false,
+      "best_baseline_true_prune_rate": {
+        "conservative_pc": 0.9716182192721446,
+        "ebicglasso": 0.9341954680704967,
+        "fci": 0.9950789654383154,
+        "ges": 0.9985122453650721,
+        "pc": 0.9932478828107119
+      },
+      "delta": 0.1,
+      "dominated_baseline_arms": [],
+      "dominates_a_baseline": false,
+      "edge_strength": "realistic",
+      "false_prune_rate": 0.00340522133938706,
+      "family": "linear_gaussian",
+      "familywise_controlled": false,
+      "familywise_error_rate": 0.05,
+      "familywise_upper_bound": 0.10126897166065246,
+      "graphical_false_prune_rate": 0.00340522133938706,
+      "graphical_true_prune_rate": 0.15850308995193407,
+      "matched_power_comparison": {
+        "baseline_false_prune_rate": 0.00340522133938706,
+        "baseline_true_prune_rate": 0.7976653696498055,
+        "exists": true,
+        "method": "ebicglasso",
+        "renca_is_better": false,
+        "setting": 0.0
+      },
+      "n": 375,
+      "prunes_a_useful_fraction": true,
+      "scoring": "graphical",
+      "spec_criterion_baseline_arms": [],
+      "true_prune_rate": 0.15850308995193407
+    },
+    {
+      "beats_a_baseline_on_the_spec_criterion": false,
+      "best_baseline_true_prune_rate": {
+        "conservative_pc": 0.9716182192721446,
+        "ebicglasso": 0.9341954680704967,
+        "fci": 0.9950789654383154,
+        "ges": 0.9985122453650721,
+        "pc": 0.9932478828107119
+      },
+      "delta": 0.2,
+      "dominated_baseline_arms": [],
+      "dominates_a_baseline": false,
+      "edge_strength": "realistic",
+      "false_prune_rate": 0.14472190692395007,
+      "family": "linear_gaussian",
+      "familywise_controlled": false,
+      "familywise_error_rate": 0.94,
+      "familywise_upper_bound": 0.967022531671149,
+      "graphical_false_prune_rate": 0.14472190692395007,
+      "graphical_true_prune_rate": 0.9323643854428931,
+      "matched_power_comparison": {
+        "baseline_false_prune_rate": 0.016458569807037457,
+        "baseline_true_prune_rate": 0.9709315632867933,
+        "exists": true,
+        "method": "ges",
+        "renca_is_better": false,
+        "setting": 0.5
+      },
+      "n": 375,
+      "prunes_a_useful_fraction": true,
+      "scoring": "graphical",
+      "spec_criterion_baseline_arms": [],
+      "true_prune_rate": 0.9323643854428931
+    },
+    {
+      "beats_a_baseline_on_the_spec_criterion": false,
+      "best_baseline_true_prune_rate": {
+        "conservative_pc": 0.941599178738451,
+        "ebicglasso": 0.6998973423063762,
+        "fci": 0.9835747690201894,
+        "ges": 0.9889357819094331,
+        "pc": 0.9698870765370138
+      },
+      "delta": 0.05,
+      "dominated_baseline_arms": [],
+      "dominates_a_baseline": false,
+      "edge_strength": "strong",
+      "false_prune_rate": 0.0017311021350259665,
+      "family": "linear_gaussian",
+      "familywise_controlled": false,
+      "familywise_error_rate": 0.03,
+      "familywise_upper_bound": 0.07497891525910351,
+      "graphical_false_prune_rate": 0.0017311021350259665,
+      "graphical_true_prune_rate": 0.058286757157522524,
+      "matched_power_comparison": {
+        "baseline_false_prune_rate": 0.002308136180034622,
+        "baseline_true_prune_rate": 0.6587202007528231,
+        "exists": true,
+        "method": "ebicglasso",
+        "renca_is_better": true,
+        "setting": 0.0
+      },
+      "n": 375,
+      "prunes_a_useful_fraction": false,
+      "scoring": "graphical",
+      "spec_criterion_baseline_arms": [],
+      "true_prune_rate": 0.058286757157522524
+    },
+    {
+      "beats_a_baseline_on_the_spec_criterion": false,
+      "best_baseline_true_prune_rate": {
+        "conservative_pc": 0.941599178738451,
+        "ebicglasso": 0.6998973423063762,
+        "fci": 0.9835747690201894,
+        "ges": 0.9889357819094331,
+        "pc": 0.9698870765370138
+      },
+      "delta": 0.1,
+      "dominated_baseline_arms": [],
+      "dominates_a_baseline": false,
+      "edge_strength": "strong",
+      "false_prune_rate": 0.024235429890363532,
+      "family": "linear_gaussian",
+      "familywise_controlled": false,
+      "familywise_error_rate": 0.34,
+      "familywise_upper_bound": 0.421852274389646,
+      "graphical_false_prune_rate": 0.024235429890363532,
+      "graphical_true_prune_rate": 0.23805178510322803,
+      "matched_power_comparison": {
+        "baseline_false_prune_rate": 0.002308136180034622,
+        "baseline_true_prune_rate": 0.6587202007528231,
+        "exists": true,
+        "method": "ebicglasso",
+        "renca_is_better": false,
+        "setting": 0.0
+      },
+      "n": 375,
+      "prunes_a_useful_fraction": true,
+      "scoring": "graphical",
+      "spec_criterion_baseline_arms": [],
+      "true_prune_rate": 0.23805178510322803
+    },
+    {
+      "beats_a_baseline_on_the_spec_criterion": false,
+      "best_baseline_true_prune_rate": {
+        "conservative_pc": 0.941599178738451,
+        "ebicglasso": 0.6998973423063762,
+        "fci": 0.9835747690201894,
+        "ges": 0.9889357819094331,
+        "pc": 0.9698870765370138
+      },
+      "delta": 0.2,
+      "dominated_baseline_arms": [],
+      "dominates_a_baseline": false,
+      "edge_strength": "strong",
+      "false_prune_rate": 0.19099826889786498,
+      "family": "linear_gaussian",
+      "familywise_controlled": false,
+      "familywise_error_rate": 0.94,
+      "familywise_upper_bound": 0.967022531671149,
+      "graphical_false_prune_rate": 0.19099826889786498,
+      "graphical_true_prune_rate": 0.9102315501311737,
+      "matched_power_comparison": {
+        "baseline_false_prune_rate": 0.009809578765147143,
+        "baseline_true_prune_rate": 0.9671495380403787,
+        "exists": true,
+        "method": "ges",
+        "renca_is_better": false,
+        "setting": 0.5
+      },
+      "n": 375,
+      "prunes_a_useful_fraction": true,
+      "scoring": "graphical",
+      "spec_criterion_baseline_arms": [],
+      "true_prune_rate": 0.9102315501311737
+    }
+  ],
+  "graphical_verdict": "REDESIGN",
+  "material_margin": 0.01,
+  "nearly_as_many": 0.8,
+  "reason": "error is controlled but no region pruned 10% of true nonedges, so the output is mostly unresolved",
+  "regions": [
+    {
+      "beats_a_baseline_on_the_spec_criterion": false,
+      "best_baseline_true_prune_rate": {
+        "conservative_pc": 0.9675028506271379,
+        "ebicglasso": 0.9670467502850627,
+        "fci": 0.9908779931584949,
+        "ges": 0.9976054732041049,
+        "pc": 0.9904218928164196
+      },
+      "delta": 0.05,
+      "dominated_baseline_arms": [],
+      "dominates_a_baseline": false,
+      "edge_strength": "realistic",
+      "false_prune_rate": 0.0,
+      "family": "additive_nonlinear",
+      "familywise_controlled": true,
+      "familywise_error_rate": 0.0,
+      "familywise_upper_bound": 0.02922515353903906,
+      "graphical_false_prune_rate": 0.0,
+      "graphical_true_prune_rate": 0.004921034561684596,
+      "matched_power_comparison": {
+        "baseline_false_prune_rate": 0.2774566473988439,
+        "baseline_true_prune_rate": 0.9039908779931585,
+        "exists": true,
+        "method": "pc",
+        "renca_is_better": true,
+        "setting": 0.2
+      },
+      "n": 375,
+      "prunes_a_useful_fraction": false,
+      "scoring": "practical",
+      "spec_criterion_baseline_arms": [],
+      "true_prune_rate": 0.004903078677309008
+    },
+    {
+      "beats_a_baseline_on_the_spec_criterion": false,
+      "best_baseline_true_prune_rate": {
+        "conservative_pc": 0.952970021174635,
+        "ebicglasso": 0.9540844756491698,
+        "fci": 0.9769307923771314,
+        "ges": 0.9909729187562688,
+        "pc": 0.9764850105873175
+      },
+      "delta": 0.1,
+      "dominated_baseline_arms": [],
+      "dominates_a_baseline": false,
+      "edge_strength": "realistic",
+      "false_prune_rate": 0.0,
+      "family": "additive_nonlinear",
+      "familywise_controlled": true,
+      "familywise_error_rate": 0.0,
+      "familywise_upper_bound": 0.02922515353903906,
+      "graphical_false_prune_rate": 0.0005675368898978433,
+      "graphical_true_prune_rate": 0.09304188601510643,
+      "matched_power_comparison": {
+        "baseline_false_prune_rate": 0.2776686313032089,
+        "baseline_true_prune_rate": 0.8897804524685167,
+        "exists": true,
+        "method": "pc",
+        "renca_is_better": true,
+        "setting": 0.2
+      },
+      "n": 375,
+      "prunes_a_useful_fraction": false,
+      "scoring": "practical",
+      "spec_criterion_baseline_arms": [],
+      "true_prune_rate": 0.09071659422712582
+    },
+    {
+      "beats_a_baseline_on_the_spec_criterion": true,
+      "best_baseline_true_prune_rate": {
+        "conservative_pc": 0.9124163879598662,
+        "ebicglasso": 0.9152382943143813,
+        "fci": 0.9363503344481605,
+        "ges": 0.9539088628762542,
+        "pc": 0.9359322742474916
+      },
+      "delta": 0.2,
+      "dominated_baseline_arms": [],
+      "dominates_a_baseline": false,
+      "edge_strength": "realistic",
+      "false_prune_rate": 0.015021459227467811,
+      "family": "additive_nonlinear",
+      "familywise_controlled": false,
+      "familywise_error_rate": 0.13,
+      "familywise_upper_bound": 0.1968308450855157,
+      "graphical_false_prune_rate": 0.07548240635641316,
+      "graphical_true_prune_rate": 0.8259327077134355,
+      "matched_power_comparison": {
+        "baseline_false_prune_rate": 0.2875536480686695,
+        "baseline_true_prune_rate": 0.850752508361204,
+        "exists": true,
+        "method": "pc",
+        "renca_is_better": true,
+        "setting": 0.2
+      },
+      "n": 375,
+      "prunes_a_useful_fraction": true,
+      "scoring": "practical",
+      "spec_criterion_baseline_arms": [
+        {
+          "baseline_false_prune_rate": 0.33261802575107297,
+          "baseline_true_prune_rate": 0.9124163879598662,
+          "false_prune_reduction": 0.31759656652360513,
+          "method": "conservative_pc",
+          "pruning_retained": 0.8403207331042383,
+          "setting": 0.05
+        },
+        {
+          "baseline_false_prune_rate": 0.2907725321888412,
+          "baseline_true_prune_rate": 0.8290133779264214,
+          "false_prune_reduction": 0.27575107296137336,
+          "method": "ebicglasso",
+          "pruning_retained": 0.9248613212304589,
+          "setting": 0.0
+        },
+        {
+          "baseline_false_prune_rate": 0.3143776824034335,
+          "baseline_true_prune_rate": 0.8681020066889632,
+          "false_prune_reduction": 0.29935622317596566,
+          "method": "ebicglasso",
+          "pruning_retained": 0.8832169516012521,
+          "setting": 0.25
+        },
+        {
+          "baseline_false_prune_rate": 0.33261802575107297,
+          "baseline_true_prune_rate": 0.8899456521739131,
+          "false_prune_reduction": 0.31759656652360513,
+          "method": "ebicglasso",
+          "pruning_retained": 0.8615384615384615,
+          "setting": 0.5
+        },
+        {
+          "baseline_false_prune_rate": 0.3530042918454936,
+          "baseline_true_prune_rate": 0.9152382943143813,
+          "false_prune_reduction": 0.33798283261802575,
+          "method": "ebicglasso",
+          "pruning_retained": 0.8377298161470823,
+          "setting": 1.0
+        },
+        {
+          "baseline_false_prune_rate": 0.361587982832618,
+          "baseline_true_prune_rate": 0.9363503344481605,
+          "false_prune_reduction": 0.34656652360515017,
+          "method": "fci",
+          "pruning_retained": 0.818841388547829,
+          "setting": 0.001
+        },
+        {
+          "baseline_false_prune_rate": 0.3551502145922747,
+          "baseline_true_prune_rate": 0.9323787625418061,
+          "false_prune_reduction": 0.34012875536480686,
+          "method": "fci",
+          "pruning_retained": 0.8223293352763142,
+          "setting": 0.005
+        },
+        {
+          "baseline_false_prune_rate": 0.3530042918454936,
+          "baseline_true_prune_rate": 0.9296613712374582,
+          "false_prune_reduction": 0.33798283261802575,
+          "method": "fci",
+          "pruning_retained": 0.8247329960652052,
+          "setting": 0.01
+        },
+        {
+          "baseline_false_prune_rate": 0.33369098712446355,
+          "baseline_true_prune_rate": 0.9149247491638796,
+          "false_prune_reduction": 0.3186695278969957,
+          "method": "fci",
+          "pruning_retained": 0.8380169065570026,
+          "setting": 0.05
+        },
+        {
+          "baseline_false_prune_rate": 0.3143776824034335,
+          "baseline_true_prune_rate": 0.8972617056856187,
+          "false_prune_reduction": 0.29935622317596566,
+          "method": "fci",
+          "pruning_retained": 0.8545136866627839,
+          "setting": 0.1
+        },
+        {
+          "baseline_false_prune_rate": 0.29506437768240346,
+          "baseline_true_prune_rate": 0.865175585284281,
+          "false_prune_reduction": 0.2800429184549356,
+          "method": "fci",
+          "pruning_retained": 0.8862043971973906,
+          "setting": 0.2
+        },
+        {
+          "baseline_false_prune_rate": 0.3218884120171674,
+          "baseline_true_prune_rate": 0.905309364548495,
+          "false_prune_reduction": 0.30686695278969955,
+          "method": "ges",
+          "pruning_retained": 0.846917570999769,
+          "setting": 0.5
+        },
+        {
+          "baseline_false_prune_rate": 0.3487124463519313,
+          "baseline_true_prune_rate": 0.9291387959866221,
+          "false_prune_reduction": 0.3336909871244635,
+          "method": "ges",
+          "pruning_retained": 0.8251968503937007,
+          "setting": 1.0
+        },
+        {
+          "baseline_false_prune_rate": 0.36373390557939916,
+          "baseline_true_prune_rate": 0.9373954849498328,
+          "false_prune_reduction": 0.3487124463519313,
+          "method": "ges",
+          "pruning_retained": 0.817928420113725,
+          "setting": 2.0
+        },
+        {
+          "baseline_false_prune_rate": 0.37124463519313305,
+          "baseline_true_prune_rate": 0.9539088628762542,
+          "false_prune_reduction": 0.3562231759656652,
+          "method": "ges",
+          "pruning_retained": 0.8037690369234141,
+          "setting": 4.0
+        },
+        {
+          "baseline_false_prune_rate": 0.361587982832618,
+          "baseline_true_prune_rate": 0.9359322742474916,
+          "false_prune_reduction": 0.34656652360515017,
+          "method": "pc",
+          "pruning_retained": 0.8192071468453378,
+          "setting": 0.001
+        },
+        {
+          "baseline_false_prune_rate": 0.3551502145922747,
+          "baseline_true_prune_rate": 0.9318561872909699,
+          "false_prune_reduction": 0.34012875536480686,
+          "method": "pc",
+          "pruning_retained": 0.822790489008524,
+          "setting": 0.005
+        },
+        {
+          "baseline_false_prune_rate": 0.3530042918454936,
+          "baseline_true_prune_rate": 0.928616220735786,
+          "false_prune_reduction": 0.33798283261802575,
+          "method": "pc",
+          "pruning_retained": 0.8256612267867192,
+          "setting": 0.01
+        },
+        {
+          "baseline_false_prune_rate": 0.33261802575107297,
+          "baseline_true_prune_rate": 0.9124163879598662,
+          "false_prune_reduction": 0.31759656652360513,
+          "method": "pc",
+          "pruning_retained": 0.8403207331042383,
+          "setting": 0.05
+        },
+        {
+          "baseline_false_prune_rate": 0.31008583690987124,
+          "baseline_true_prune_rate": 0.8915133779264214,
+          "false_prune_reduction": 0.2950643776824034,
+          "method": "pc",
+          "pruning_retained": 0.8600234466588511,
+          "setting": 0.1
+        },
+        {
+          "baseline_false_prune_rate": 0.2875536480686695,
+          "baseline_true_prune_rate": 0.850752508361204,
+          "false_prune_reduction": 0.2725321888412017,
+          "method": "pc",
+          "pruning_retained": 0.9012285012285013,
+          "setting": 0.2
+        }
+      ],
+      "true_prune_rate": 0.7667224080267558
+    },
+    {
+      "beats_a_baseline_on_the_spec_criterion": false,
+      "best_baseline_true_prune_rate": {
+        "conservative_pc": 0.9561153539268209,
+        "ebicglasso": 0.8129488202439302,
+        "fci": 0.9807363501652798,
+        "ges": 0.9838139746950872,
+        "pc": 0.9782286561039553
+      },
+      "delta": 0.05,
+      "dominated_baseline_arms": [],
+      "dominates_a_baseline": false,
+      "edge_strength": "strong",
+      "false_prune_rate": 0.0,
+      "family": "additive_nonlinear",
+      "familywise_controlled": true,
+      "familywise_error_rate": 0.0,
+      "familywise_upper_bound": 0.02922515353903906,
+      "graphical_false_prune_rate": 0.0,
+      "graphical_true_prune_rate": 0.018022128436181135,
+      "matched_power_comparison": {
+        "baseline_false_prune_rate": 0.22698320787492762,
+        "baseline_true_prune_rate": 0.7739655761997036,
+        "exists": true,
+        "method": "ebicglasso",
+        "renca_is_better": true,
+        "setting": 0.0
+      },
+      "n": 375,
+      "prunes_a_useful_fraction": false,
+      "scoring": "practical",
+      "spec_criterion_baseline_arms": [],
+      "true_prune_rate": 0.018009802804057905
+    },
+    {
+      "beats_a_baseline_on_the_spec_criterion": false,
+      "best_baseline_true_prune_rate": {
+        "conservative_pc": 0.9539615778106173,
+        "ebicglasso": 0.8110719563487553,
+        "fci": 0.978629078094805,
+        "ges": 0.9821530067068319,
+        "pc": 0.9761282255314312
+      },
+      "delta": 0.1,
+      "dominated_baseline_arms": [],
+      "dominates_a_baseline": false,
+      "edge_strength": "strong",
+      "false_prune_rate": 0.0017615971814445098,
+      "family": "additive_nonlinear",
+      "familywise_controlled": false,
+      "familywise_error_rate": 0.03,
+      "familywise_upper_bound": 0.07497891525910351,
+      "graphical_false_prune_rate": 0.0017311021350259665,
+      "graphical_true_prune_rate": 0.1081327706170868,
+      "matched_power_comparison": {
+        "baseline_false_prune_rate": 0.22842043452730476,
+        "baseline_true_prune_rate": 0.7721950664999432,
+        "exists": true,
+        "method": "ebicglasso",
+        "renca_is_better": true,
+        "setting": 0.0
+      },
+      "n": 375,
+      "prunes_a_useful_fraction": true,
+      "scoring": "practical",
+      "spec_criterion_baseline_arms": [],
+      "true_prune_rate": 0.10776401045811072
+    },
+    {
+      "beats_a_baseline_on_the_spec_criterion": true,
+      "best_baseline_true_prune_rate": {
+        "conservative_pc": 0.9409729970988618,
+        "ebicglasso": 0.7994867217139031,
+        "fci": 0.9661905824592725,
+        "ges": 0.9694264673064048,
+        "pc": 0.9636241910287883
+      },
+      "delta": 0.2,
+      "dominated_baseline_arms": [],
+      "dominates_a_baseline": false,
+      "edge_strength": "strong",
+      "false_prune_rate": 0.04876462938881664,
+      "family": "additive_nonlinear",
+      "familywise_controlled": false,
+      "familywise_error_rate": 0.52,
+      "familywise_upper_bound": 0.6004159698768228,
+      "graphical_false_prune_rate": 0.06289671090594345,
+      "graphical_true_prune_rate": 0.6677312649709136,
+      "matched_power_comparison": {
+        "baseline_false_prune_rate": 0.23472041612483746,
+        "baseline_true_prune_rate": 0.7611024324927471,
+        "exists": true,
+        "method": "ebicglasso",
+        "renca_is_better": true,
+        "setting": 0.0
+      },
+      "n": 375,
+      "prunes_a_useful_fraction": true,
+      "scoring": "practical",
+      "spec_criterion_baseline_arms": [
+        {
+          "baseline_false_prune_rate": 0.23472041612483746,
+          "baseline_true_prune_rate": 0.7611024324927471,
+          "false_prune_reduction": 0.1859557867360208,
+          "method": "ebicglasso",
+          "pruning_retained": 0.8632165371646388,
+          "setting": 0.0
+        },
+        {
+          "baseline_false_prune_rate": 0.24902470741222366,
+          "baseline_true_prune_rate": 0.7749386297701406,
+          "false_prune_reduction": 0.200260078023407,
+          "method": "ebicglasso",
+          "pruning_retained": 0.8478041756659468,
+          "setting": 0.25
+        },
+        {
+          "baseline_false_prune_rate": 0.25682704811443435,
+          "baseline_true_prune_rate": 0.7873242579781299,
+          "false_prune_reduction": 0.2080624187256177,
+          "method": "ebicglasso",
+          "pruning_retained": 0.8344671201814059,
+          "setting": 0.5
+        },
+        {
+          "baseline_false_prune_rate": 0.26788036410923277,
+          "baseline_true_prune_rate": 0.7994867217139031,
+          "false_prune_reduction": 0.21911573472041612,
+          "method": "ebicglasso",
+          "pruning_retained": 0.8217725052337754,
+          "setting": 1.0
+        }
+      ],
+      "true_prune_rate": 0.6569962062039724
+    },
+    {
+      "beats_a_baseline_on_the_spec_criterion": false,
+      "best_baseline_true_prune_rate": {
+        "conservative_pc": 0.9691956645750143,
+        "ebicglasso": 0.9331431831146606,
+        "fci": 0.9936109526525956,
+        "ges": 0.9984027381631488,
+        "pc": 0.9917855105533372
+      },
+      "delta": 0.05,
+      "dominated_baseline_arms": [],
+      "dominates_a_baseline": false,
+      "edge_strength": "realistic",
+      "false_prune_rate": 0.0,
+      "family": "linear_gaussian",
+      "familywise_controlled": true,
+      "familywise_error_rate": 0.0,
+      "familywise_upper_bound": 0.02922515353903906,
+      "graphical_false_prune_rate": 0.0,
+      "graphical_true_prune_rate": 0.012588693064774548,
+      "matched_power_comparison": {
+        "baseline_false_prune_rate": 0.001729106628242075,
+        "baseline_true_prune_rate": 0.7955504848830576,
+        "exists": true,
+        "method": "ebicglasso",
+        "renca_is_better": true,
+        "setting": 0.0
+      },
+      "n": 375,
+      "prunes_a_useful_fraction": false,
+      "scoring": "practical",
+      "spec_criterion_baseline_arms": [],
+      "true_prune_rate": 0.012549914432401598
+    },
+    {
+      "beats_a_baseline_on_the_spec_criterion": false,
+      "best_baseline_true_prune_rate": {
+        "conservative_pc": 0.9513175524787851,
+        "ebicglasso": 0.9201652523447967,
+        "fci": 0.9782268870031264,
+        "ges": 0.9899508709245198,
+        "pc": 0.9759937472085752
+      },
+      "delta": 0.1,
+      "dominated_baseline_arms": [],
+      "dominates_a_baseline": false,
+      "edge_strength": "realistic",
+      "false_prune_rate": 0.0019430051813471502,
+      "family": "linear_gaussian",
+      "familywise_controlled": false,
+      "familywise_error_rate": 0.02,
+      "familywise_upper_bound": 0.061022102608543335,
+      "graphical_false_prune_rate": 0.00340522133938706,
+      "graphical_true_prune_rate": 0.15850308995193407,
+      "matched_power_comparison": {
+        "baseline_false_prune_rate": 0.0006476683937823834,
+        "baseline_true_prune_rate": 0.7788075033497097,
+        "exists": true,
+        "method": "ebicglasso",
+        "renca_is_better": false,
+        "setting": 0.0
+      },
+      "n": 375,
+      "prunes_a_useful_fraction": true,
+      "scoring": "practical",
+      "spec_criterion_baseline_arms": [],
+      "true_prune_rate": 0.15497990174184903
+    },
+    {
+      "beats_a_baseline_on_the_spec_criterion": false,
+      "best_baseline_true_prune_rate": {
+        "conservative_pc": 0.897729661551398,
+        "ebicglasso": 0.8710321631280219,
+        "fci": 0.9257935673743957,
+        "ges": 0.9398780744166492,
+        "pc": 0.9235862938826992
+      },
+      "delta": 0.2,
+      "dominated_baseline_arms": [],
+      "dominates_a_baseline": false,
+      "edge_strength": "realistic",
+      "false_prune_rate": 0.04563894523326572,
+      "family": "linear_gaussian",
+      "familywise_controlled": false,
+      "familywise_error_rate": 0.32,
+      "familywise_upper_bound": 0.4013282357486885,
+      "graphical_false_prune_rate": 0.14472190692395007,
+      "graphical_true_prune_rate": 0.9323643854428931,
+      "matched_power_comparison": {
+        "baseline_false_prune_rate": 0.005070993914807302,
+        "baseline_true_prune_rate": 0.879966365356317,
+        "exists": true,
+        "method": "pc",
+        "renca_is_better": false,
+        "setting": 0.1
+      },
+      "n": 375,
+      "prunes_a_useful_fraction": true,
+      "scoring": "practical",
+      "spec_criterion_baseline_arms": [],
+      "true_prune_rate": 0.8783897414336767
+    },
+    {
+      "beats_a_baseline_on_the_spec_criterion": false,
+      "best_baseline_true_prune_rate": {
+        "conservative_pc": 0.9407407407407408,
+        "ebicglasso": 0.6992592592592592,
+        "fci": 0.9826780626780627,
+        "ges": 0.9886039886039886,
+        "pc": 0.969002849002849
+      },
+      "delta": 0.05,
+      "dominated_baseline_arms": [],
+      "dominates_a_baseline": false,
+      "edge_strength": "strong",
+      "false_prune_rate": 0.0017391304347826088,
+      "family": "linear_gaussian",
+      "familywise_controlled": false,
+      "familywise_error_rate": 0.03,
+      "familywise_upper_bound": 0.07497891525910351,
+      "graphical_false_prune_rate": 0.0017311021350259665,
+      "graphical_true_prune_rate": 0.058286757157522524,
+      "matched_power_comparison": {
+        "baseline_false_prune_rate": 0.002318840579710145,
+        "baseline_true_prune_rate": 0.6581196581196581,
+        "exists": true,
+        "method": "ebicglasso",
+        "renca_is_better": true,
+        "setting": 0.0
+      },
+      "n": 375,
+      "prunes_a_useful_fraction": false,
+      "scoring": "practical",
+      "spec_criterion_baseline_arms": [],
+      "true_prune_rate": 0.05823361823361824
+    },
+    {
+      "beats_a_baseline_on_the_spec_criterion": false,
+      "best_baseline_true_prune_rate": {
+        "conservative_pc": 0.9372161671207992,
+        "ebicglasso": 0.6966394187102634,
+        "fci": 0.9792234332425068,
+        "ges": 0.9854677565849228,
+        "pc": 0.9654859218891917
+      },
+      "delta": 0.1,
+      "dominated_baseline_arms": [],
+      "dominates_a_baseline": false,
+      "edge_strength": "strong",
+      "false_prune_rate": 0.024822695035460994,
+      "family": "linear_gaussian",
+      "familywise_controlled": false,
+      "familywise_error_rate": 0.34,
+      "familywise_upper_bound": 0.421852274389646,
+      "graphical_false_prune_rate": 0.024235429890363532,
+      "graphical_true_prune_rate": 0.23805178510322803,
+      "matched_power_comparison": {
+        "baseline_false_prune_rate": 0.002364066193853428,
+        "baseline_true_prune_rate": 0.6556539509536785,
+        "exists": true,
+        "method": "ebicglasso",
+        "renca_is_better": false,
+        "setting": 0.0
+      },
+      "n": 375,
+      "prunes_a_useful_fraction": true,
+      "scoring": "practical",
+      "spec_criterion_baseline_arms": [],
+      "true_prune_rate": 0.23694368755676656
+    },
+    {
+      "beats_a_baseline_on_the_spec_criterion": false,
+      "best_baseline_true_prune_rate": {
+        "conservative_pc": 0.9232399866116255,
+        "ebicglasso": 0.6849269217895794,
+        "fci": 0.9666406337163896,
+        "ges": 0.9698761575365391,
+        "pc": 0.9529175499274797
+      },
+      "delta": 0.2,
+      "dominated_baseline_arms": [],
+      "dominates_a_baseline": false,
+      "edge_strength": "strong",
+      "false_prune_rate": 0.15744957709824334,
+      "family": "linear_gaussian",
+      "familywise_controlled": false,
+      "familywise_error_rate": 0.91,
+      "familywise_upper_bound": 0.9452942204791331,
+      "graphical_false_prune_rate": 0.19099826889786498,
+      "graphical_true_prune_rate": 0.9102315501311737,
+      "matched_power_comparison": {
+        "baseline_false_prune_rate": 0.01040988939492518,
+        "baseline_true_prune_rate": 0.9461117929264755,
+        "exists": true,
+        "method": "ges",
+        "renca_is_better": false,
+        "setting": 0.5
+      },
+      "n": 375,
+      "prunes_a_useful_fraction": true,
+      "scoring": "practical",
+      "spec_criterion_baseline_arms": [],
+      "true_prune_rate": 0.9002566105098739
+    }
+  ],
+  "regions_assessed": 12,
+  "regions_passing": 0,
+  "requires_human_signoff": [
+    "practical threshold is substantively interpretable"
+  ],
+  "scoring": "practical_at_delta",
+  "useful_prune_floor": 0.1,
+  "verdict": "REDESIGN",
+  "verdict_depends_on_scoring": false
+}
