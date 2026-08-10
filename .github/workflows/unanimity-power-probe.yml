@@ -1,0 +1,76 @@
+name: Unanimity power probe
+
+on:
+  workflow_dispatch:
+    inputs:
+      replications_per_shard:
+        description: Replications per shard; 6 conditions x 3 shards x this = total
+        default: '34'
+      forest_trees:
+        description: Forest size; 10 matches the comparator gate's benchmark setting
+        default: '10'
+      learner_library_version:
+        description: Learner library under study
+        default: v4_cubic_blend
+        type: choice
+        options: [v3_nested_blend, v4_cubic_blend]
+
+permissions:
+  contents: read
+
+jobs:
+  replicate:
+    runs-on: ubuntu-latest
+    # Three network sizes x two families x three shards is 18 jobs, inside the
+    # 20-concurrent-job cap on a free public repository. Cost is steeply uneven -- one p=6
+    # replication is roughly four times a p=4 one -- so the p=6 shards set the wall clock.
+    strategy:
+      fail-fast: false
+      matrix:
+        p: [4, 5, 6]
+        family: [linear_gaussian, additive_nonlinear]
+        shard: [0, 1, 2]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: pip install ".[test]"
+      - name: Report runner capacity
+        run: 'nproc && free -g | head -2'
+      - run: >
+          python simulations/unanimity_power_probe.py shard
+          --start $(( ${{ matrix.shard }} * ${{ inputs.replications_per_shard }} ))
+          --count ${{ inputs.replications_per_shard }}
+          --p ${{ matrix.p }}
+          --family ${{ matrix.family }}
+          --forest-trees ${{ inputs.forest_trees }}
+          --learner-library-version ${{ inputs.learner_library_version }}
+          --output out/p${{ matrix.p }}-${{ matrix.family }}-${{ matrix.shard }}.parquet
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unanimity-shard-p${{ matrix.p }}-${{ matrix.family }}-${{ matrix.shard }}
+          path: out/*.parquet
+          retention-days: 90
+
+  summarize:
+    needs: replicate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: pip install ".[test]"
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: unanimity-shard-*
+          path: downloaded
+      - run: mkdir shards
+      - run: find downloaded -name '*.parquet' -exec cp {} shards/ \;
+      - run: python simulations/unanimity_power_probe.py summarize --shards shards --output unanimity-power-probe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unanimity-power-evidence
+          path: unanimity-power-probe
+          retention-days: 90
