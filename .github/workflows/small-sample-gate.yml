@@ -9,11 +9,6 @@ on:
       delta:
         description: Resolution to test for reachability
         default: '0.20'
-      learner_library_version:
-        description: Learner library under study
-        default: v4_cubic_blend
-        type: choice
-        options: [v3_nested_blend, v4_cubic_blend]
 
 permissions:
   contents: read
@@ -21,12 +16,18 @@ permissions:
 jobs:
   cell:
     runs-on: ubuntu-latest
-    # Five frozen families x four sample sizes is 20 jobs, exactly the concurrent cap on a
-    # free public repository. n=300 is the control rung: a shipped profile already exists
-    # there, so the miniature's estimate at 300 says how far to trust the other three.
+    # Three libraries x five frozen families x four sample sizes. That is 60 jobs against a
+    # 20-concurrent cap, so it queues in three waves; running them as one matrix rather than
+    # three dispatches is what lets a single summarize produce one comparison table.
+    #
+    # n=300 with v4 is the control cell: a shipped profile exists there, so its estimate says
+    # how far to trust the rest. The libraries differ in size and in how they combine members --
+    # v2 selects one by inner cross-validation, v3 blends three, v4 blends four -- which is the
+    # complexity axis under test.
     strategy:
       fail-fast: false
       matrix:
+        learner_library_version: [v2_quadratic_ridge, v3_nested_blend, v4_cubic_blend]
         family:
           - continuous_linear_boundary_v1
           - bounded_composite_unsaturated_v1
@@ -48,11 +49,11 @@ jobs:
           --sample-size ${{ matrix.sample_size }}
           --replications ${{ inputs.replications }}
           --delta ${{ inputs.delta }}
-          --learner-library-version ${{ inputs.learner_library_version }}
-          --output out/${{ matrix.family }}-n${{ matrix.sample_size }}.parquet
+          --learner-library-version ${{ matrix.learner_library_version }}
+          --output out/${{ matrix.learner_library_version }}-${{ matrix.family }}-n${{ matrix.sample_size }}.parquet
       - uses: actions/upload-artifact@v4
         with:
-          name: small-sample-${{ matrix.family }}-n${{ matrix.sample_size }}
+          name: small-sample-${{ matrix.learner_library_version }}-${{ matrix.family }}-n${{ matrix.sample_size }}
           path: out/*.parquet
           retention-days: 90
 

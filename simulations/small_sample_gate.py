@@ -61,7 +61,7 @@ def shard(args: argparse.Namespace) -> None:
         scenario_families=(args.family,), boundary_signals={args.family: signal},
         workers=args.workers or (os.cpu_count() or 1),
     )
-    frame = frame.assign(sample_size=args.sample_size, delta=args.delta, boundary_signal=signal, achieved_theta=achieved)
+    frame = frame.assign(sample_size=args.sample_size, delta=args.delta, boundary_signal=signal, achieved_theta=achieved, learner_library_version=args.learner_library_version, forest_trees=args.forest_trees)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     frame.to_parquet(args.output, index=False)
     usable = frame.studentized_statistic.notna()
@@ -84,10 +84,12 @@ def summarize(args: argparse.Namespace) -> None:
     delta = float(data.delta.iloc[0])
 
     rows = []
-    for sample_size, group in data.groupby("sample_size"):
+    # A critical value is only meaningful within one library: the fingerprint differs, so
+    # statistics from different libraries are not draws from one distribution.
+    for (library, sample_size), group in data.groupby(["learner_library_version", "sample_size"]):
         missing = set(REQUIRED_SCENARIO_FAMILIES) - set(group.scenario_family)
         if missing:
-            raise ValueError(f"n={sample_size} is missing families: {', '.join(sorted(missing))}")
+            raise ValueError(f"{library} n={sample_size} is missing families: {', '.join(sorted(missing))}")
         critical = critical_value(group)
         tolerated = delta / abs(critical)
         for family in REQUIRED_SCENARIO_FAMILIES:
@@ -95,6 +97,7 @@ def summarize(args: argparse.Namespace) -> None:
             usable = subset[subset.studentized_statistic.notna()]
             median_se = float(usable.se_theta.median())
             rows.append({
+                "learner_library_version": library,
                 "sample_size": int(sample_size), "scenario_family": family,
                 "replications": len(subset), "abstention_rate": float((subset.status != "success").mean()),
                 "median_theta_hat": float(usable.theta_hat.median()),
@@ -105,9 +108,9 @@ def summarize(args: argparse.Namespace) -> None:
                 "resolution_floor": abs(critical) * median_se,
                 "reachable": bool(abs(critical) * median_se <= delta),
             })
-    summary = pd.DataFrame(rows).sort_values(["sample_size", "scenario_family"], ignore_index=True)
+    summary = pd.DataFrame(rows).sort_values(["learner_library_version", "sample_size", "scenario_family"], ignore_index=True)
 
-    headline = summary.groupby("sample_size").agg(
+    headline = summary.groupby(["learner_library_version", "sample_size"]).agg(
         critical_value=("critical_value", "first"),
         tolerated_se=("tolerated_se", "first"),
         worst_family_se=("median_se", "max"),
@@ -129,18 +132,21 @@ def summarize(args: argparse.Namespace) -> None:
     print()
     print(summary.to_string(index=False, float_format=lambda value: f"{value:.4f}"))
 
-    control = headline[headline.sample_size == 300]
+    control = headline[(headline.sample_size == 300) & (headline.learner_library_version == "v4_cubic_blend")]
     verdict = {
-        "smallest_reachable_sample_size": (
-            int(headline[headline.delta_reachable_everywhere].sample_size.min())
-            if bool(headline.delta_reachable_everywhere.any()) else None
-        ),
-        "control_check_at_n300": {
+        "smallest_reachable_sample_size_by_library": {
+            str(library): (
+                int(group[group.delta_reachable_everywhere].sample_size.min())
+                if bool(group.delta_reachable_everywhere.any()) else None
+            )
+            for library, group in headline.groupby("learner_library_version")
+        },
+        "control_check_at_n300_v4": {
             "miniature_critical_value": round(float(control.critical_value.iloc[0]), 4) if len(control) else None,
             "shipped_profile_critical_value": SHIPPED_CRITICAL_VALUE_AT_300,
-            "note": "Agreement here is what licenses reading the other rungs; disagreement means the miniature's replication count is too low to estimate the quantile.",
+            "note": "Only v4 at 300 rows has a shipped profile to check against. Agreement licenses reading the other cells; disagreement means the replication count is too low to estimate the quantile.",
         },
-        "reading": "Estimates, not a calibration. Replication counts are far below the 5,000 per family the registry gate requires, and no profile is produced.",
+        "reading": "Estimates, not a calibration. Replication counts are far below the 5,000 per family the registry gate requires, and no profile is produced. Each library has its own vimp_fingerprint, so critical values are never comparable across libraries as thresholds -- only the resolution floors are comparable, because those are what decide usability.",
     }
     (args.output / "small_sample_gate_verdict.json").write_text(json.dumps(verdict, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print()
