@@ -1,0 +1,5 @@
+{
+  "best_correct_prune_rate_under_the_optimistic_rule": 0.5,
+  "reading": "A real calibration is strictly more conservative than the normal approximation, so the optimistic column is an upper bound on achievable power. Nothing here is calibrated.",
+  "worst_wrongful_prune_rate_under_the_optimistic_rule": 0.0098
+}
