@@ -1,0 +1,69 @@
+name: Empty-separator pilot
+
+on:
+  workflow_dispatch:
+    inputs:
+      replications:
+        description: Replications per shape cell; 5 cells x this, each run through both conditioning modes
+        default: '300'
+      delta:
+        description: Boundary the scenarios sit exactly on
+        default: '0.20'
+      forest_trees:
+        description: Forest size; 100 matches the packaged profiles
+        default: '100'
+
+permissions:
+  contents: read
+
+jobs:
+  cell:
+    runs-on: ubuntu-latest
+    # One job per shape cell. Each replication runs the same rows through both conditioning
+    # modes, so the comparison is paired inside a job and never across shards.
+    strategy:
+      fail-fast: false
+      matrix:
+        cell: [0, 1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: pip install ".[test]"
+      - name: Report runner capacity
+        run: 'nproc && free -g | head -2'
+      - run: >
+          python docs/evidence/phase1/empty-separator-pilot/empty_separator_pilot.py shard
+          --cell ${{ matrix.cell }}
+          --replications ${{ inputs.replications }}
+          --delta ${{ inputs.delta }}
+          --forest-trees ${{ inputs.forest_trees }}
+          --output out/cell-${{ matrix.cell }}.parquet
+      - uses: actions/upload-artifact@v4
+        with:
+          name: empty-separator-cell-${{ matrix.cell }}
+          path: out/*.parquet
+          retention-days: 90
+
+  assemble:
+    needs: cell
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: pip install ".[test]"
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: empty-separator-cell-*
+          path: downloaded
+      - run: mkdir shards
+      - run: find downloaded -name '*.parquet' -exec cp {} shards/ \;
+      - run: python docs/evidence/phase1/empty-separator-pilot/empty_separator_pilot.py assemble --shards shards --output empty-separator-pilot
+      - uses: actions/upload-artifact@v4
+        with:
+          name: empty-separator-evidence
+          path: empty-separator-pilot
+          retention-days: 90
