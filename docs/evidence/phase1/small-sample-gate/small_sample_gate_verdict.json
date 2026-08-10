@@ -1,0 +1,9 @@
+{
+  "control_check_at_n300": {
+    "miniature_critical_value": -3.3859,
+    "note": "Agreement here is what licenses reading the other rungs; disagreement means the miniature's replication count is too low to estimate the quantile.",
+    "shipped_profile_critical_value": -3.0840871297004298
+  },
+  "reading": "Estimates, not a calibration. Replication counts are far below the 5,000 per family the registry gate requires, and no profile is produced.",
+  "smallest_reachable_sample_size": 300
+}
