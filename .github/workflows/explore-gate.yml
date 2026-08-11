@@ -1,0 +1,75 @@
+name: Explore gate
+
+on:
+  workflow_dispatch:
+    inputs:
+      replications:
+        description: Replications per cell. The protocol fixes 500 for the full run; the pilot uses fewer and may only reject.
+        default: '60'
+      stage:
+        description: pilot or full. A pilot may reject a design; it may never establish that a cell is eligible.
+        default: 'pilot'
+        type: choice
+        options: [pilot, full]
+
+permissions:
+  contents: read
+
+jobs:
+  cell:
+    runs-on: ubuntu-latest
+    # Five sample sizes x five variable counts x two arms = 50 jobs against a
+    # 20-concurrent cap, so it queues in three waves. The whole grid runs even at pilot
+    # scale rather than a subset, because one purpose of the pilot is to measure per-cell
+    # runtime everywhere so the full run can be sized honestly.
+    #
+    # n = 50 and n = 75 are included to locate the lower boundary, not to demonstrate
+    # one. The protocol expects them to fail.
+    strategy:
+      fail-fast: false
+      matrix:
+        sample_size: [50, 75, 100, 125, 150]
+        variables: [6, 7, 8, 9, 10]
+        arm: [linear, nonlinear]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: pip install .
+      - name: Report runner capacity
+        run: 'nproc && free -g | head -2'
+      - run: >
+          python simulations/explore_gate.py shard
+          --sample-size ${{ matrix.sample_size }}
+          --variables ${{ matrix.variables }}
+          --arm ${{ matrix.arm }}
+          --replications ${{ inputs.replications }}
+          --output out/${{ matrix.arm }}-n${{ matrix.sample_size }}-p${{ matrix.variables }}.parquet
+      - uses: actions/upload-artifact@v4
+        with:
+          name: explore-gate-${{ matrix.arm }}-n${{ matrix.sample_size }}-p${{ matrix.variables }}
+          path: out/*.parquet
+          retention-days: 90
+
+  summarize:
+    needs: cell
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: pip install . matplotlib
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: explore-gate-*
+          path: downloaded
+      - run: mkdir shards
+      - run: find downloaded -name '*.parquet' -exec cp {} shards/ \;
+      - run: python simulations/explore_gate.py summarize --shards shards --output explore-gate --stage ${{ inputs.stage }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: explore-gate-evidence
+          path: explore-gate
+          retention-days: 90
