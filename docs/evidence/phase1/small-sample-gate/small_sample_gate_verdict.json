@@ -1,9 +1,13 @@
 {
-  "control_check_at_n300": {
+  "control_check_at_n300_v4": {
     "miniature_critical_value": -3.3859,
-    "note": "Agreement here is what licenses reading the other rungs; disagreement means the miniature's replication count is too low to estimate the quantile.",
+    "note": "Only v4 at 300 rows has a shipped profile to check against. Agreement licenses reading the other cells; disagreement means the replication count is too low to estimate the quantile.",
     "shipped_profile_critical_value": -3.0840871297004298
   },
-  "reading": "Estimates, not a calibration. Replication counts are far below the 5,000 per family the registry gate requires, and no profile is produced.",
-  "smallest_reachable_sample_size": 300
+  "reading": "Estimates, not a calibration. Replication counts are far below the 5,000 per family the registry gate requires, and no profile is produced. Each library has its own vimp_fingerprint, so critical values are never comparable across libraries as thresholds -- only the resolution floors are comparable, because those are what decide usability.",
+  "smallest_reachable_sample_size_by_library": {
+    "v2_quadratic_ridge": 300,
+    "v3_nested_blend": 300,
+    "v4_cubic_blend": 300
+  }
 }
