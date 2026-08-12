@@ -52,19 +52,38 @@ intersection is the only defensible read:
 The single eligible cell at `n = 50` is `p = 8` and should be treated as a curiosity rather
 than a recommendation; it sits alone in a row of failures and one cell is not a region.
 
-### Off-grid rules
+**6 to 10 variables is the current validated range, not a product limit.** Comprehensive
+psychological datasets commonly carry 15 to 30 variables, and a tool that refuses them is
+not a tool for that field. The grid is small because that is what has been simulated so
+far, and extending it is the subject of
+[the p-extension protocol](../pilots/explore-p-extension-protocol.md).
 
-Most real datasets will fall outside `n` in {50..150} and `p` in {6..10}. The extrapolation
-rules are asymmetric, and deliberately:
+### The audit labels; it does not refuse
 
-* **`n` above 150, `p` in range — provisional yes.** Recovery rises monotonically with `n`
-  in every column of the measured grid, so extrapolating upward has support. The verdict is
-  marked provisional and names the largest `n` actually measured.
-* **`n` below 50 — no.** Below the measured floor with no evidence in that direction.
-* **`p` outside {6..10} — not evaluated, in either direction.** Recovery is *non-monotone*
-  in `p`: it peaks at `p = 8` and falls at both 6 and 10. There is no safe direction to
-  extrapolate, so the audit must decline rather than guess. This is the rule most likely to
-  frustrate users and it is the one with the clearest justification.
+Refusal belongs to `audit_project`, which stops a run for genuine technical or data-quality
+failures — missing columns, non-finite values, a variable with no variance, saturated
+scales, too few complete rows for the fold structure. Those are reasons the analysis cannot
+execute.
+
+Being outside a simulation grid is not such a reason. The analysis executes fine; what is
+missing is evidence about how well it performs. So the audit attaches a **label** and the
+run proceeds.
+
+| Condition | Label |
+|---|---|
+| `p` 6-10, and `n` inside the table above | **validated** |
+| `p` 11-30 | **unsupported — not yet validated at this network size** |
+| `p` above 30 | **unsupported — statistical *and* computational behaviour unevaluated at this size** |
+| `p` 6-10 but `n` outside the table | **unsupported — not yet validated at this sample size** |
+
+`n` above 150 with `p` in range is the one extrapolation with support, since recovery rises
+monotonically with `n` in every column measured; it is labelled **provisional** rather than
+unsupported, and names the largest `n` actually tested.
+
+The label is written into the report and into the evidence bundle manifest, so a reader
+downstream sees what evidence stood behind the run. The stronger warning above 30 variables
+is separate because two different things are unknown there: whether the results are any
+good, and whether the run finishes in reasonable time and memory at all.
 
 ---
 
@@ -96,21 +115,23 @@ fingerprint, `delta` — plus the resolve operating region on `(n, p, delta)`.
 
 ## Verdicts
 
-| Verdict | Reachable today | Basis |
+| Verdict | Available today | Basis |
 |---|---|---|
-| `explore` | yes | inside the measured region above |
+| `explore`, labelled **validated** | yes | inside the measured region above |
+| `explore`, labelled **unsupported** | yes | outside the grid; runs, carries the warning |
 | `resolve` | **no** | no calibration exists for the revised rule |
-| `linear_only` | **no** | see below |
-| `no_network` | yes | inside no region |
+| `no_network` | yes | `audit_project` refused on technical or data-quality grounds |
 
-**`linear_only` cannot be issued and this needs a decision.** The explore protocol states
-that the linear comparator is an incumbent benchmark whose performance "does not authorize
-shipping it as a mode", and the earlier instruction was that a linear fallback "must not be
-silently substituted". Recommending it would recommend a mode that does not exist and has
-no evidence of its own. Option 1 below resolves this.
+**There is no `linear_only` verdict.** The linear method used in the explore study is a
+comparison benchmark, not a renca mode; testing something as a benchmark does not build it
+and gives it no evidence of its own. The audit will not name it, recommend it, or fall back
+to it. Whether a linear mode should ever exist is a separate decision, not taken.
 
-Every verdict carries: the reason code, the region cell consulted, the study and Actions
-run the region came from, and whether the verdict is provisional.
+`no_network` is now reserved for genuine failures rather than for absent evidence. A clean
+dataset outside every grid gets `explore` with an unsupported label, not a refusal.
+
+Every verdict carries: the label, the reason code, the region cell consulted, the study and
+Actions run the region came from, and whether the label is provisional.
 
 ---
 
@@ -138,23 +159,16 @@ already computed.
 
 ---
 
-## Decisions required before implementation
+## Decisions taken
 
-1. **The `linear_only` verdict.** Omit it entirely; or issue it as information only —
-   "outside every renca region; a linear graphical model is what the field would otherwise
-   use" — without presenting it as a renca mode; or defer until a linear mode has evidence
-   of its own. Omitting is the conservative choice and the easiest to reverse.
+All three open questions in the first draft of this scope have been settled:
 
-2. **Advise or block.** When the verdict is `no_network`, does the run refuse, or proceed
-   with the disagreement stamped into the manifest? Refusing is cleaner but researchers will
-   route around a tool that refuses, and a stamped record is more likely to reach a reviewer
-   than a run that never happened. Recommendation: proceed and stamp.
-
-3. **Whether `p` outside {6..10} refuses outright** or emits a strong warning. The
-   non-monotonicity in `p` argues for refusing; usability argues the other way, since a
-   twelve-variable network is a perfectly ordinary request. Recommendation: refuse for now
-   and extend the grid, because a guess here is exactly the kind of unevidenced claim the
-   rest of this work exists to avoid.
+1. **No `linear_only` verdict.** Not added, not endorsed, not offered as a fallback.
+2. **The audit labels rather than blocks.** Refusal is reserved for technical and
+   data-quality failures, which `audit_project` already owns.
+3. **Variable counts outside the grid run with a label**, not a refusal. 6 to 10 is the
+   current validated range and explicitly not a product limit; the grid extends via
+   [the p-extension protocol](../pilots/explore-p-extension-protocol.md).
 
 ## Cost
 
