@@ -98,13 +98,34 @@ fresh protocol.
 
 * basis dimension per smooth term;
 * penalty selection procedure;
-* stability-selection subsample count, subsample fraction, and retention
-  threshold `pi`;
+* stability-selection subsample count, subsample fraction, retention threshold
+  `pi`, and the per-node selection quota;
 * the `tau >= 0.10` strong-edge boundary;
 * replications per cell;
 * the seed derivation, which must depend on cell identity and replication index
   rather than execution order, so re-running reproduces the numbers themselves
   and not merely their distribution.
+
+### Amendment of 2026-08-11, disclosed
+
+The per-node selection quota was changed **after** a first pilot was run and read.
+That is the kind of adjustment the fixed-decision list exists to prevent, so the
+change and its reason are recorded here rather than absorbed silently, and the
+pilot was re-run from scratch rather than patched.
+
+The first pilot derived the quota and the graph's degree cap from two different
+fractions of `p - 1`. At `p` in {7, 8, 9} the rounding placed the quota *below* the
+cap, so a node at maximum degree could not have all of its edges selected however
+good the data were. Recovery at those three variable counts was measuring that
+arithmetic and not the method; the only two variable counts where the constants
+happened to agree, `p = 6` and `p = 10`, were the two best performers, which is
+what identified the fault.
+
+Both quantities now derive from one function. The quota is the sparsity level the
+design permits. This is a correction of a structural impossibility rather than a
+tuning choice: the estimator was incapable of representing the truth, which is a
+different thing from performing poorly at it. **The first pilot's numbers are
+superseded and may not be cited.**
 
 ---
 
@@ -218,5 +239,9 @@ establishing that a cell is in the operating region.
   absent.
 * One estimator configuration throughout. A failure here is a failure of this
   configuration, not a proof that no sparse additive method can work.
+* The per-node selection quota is set to the sparsity level the design permits. A
+  real analyst does not know that level, so this isolates the question the study
+  asks at the cost of assuming the quota is set well. Sensitivity to mis-setting it
+  is a separate question and is not addressed here.
 * The linear comparator is an incumbent benchmark. Its performance here does not
   authorize shipping it as a mode.

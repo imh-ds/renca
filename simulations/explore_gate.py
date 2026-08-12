@@ -71,6 +71,23 @@ MIN_WEAK_EDGES = 1
 MIN_NONEDGES = 2
 MAX_DEGREE_FRACTION = 0.5
 
+
+def sparsity_cap(p: int) -> int:
+    """Densest node the design permits, and the estimator's per-node selection quota.
+
+    One function serves both deliberately. The 2026-08-11 pilot set the quota to a
+    different fraction of `p - 1` than the degree cap, and at `p` in {7, 8, 9} the
+    rounding put the quota *below* the cap -- so a node at maximum degree could not have
+    all its edges selected however good the data were. Recovery at those three variable
+    counts measured that arithmetic rather than the method, and the only two cells where
+    the constants happened to agree, `p = 6` and `p = 10`, were the two best performers.
+
+    The quota is therefore the sparsity level the design permits. A real analyst does not
+    know that level; setting it correctly here isolates the question this study asks, and
+    sensitivity to mis-setting it is a separate question this study does not address.
+    """
+    return max(2, int(round(MAX_DEGREE_FRACTION * (p - 1))))
+
 TARGET_FALSE_INCLUSION = 0.05
 RECOVERY_BAR = 0.60
 BLANK_BAR = 0.10
@@ -129,7 +146,7 @@ def _apply_shape(z: np.ndarray, shape: str) -> np.ndarray:
 
 def sample_precision(rng: np.random.Generator, p: int) -> tuple[np.ndarray, np.ndarray]:
     """Draw a skeleton and a positive-definite precision matrix supported on it."""
-    max_degree = max(2, int(round(MAX_DEGREE_FRACTION * (p - 1))))
+    max_degree = sparsity_cap(p)
     adjacency = np.zeros((p, p), dtype=bool)
     order = rng.permutation([(i, j) for i in range(p) for j in range(i + 1, p)])
     for i, j in order:
@@ -282,7 +299,7 @@ def explore_selection(values: np.ndarray, rng: np.random.Generator) -> np.ndarra
     n, p = values.shape
     standardised = _standardise(values)
     blocks_by_column = _spline_blocks(standardised)
-    quota = max(2, int(round(0.4 * (p - 1))))
+    quota = sparsity_cap(p)
     size = max(SPLINE_KNOTS + SPLINE_DEGREE, int(round(SUBSAMPLE_FRACTION * n)))
 
     counts = np.zeros((p, p))
