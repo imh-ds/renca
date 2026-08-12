@@ -1,0 +1,20 @@
+{
+  "actions_job_limit_hours": 6,
+  "largest_single_cell_hours_at_500_reps": 6.3,
+  "peak_rss_mb": 240.7,
+  "projected_core_hours": {
+    "stage_1_32_cells_500_reps": 57.5,
+    "stage_2_48_cells_500_reps": 228.4
+  },
+  "protocol_extrapolation_for_comparison": {
+    "stage_1": 90,
+    "stage_2": 470
+  },
+  "purpose": "Measure how cost scales with variable count and sample size, and replace the protocol's extrapolated cost figures with measurements. Ten replications establish no performance criterion and none may be cited from this run.",
+  "scaling_exponent_in_p_by_sample_size": {
+    "100": 1.1,
+    "500": 1.57
+  },
+  "shards_needed_for_largest_cell": 2,
+  "stage": "0"
+}

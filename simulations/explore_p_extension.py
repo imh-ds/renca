@@ -386,14 +386,23 @@ def summarize(args: argparse.Namespace) -> None:
                 np.log(high.replication_seconds / low.replication_seconds) / np.log(high.variables / low.variables)), 2)
 
     def project(cells: list[tuple[int, int]], replications: int) -> float:
-        """Core-hours for a grid, from measured cost and the fitted exponent."""
-        exponent = float(np.mean(list(slopes.values()))) if slopes else 2.0
-        reference = summary.sort_values(["variables", "sample_size"]).iloc[-1]
-        total = 0.0
-        for p, n in cells:
-            scaled = float(reference.replication_seconds) * (p / reference.variables) ** exponent * (n / reference.sample_size)
-            total += scaled * replications
-        return total / 3600
+        """Core-hours for a grid, from measured cost and the fitted exponent.
+
+        **Cost is not scaled by sample size.** The first version of this function scaled by
+        `n / reference_n`, which predicted 9s per replication for the 30-variable
+        100-person cell against 44s measured -- a fivefold under-estimate. Sample size
+        barely moves the cost in this range: 44.3s against 45.1s at 30 variables for a
+        fivefold difference in rows. The work is dominated by the loop over variables,
+        subsamples and penalty steps, none of which grow with row count, and more data can
+        even shorten the penalty path by reaching the selection quota sooner.
+
+        The steeper of the two measured slopes is used, so the estimate errs high.
+        """
+        exponent = max(slopes.values()) if slopes else 2.0
+        reference = summary.loc[summary.variables.idxmax()]
+        reference_seconds = float(summary[summary.variables == reference.variables].replication_seconds.max())
+        return sum(reference_seconds * (p / reference.variables) ** exponent * replications
+                   for p, _ in cells) / 3600
 
     stage1 = [(p, n) for p in (12, 15) for n in (75, 100, 150, 250) for _ in range(4)]
     stage2 = [(p, n) for p in (20, 25, 30) for n in (100, 150, 250, 500) for _ in range(4)]
