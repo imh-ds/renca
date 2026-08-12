@@ -451,6 +451,27 @@ def replicate(index: int, n: int, p: int, arm: str, seed: int) -> dict[str, obje
     else:
         record["jaccard"] = len(first_set & second_set) / len(first_set | second_set)
         record["both_blank"] = 0.0
+
+    # Where the disagreement actually lives. The full-run write-up inferred from the
+    # separate strong and weak recovery rates that essentially all of it sits in weak
+    # edges, and recorded that as an inference to be measured rather than a result.
+    # This measures it. Nothing here draws from `rng`, so every column above is
+    # unchanged and the full run's numbers remain reproducible.
+    first_flat, second_flat = default[upper], second[upper]
+    present, strength = truth.adjacency[upper], truth.edge_strength[upper]
+    classes = {
+        "strong": present & (strength >= STRONG_TAU),
+        "weak": present & (strength < STRONG_TAU),
+        "nonedge": ~present,
+    }
+    disagreement = first_flat ^ second_flat
+    total_disagreement = int(disagreement.sum())
+    for name, mask in classes.items():
+        union = int((first_flat | second_flat)[mask].sum())
+        record[f"jaccard_{name}"] = (int((first_flat & second_flat)[mask].sum()) / union) if union else np.nan
+        record[f"disagreement_share_{name}"] = (int(disagreement[mask].sum()) / total_disagreement) if total_disagreement else np.nan
+        record[f"pairs_{name}"] = float(mask.sum())
+    record["disagreement_edges"] = float(total_disagreement)
     return record
 
 
@@ -504,6 +525,10 @@ def summarize(args: argparse.Namespace) -> None:
             "unconditional_blank": float(group.explore_blank.mean()),
             "jaccard_median": float(group.jaccard.median()),
             "both_blank_rate": float(group.both_blank.mean()),
+            **{f"jaccard_{name}": float(group[f"jaccard_{name}"].median()) for name in ("strong", "weak", "nonedge")
+               if f"jaccard_{name}" in group},
+            **{f"disagreement_share_{name}": float(group[f"disagreement_share_{name}"].mean()) for name in ("strong", "weak", "nonedge")
+               if f"disagreement_share_{name}" in group},
             "pass_1a": false_inclusion <= TARGET_FALSE_INCLUSION,
             "pass_1b": expected_false <= EXPECTED_FALSE_EDGES_BAR,
             "pass_2": recovery >= RECOVERY_BAR,
