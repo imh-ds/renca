@@ -66,6 +66,15 @@ SUBSAMPLE_FRACTION = 0.5
 RETENTION_THRESHOLD = 0.75
 FALSE_CONNECTION_BAR = 0.10
 
+STRONG_TARGET_EDGES = 3
+STRONG_MAGNITUDE = (0.45, 0.70)
+MODEST_MAGNITUDE = (0.08, 0.28)
+EIGENVALUE_FLOOR = 0.08
+"""Smallest eigenvalue the precision matrix is allowed. Off-diagonals are scaled down
+together when a draw falls below it, which is what keeps the matrix a valid one."""
+
+DRAW_ATTEMPTS = 100
+
 
 def degree_cap(average_degree: float) -> int:
     """Densest node the sampler permits, and the estimator's per-node quota.
@@ -95,24 +104,42 @@ def sample_structure(rng: np.random.Generator, p: int, average_degree: float) ->
     target_edges = int(round(p * average_degree / 2))
     adjacency = np.zeros((p, p), dtype=bool)
     pairs = [(i, j) for i in range(p) for j in range(i + 1, p)]
-    drawn = 0
+    chosen_pairs: list[tuple[int, int]] = []
     for index in rng.permutation(len(pairs)):
-        if drawn >= target_edges:
+        if len(chosen_pairs) >= target_edges:
             break
         i, j = pairs[index]
         if adjacency[i].sum() < cap and adjacency[j].sum() < cap:
             adjacency[i, j] = adjacency[j, i] = True
-            drawn += 1
+            chosen_pairs.append((i, j))
 
-    precision = np.zeros((p, p))
-    for i in range(p):
-        for j in range(i + 1, p):
-            if adjacency[i, j]:
-                precision[i, j] = precision[j, i] = rng.choice((-1.0, 1.0)) * rng.uniform(0.35, 0.95)
-    # Diagonal dominance is the cheapest guarantee of positive definiteness that leaves the
-    # off-diagonal support -- which is the skeleton -- untouched.
-    np.fill_diagonal(precision, np.abs(precision).sum(axis=1) + rng.uniform(0.05, 0.25, size=p))
-    covariance = np.linalg.inv(precision)
+    # Relationship strengths are heterogeneous by design: a few genuinely strong, the rest
+    # modest. Real psychological networks look like that, and drawing every edge from one
+    # range does not.
+    #
+    # This replaced a construction that guaranteed positive definiteness by diagonal
+    # dominance, which set each diagonal entry to the *sum* of a node's edge magnitudes and
+    # so roughly halved every partial correlation when the average degree doubled. Density
+    # and relationship strength were welded together: at degree 4 only a third of graphs
+    # carried the two strong relationships the protocol requires, and the sampler exhausted
+    # its attempts on Actions. Replacing dominance with an eigenvalue shift made it worse
+    # rather than better, which is what identified the real constraint -- any valid precision
+    # matrix with many strong off-diagonals needs a large diagonal, so a dense graph *cannot*
+    # have uniformly strong relationships. Heterogeneity is the way out, not a milder shift.
+    #
+    # With a unit diagonal the off-diagonal entries are the partial correlations themselves,
+    # so strength is set directly rather than emerging from whatever positive definiteness
+    # happened to cost.
+    offdiag = np.zeros((p, p))
+    for rank, position in enumerate(rng.permutation(len(chosen_pairs))):
+        i, j = chosen_pairs[position]
+        low, high = STRONG_MAGNITUDE if rank < STRONG_TARGET_EDGES else MODEST_MAGNITUDE
+        offdiag[i, j] = offdiag[j, i] = rng.choice((-1.0, 1.0)) * rng.uniform(low, high)
+    smallest = float(np.linalg.eigvalsh(np.eye(p) + offdiag)[0])
+    if smallest < EIGENVALUE_FLOOR:
+        offdiag *= (1 - EIGENVALUE_FLOOR) / (1 - smallest)
+
+    covariance = np.linalg.inv(np.eye(p) + offdiag)
     scale = np.sqrt(np.diag(covariance))
     return adjacency, covariance / np.outer(scale, scale)
 
@@ -120,7 +147,7 @@ def sample_structure(rng: np.random.Generator, p: int, average_degree: float) ->
 def draw_truth(rng: np.random.Generator, p: int, average_degree: float, arm: str) -> tuple[Truth, int]:
     """Rejection-sample until the graph can actually be scored against the protocol."""
     curved_count = 0 if arm == "linear" else int(round(CURVED_FRACTION * p))
-    for attempt in range(60):
+    for attempt in range(DRAW_ATTEMPTS):
         adjacency, covariance = sample_structure(rng, p, average_degree)
         curved_nodes = rng.permutation(p)[:curved_count]
         shapes = ["identity"] * p
