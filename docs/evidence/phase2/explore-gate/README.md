@@ -113,6 +113,14 @@ If it holds, the product implication is direct: a single line style for every re
 misrepresents what is stable. The protocol's retention path, showing at what pruning
 strictness each edge enters, is the artifact that would carry this honestly.
 
+> **Measured since, in [`reproducibility-rerun/`](reproducibility-rerun/README.md).** The
+> inference is confirmed in direction and was overstated in degree. Strong edges reproduce
+> at 0.90-1.00 inside the operating region and weak edges reach 0.41 at best, so the mixed
+> figure above averages a trustworthy component with a near-random one. But weak edges carry
+> 61-78% of the disagreement rather than essentially all of it; strong edges still
+> contribute 13-25%. Spurious edges are irreproducible noise, agreeing across datasets at
+> 0.000, which is the outcome that rules out systematic bias.
+
 ## Amendment, disclosed
 
 The per-node selection quota was changed after a first pilot
