@@ -1,0 +1,93 @@
+{
+  "cells_eligible": 9,
+  "cells_evaluated": 32,
+  "false_edges_per_network_by_size_and_density": {
+    "p12-moderate": 1.542,
+    "p12-sparse": 0.458,
+    "p15-moderate": 1.088,
+    "p15-sparse": 0.368
+  },
+  "first_failing_gate": {
+    "linear-moderate-p12-n100": "pass_1_false_connections",
+    "linear-moderate-p12-n150": "pass_1_false_connections",
+    "linear-moderate-p12-n250": "pass_1_false_connections",
+    "linear-moderate-p12-n75": "pass_1_false_connections",
+    "linear-moderate-p15-n150": "pass_1_false_connections",
+    "linear-moderate-p15-n250": "pass_1_false_connections",
+    "linear-moderate-p15-n75": "pass_1_false_connections",
+    "mixed-moderate-p12-n100": "pass_1_false_connections",
+    "mixed-moderate-p12-n150": "pass_1_false_connections",
+    "mixed-moderate-p12-n250": "pass_1_false_connections",
+    "mixed-moderate-p12-n75": "pass_1_false_connections",
+    "mixed-moderate-p15-n100": "pass_1_false_connections",
+    "mixed-moderate-p15-n150": "pass_1_false_connections",
+    "mixed-moderate-p15-n250": "pass_1_false_connections",
+    "mixed-moderate-p15-n75": "pass_1_false_connections",
+    "mixed-sparse-p12-n100": "pass_1_false_connections",
+    "mixed-sparse-p12-n150": "pass_1_false_connections",
+    "mixed-sparse-p12-n250": "pass_1_false_connections",
+    "mixed-sparse-p12-n75": "pass_1_false_connections",
+    "mixed-sparse-p15-n100": "pass_5_beats_baseline",
+    "mixed-sparse-p15-n150": "pass_5_beats_baseline",
+    "mixed-sparse-p15-n250": "pass_5_beats_baseline",
+    "mixed-sparse-p15-n75": "pass_1_false_connections"
+  },
+  "operating_region": [
+    {
+      "arm": "linear",
+      "density": "moderate",
+      "sample_size": 100,
+      "variables": 15
+    },
+    {
+      "arm": "linear",
+      "density": "sparse",
+      "sample_size": 75,
+      "variables": 12
+    },
+    {
+      "arm": "linear",
+      "density": "sparse",
+      "sample_size": 100,
+      "variables": 12
+    },
+    {
+      "arm": "linear",
+      "density": "sparse",
+      "sample_size": 150,
+      "variables": 12
+    },
+    {
+      "arm": "linear",
+      "density": "sparse",
+      "sample_size": 250,
+      "variables": 12
+    },
+    {
+      "arm": "linear",
+      "density": "sparse",
+      "sample_size": 75,
+      "variables": 15
+    },
+    {
+      "arm": "linear",
+      "density": "sparse",
+      "sample_size": 100,
+      "variables": 15
+    },
+    {
+      "arm": "linear",
+      "density": "sparse",
+      "sample_size": 150,
+      "variables": 15
+    },
+    {
+      "arm": "linear",
+      "density": "sparse",
+      "sample_size": 250,
+      "variables": 15
+    }
+  ],
+  "reading": "Criteria 1 to 4 are scored at the default operating point, which is what a user gets; scoring them at the matched-false-inclusion point would be circular. Criteria 5 to 7 compare curved-relationship performance and apply to the mixed arm only, since the fully linear arm contains no curved relationships; that arm is a control gated on 1 to 4. Where the exact binomial and bootstrap intervals on the false-connection share disagree, the bootstrap governs, because relationships within one network are not independent.",
+  "stage": "1"
+}
