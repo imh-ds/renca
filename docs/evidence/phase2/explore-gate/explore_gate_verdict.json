@@ -1,0 +1,284 @@
+{
+  "cells_eligible": 43,
+  "cells_evaluated": 50,
+  "first_failing_gate": {
+    "linear-n50-p10": "pass_2",
+    "linear-n50-p6": "pass_2",
+    "nonlinear-n50-p10": "pass_2",
+    "nonlinear-n50-p6": "pass_2",
+    "nonlinear-n50-p7": "pass_2",
+    "nonlinear-n50-p9": "pass_2",
+    "nonlinear-n75-p6": "pass_2"
+  },
+  "median_runtime_seconds_by_cell": {
+    "linear-n100-p10": 1.25,
+    "linear-n100-p6": 0.29,
+    "linear-n100-p7": 0.38,
+    "linear-n100-p8": 1.11,
+    "linear-n100-p9": 1.11,
+    "linear-n125-p10": 1.47,
+    "linear-n125-p6": 0.28,
+    "linear-n125-p7": 0.55,
+    "linear-n125-p8": 1.05,
+    "linear-n125-p9": 1.06,
+    "linear-n150-p10": 1.22,
+    "linear-n150-p6": 0.3,
+    "linear-n150-p7": 0.55,
+    "linear-n150-p8": 0.93,
+    "linear-n150-p9": 1.29,
+    "linear-n50-p10": 1.55,
+    "linear-n50-p6": 0.18,
+    "linear-n50-p7": 0.6,
+    "linear-n50-p8": 1.1,
+    "linear-n50-p9": 1.54,
+    "linear-n75-p10": 0.93,
+    "linear-n75-p6": 0.29,
+    "linear-n75-p7": 0.67,
+    "linear-n75-p8": 0.96,
+    "linear-n75-p9": 1.14,
+    "nonlinear-n100-p10": 0.87,
+    "nonlinear-n100-p6": 0.25,
+    "nonlinear-n100-p7": 0.35,
+    "nonlinear-n100-p8": 1.26,
+    "nonlinear-n100-p9": 1.56,
+    "nonlinear-n125-p10": 1.14,
+    "nonlinear-n125-p6": 0.3,
+    "nonlinear-n125-p7": 0.74,
+    "nonlinear-n125-p8": 0.79,
+    "nonlinear-n125-p9": 1.42,
+    "nonlinear-n150-p10": 1.12,
+    "nonlinear-n150-p6": 0.14,
+    "nonlinear-n150-p7": 0.74,
+    "nonlinear-n150-p8": 1.18,
+    "nonlinear-n150-p9": 1.45,
+    "nonlinear-n50-p10": 2.51,
+    "nonlinear-n50-p6": 0.15,
+    "nonlinear-n50-p7": 0.75,
+    "nonlinear-n50-p8": 1.47,
+    "nonlinear-n50-p9": 1.67,
+    "nonlinear-n75-p10": 1.94,
+    "nonlinear-n75-p6": 0.31,
+    "nonlinear-n75-p7": 0.66,
+    "nonlinear-n75-p8": 1.27,
+    "nonlinear-n75-p9": 1.61
+  },
+  "operating_region": [
+    {
+      "arm": "linear",
+      "sample_size": 50,
+      "variables": 7
+    },
+    {
+      "arm": "linear",
+      "sample_size": 50,
+      "variables": 8
+    },
+    {
+      "arm": "linear",
+      "sample_size": 50,
+      "variables": 9
+    },
+    {
+      "arm": "linear",
+      "sample_size": 75,
+      "variables": 6
+    },
+    {
+      "arm": "linear",
+      "sample_size": 75,
+      "variables": 7
+    },
+    {
+      "arm": "linear",
+      "sample_size": 75,
+      "variables": 8
+    },
+    {
+      "arm": "linear",
+      "sample_size": 75,
+      "variables": 9
+    },
+    {
+      "arm": "linear",
+      "sample_size": 75,
+      "variables": 10
+    },
+    {
+      "arm": "linear",
+      "sample_size": 100,
+      "variables": 6
+    },
+    {
+      "arm": "linear",
+      "sample_size": 100,
+      "variables": 7
+    },
+    {
+      "arm": "linear",
+      "sample_size": 100,
+      "variables": 8
+    },
+    {
+      "arm": "linear",
+      "sample_size": 100,
+      "variables": 9
+    },
+    {
+      "arm": "linear",
+      "sample_size": 100,
+      "variables": 10
+    },
+    {
+      "arm": "linear",
+      "sample_size": 125,
+      "variables": 6
+    },
+    {
+      "arm": "linear",
+      "sample_size": 125,
+      "variables": 7
+    },
+    {
+      "arm": "linear",
+      "sample_size": 125,
+      "variables": 8
+    },
+    {
+      "arm": "linear",
+      "sample_size": 125,
+      "variables": 9
+    },
+    {
+      "arm": "linear",
+      "sample_size": 125,
+      "variables": 10
+    },
+    {
+      "arm": "linear",
+      "sample_size": 150,
+      "variables": 6
+    },
+    {
+      "arm": "linear",
+      "sample_size": 150,
+      "variables": 7
+    },
+    {
+      "arm": "linear",
+      "sample_size": 150,
+      "variables": 8
+    },
+    {
+      "arm": "linear",
+      "sample_size": 150,
+      "variables": 9
+    },
+    {
+      "arm": "linear",
+      "sample_size": 150,
+      "variables": 10
+    },
+    {
+      "arm": "nonlinear",
+      "sample_size": 50,
+      "variables": 8
+    },
+    {
+      "arm": "nonlinear",
+      "sample_size": 75,
+      "variables": 7
+    },
+    {
+      "arm": "nonlinear",
+      "sample_size": 75,
+      "variables": 8
+    },
+    {
+      "arm": "nonlinear",
+      "sample_size": 75,
+      "variables": 9
+    },
+    {
+      "arm": "nonlinear",
+      "sample_size": 75,
+      "variables": 10
+    },
+    {
+      "arm": "nonlinear",
+      "sample_size": 100,
+      "variables": 6
+    },
+    {
+      "arm": "nonlinear",
+      "sample_size": 100,
+      "variables": 7
+    },
+    {
+      "arm": "nonlinear",
+      "sample_size": 100,
+      "variables": 8
+    },
+    {
+      "arm": "nonlinear",
+      "sample_size": 100,
+      "variables": 9
+    },
+    {
+      "arm": "nonlinear",
+      "sample_size": 100,
+      "variables": 10
+    },
+    {
+      "arm": "nonlinear",
+      "sample_size": 125,
+      "variables": 6
+    },
+    {
+      "arm": "nonlinear",
+      "sample_size": 125,
+      "variables": 7
+    },
+    {
+      "arm": "nonlinear",
+      "sample_size": 125,
+      "variables": 8
+    },
+    {
+      "arm": "nonlinear",
+      "sample_size": 125,
+      "variables": 9
+    },
+    {
+      "arm": "nonlinear",
+      "sample_size": 125,
+      "variables": 10
+    },
+    {
+      "arm": "nonlinear",
+      "sample_size": 150,
+      "variables": 6
+    },
+    {
+      "arm": "nonlinear",
+      "sample_size": 150,
+      "variables": 7
+    },
+    {
+      "arm": "nonlinear",
+      "sample_size": 150,
+      "variables": 8
+    },
+    {
+      "arm": "nonlinear",
+      "sample_size": 150,
+      "variables": 9
+    },
+    {
+      "arm": "nonlinear",
+      "sample_size": 150,
+      "variables": 10
+    }
+  ],
+  "reading": "Full-run evidence. `operating_region` lists the cells meeting every gated criterion in `docs/pilots/explore-feasibility-protocol.md`.",
+  "stage": "full"
+}
