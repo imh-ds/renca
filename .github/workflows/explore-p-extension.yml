@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       replications:
-        description: Replications per cell. Stage 0 uses 10; it measures scaling and establishes no performance criterion.
-        default: '10'
+        description: Replications per cell. Stage 0 uses 10 and measures scaling only; stage 1 uses the protocol's 500.
+        default: '500'
       stage:
-        description: Only stage 0 is approved. Stages 1 and 2 require review of stage 0 first.
-        default: '0'
+        description: Stage 0 measures scaling; stage 1 scores the seven criteria. Stage 2 requires review of stage 1 first.
+        default: '1'
         type: choice
-        options: ['0']
+        options: ['0', '1']
 
 permissions:
   contents: read
@@ -18,19 +18,23 @@ permissions:
 jobs:
   cell:
     runs-on: ubuntu-latest
-    # Two variable counts, not one. The cost of 30 variables alone is a number; 15 and 30
-    # together give a slope, which is the only thing that can say whether the quadratic
-    # growth assumed behind stages 1 and 2 actually holds. Two sample sizes do the same for
-    # the row dimension.
+    # Stage 1: two variable counts x four sample sizes x two densities x two shape arms,
+    # which is 32 jobs against a 20-concurrent cap and so queues in two waves.
     #
-    # Moderately dense and mixed-curved throughout: the more expensive density and the arm
-    # carrying the third estimator, so the measured cost is an upper bound rather than a
-    # best case.
+    # The fully linear arm is the control. It carries no curved relationships, so criteria
+    # 5 to 7 cannot be scored there and it is gated on 1 to 4 alone; what it contributes is
+    # the cost of explore's flexibility where the incumbent's assumptions actually hold.
+    #
+    # Stage 0 measured 15 seconds per replication at 15 variables, so the longest cell here
+    # is roughly two hours -- inside the six-hour job limit, and no sharding is needed. That
+    # only becomes necessary at stage 2's 30-variable cells.
     strategy:
       fail-fast: false
       matrix:
-        variables: [15, 30]
-        sample_size: [100, 500]
+        variables: [12, 15]
+        sample_size: [75, 100, 150, 250]
+        density: [sparse, moderate]
+        arm: [linear, mixed]
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
@@ -43,13 +47,13 @@ jobs:
           python simulations/explore_p_extension.py shard
           --variables ${{ matrix.variables }}
           --sample-size ${{ matrix.sample_size }}
-          --density moderate
-          --arm mixed
+          --density ${{ matrix.density }}
+          --arm ${{ matrix.arm }}
           --replications ${{ inputs.replications }}
-          --output out/p${{ matrix.variables }}-n${{ matrix.sample_size }}.parquet
+          --output out/${{ matrix.arm }}-${{ matrix.density }}-p${{ matrix.variables }}-n${{ matrix.sample_size }}.parquet
       - uses: actions/upload-artifact@v4
         with:
-          name: p-extension-stage0-p${{ matrix.variables }}-n${{ matrix.sample_size }}
+          name: p-extension-${{ matrix.arm }}-${{ matrix.density }}-p${{ matrix.variables }}-n${{ matrix.sample_size }}
           path: out/*.parquet
           retention-days: 90
 
@@ -64,13 +68,13 @@ jobs:
       - run: pip install .
       - uses: actions/download-artifact@v5
         with:
-          pattern: p-extension-stage0-*
+          pattern: p-extension-*
           path: downloaded
       - run: mkdir shards
       - run: find downloaded -name '*.parquet' -exec cp {} shards/ \;
-      - run: python simulations/explore_p_extension.py summarize --shards shards --output p-extension-stage0
+      - run: python simulations/explore_p_extension.py summarize --shards shards --output p-extension-stage${{ inputs.stage }} --stage ${{ inputs.stage }}
       - uses: actions/upload-artifact@v4
         with:
-          name: p-extension-stage0-evidence
-          path: p-extension-stage0
+          name: p-extension-stage${{ inputs.stage }}-evidence
+          path: p-extension-stage${{ inputs.stage }}
           retention-days: 90

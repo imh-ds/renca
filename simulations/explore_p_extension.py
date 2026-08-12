@@ -434,6 +434,139 @@ def summarize(args: argparse.Namespace) -> None:
     print(json.dumps(verdict, indent=2, sort_keys=True))
 
 
+RECOVERY_BAR = 0.60
+BLANK_BAR = 0.10
+STABILITY_BAR = 0.80
+STRAIGHT_TOLERANCE = 0.05
+BOOTSTRAP_DRAWS = 2000
+
+
+def _clopper_pearson(successes: int, trials: int) -> tuple[float, float]:
+    """Exact binomial interval, treating each drawn relationship as its own trial."""
+    from scipy.stats import beta
+    if trials == 0:
+        return float("nan"), float("nan")
+    lower = 0.0 if successes == 0 else float(beta.ppf(.025, successes, trials - successes + 1))
+    upper = 1.0 if successes == trials else float(beta.ppf(.975, successes + 1, trials - successes))
+    return lower, upper
+
+
+def _bootstrap_share(numerator: np.ndarray, denominator: np.ndarray, rng: np.random.Generator) -> tuple[float, float]:
+    """Percentile interval resampling whole replications.
+
+    Relationships drawn within one network are not independent, so the exact binomial
+    interval above is too narrow. This one resamples replications rather than edges, which
+    respects that, and it is the interval that governs where the two disagree.
+    """
+    count = len(numerator)
+    if count == 0 or denominator.sum() == 0:
+        return float("nan"), float("nan")
+    picks = rng.integers(0, count, size=(BOOTSTRAP_DRAWS, count))
+    totals = denominator[picks].sum(axis=1)
+    shares = np.divide(numerator[picks].sum(axis=1), totals, out=np.full(BOOTSTRAP_DRAWS, np.nan), where=totals > 0)
+    return float(np.nanpercentile(shares, 2.5)), float(np.nanpercentile(shares, 97.5))
+
+
+def summarize_criteria(args: argparse.Namespace) -> None:
+    """Score the protocol's seven criteria. Stages 1 and 2 only."""
+    frames = [pd.read_parquet(path) for path in sorted(Path(args.shards).glob("*.parquet"))]
+    if not frames:
+        raise ValueError(f"no shard Parquet files found in {args.shards}")
+    data = pd.concat(frames, ignore_index=True)
+    rng = np.random.default_rng(20260812)
+
+    rows = []
+    for (p, n, density, arm), group in data.groupby(["variables", "sample_size", "density", "arm"]):
+        # Criteria 1 to 4 are scored at the default operating point, which is what a user
+        # actually gets. Scoring them at the matched-false-inclusion point would be circular,
+        # since that point is chosen to sit under the very bar criterion 1 tests.
+        false_edges, retained = group.explore_false_edges.to_numpy(), group.explore_retained_edges.to_numpy()
+        share = float(false_edges.sum() / retained.sum()) if retained.sum() else np.nan
+        exact = _clopper_pearson(int(false_edges.sum()), int(retained.sum()))
+        booted = _bootstrap_share(false_edges, retained, rng)
+
+        scorable = group[group.explore_strong_edges_present >= MIN_STRONG_EDGES]
+        recovery = float(group.explore_strong_recovery.mean())
+        blank = float(scorable.explore_blank.mean()) if len(scorable) else np.nan
+        stability = float(group.stability_strong.median())
+
+        record = {
+            "variables": int(p), "sample_size": int(n), "density": density, "arm": arm,
+            "replications": len(group),
+            "false_connection_share": share,
+            "false_share_exact_low": exact[0], "false_share_exact_high": exact[1],
+            "false_share_boot_low": booted[0], "false_share_boot_high": booted[1],
+            "false_edges_per_network": float(group.explore_false_edges.mean()),
+            "false_positive_rate": float(group.explore_false_positive_rate.mean()),
+            "strong_recovery": recovery,
+            "weak_recovery": float(group.explore_weak_recovery.mean()),
+            "blank_given_strong_truth": blank,
+            "stability_strong": stability,
+            "stability_weak": float(group.stability_weak.median()),
+            "runtime_seconds": float(group.explore_seconds.median()),
+        }
+        for setting in ("matched_fc", "matched_density"):
+            for kind in ("curved", "straight"):
+                for method in ("explore", "explore_straight", "baseline"):
+                    column = f"{method}_{setting}_{kind}_recovery"
+                    record[f"{method}_{setting}_{kind}"] = float(group[column].mean()) if column in group else np.nan
+
+        record["pass_1_false_connections"] = bool(share <= FALSE_CONNECTION_BAR)
+        record["pass_2_recovery"] = bool(recovery >= RECOVERY_BAR)
+        record["pass_3_blank"] = bool(blank <= BLANK_BAR) if not np.isnan(blank) else False
+        record["pass_4_stability"] = bool(stability >= STABILITY_BAR) if not np.isnan(stability) else False
+        # Criteria 5 to 7 compare performance on curved relationships, which exist only in
+        # the mixed arm. The fully linear arm is a control: it is gated on 1 to 4 and its
+        # comparisons are reported rather than required.
+        if arm == "mixed":
+            record["pass_5_beats_baseline"] = bool(
+                record["explore_matched_fc_curved"] > record["baseline_matched_fc_curved"]
+                and record["explore_matched_density_curved"] > record["baseline_matched_density_curved"])
+            record["pass_6_beats_straight_on_curved"] = bool(
+                record["explore_matched_fc_curved"] > record["explore_straight_matched_fc_curved"])
+            record["pass_7_holds_on_straight"] = bool(
+                record["explore_matched_fc_straight"] >= record["explore_straight_matched_fc_straight"] - STRAIGHT_TOLERANCE)
+        else:
+            record["pass_5_beats_baseline"] = record["pass_6_beats_straight_on_curved"] = record["pass_7_holds_on_straight"] = True
+        rows.append(record)
+
+    summary = pd.DataFrame(rows).sort_values(["arm", "density", "variables", "sample_size"], ignore_index=True)
+    gates = [column for column in summary.columns if column.startswith("pass_")]
+    summary["eligible"] = summary[gates].all(axis=1)
+
+    args.output.mkdir(parents=True, exist_ok=True)
+    data.to_parquet(args.output / f"p_extension_stage{args.stage}_results.parquet", index=False)
+    summary.to_csv(args.output / f"p_extension_stage{args.stage}_summary.csv", index=False)
+
+    verdict = {
+        "stage": args.stage,
+        "cells_evaluated": int(len(summary)),
+        "cells_eligible": int(summary.eligible.sum()),
+        "operating_region": [
+            {"variables": int(r.variables), "sample_size": int(r.sample_size), "density": r.density, "arm": r.arm}
+            for r in summary[summary.eligible].itertuples()],
+        "first_failing_gate": {
+            f"{r.arm}-{r.density}-p{int(r.variables)}-n{int(r.sample_size)}": next((g for g in gates if not getattr(r, g)), None)
+            for r in summary[~summary.eligible].itertuples()},
+        "false_edges_per_network_by_size_and_density": {
+            f"p{int(p)}-{d}": round(float(g.false_edges_per_network.mean()), 3)
+            for (p, d), g in summary.groupby(["variables", "density"])},
+        "reading": (
+            "Criteria 1 to 4 are scored at the default operating point, which is what a user gets; scoring them "
+            "at the matched-false-inclusion point would be circular. Criteria 5 to 7 compare curved-relationship "
+            "performance and apply to the mixed arm only, since the fully linear arm contains no curved "
+            "relationships; that arm is a control gated on 1 to 4. Where the exact binomial and bootstrap "
+            "intervals on the false-connection share disagree, the bootstrap governs, because relationships "
+            "within one network are not independent."),
+    }
+    (args.output / f"p_extension_stage{args.stage}_verdict.json").write_text(json.dumps(verdict, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    pd.set_option("display.width", 300)
+    print(summary.to_string(index=False, float_format=lambda value: f"{value:.3f}"))
+    print()
+    print(json.dumps(verdict, indent=2, sort_keys=True))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
@@ -449,10 +582,11 @@ def main() -> None:
     shard_parser.add_argument("--output", type=Path, required=True)
     shard_parser.set_defaults(func=shard)
 
-    summarize_parser = commands.add_parser("summarize", help="assemble the stage 0 scaling report")
+    summarize_parser = commands.add_parser("summarize", help="assemble the stage report")
     summarize_parser.add_argument("--shards", type=Path, required=True)
     summarize_parser.add_argument("--output", type=Path, required=True)
-    summarize_parser.set_defaults(func=summarize)
+    summarize_parser.add_argument("--stage", default="0", choices=("0", "1", "2"))
+    summarize_parser.set_defaults(func=lambda args: summarize(args) if args.stage == "0" else summarize_criteria(args))
 
     args = parser.parse_args()
     args.func(args)
