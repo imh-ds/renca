@@ -1,0 +1,65 @@
+<html><body><h1>renca predictive evidence report</h1><p>All conclusions are predictive, not causal. Every result retains <code>not_yet_causal</code>.</p><h2>Calibration eligibility</h2><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>requested_profile_id</th>
+      <th>matched_profile_id</th>
+      <th>status</th>
+      <th>mismatch_fields</th>
+      <th>message</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>v3-nested-blend-n300-d005-phase0</td>
+      <td>v3-nested-blend-n300-d005-phase0</td>
+      <td>calibrated_success</td>
+      <td>[]</td>
+      <td>The requested profile exactly matches this analysis; calibrated certification is permitted.</td>
+    </tr>
+  </tbody>
+</table><h2>Pair evidence</h2><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>pair_id</th>
+      <th>state</th>
+      <th>separator</th>
+      <th>adjusted_p</th>
+      <th>causal_status</th>
+      <th>vimp_statuses</th>
+      <th>theta_estimates</th>
+      <th>resolution_reason</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>engagement--retention_intent</td>
+      <td>unresolved</td>
+      <td>satisfaction</td>
+      <td>1.000000</td>
+      <td>not_yet_causal</td>
+      <td>success;success</td>
+      <td>0.0799237964101979;0.10125239850748509</td>
+      <td>Unresolved: neither practical separation nor searched-family inseparability was established.</td>
+    </tr>
+    <tr>
+      <td>engagement--satisfaction</td>
+      <td>candidate_adjacency</td>
+      <td></td>
+      <td>1.000000</td>
+      <td>not_yet_causal</td>
+      <td>success;success</td>
+      <td>0.21703011938851113;0.2094560416596292</td>
+      <td>Candidate adjacency: no searched separator established practical separation; this is not a causal edge.</td>
+    </tr>
+    <tr>
+      <td>retention_intent--satisfaction</td>
+      <td>certified_nonedge</td>
+      <td>engagement</td>
+      <td>0.003501</td>
+      <td>not_yet_causal</td>
+      <td>success;success</td>
+      <td>0.0033510724215825966;0.000512864084824989</td>
+      <td>Certified practical nonedge under the matched predictive calibration profile; this is not a causal nonedge.</td>
+    </tr>
+  </tbody>
+</table></body></html>

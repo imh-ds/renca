@@ -1,0 +1,79 @@
+<html><head><meta charset="utf-8"><style>body{font-family:system-ui,sans-serif;margin:2rem;color:#172033}.warning{font-weight:600}.legend{display:flex;gap:1rem;flex-wrap:wrap;font-size:.9rem}.legend-candidate::before{content:"";display:inline-block;width:2rem;border-top:3px solid #334155;margin-right:.3rem}.legend-unresolved::before{content:"";display:inline-block;width:2rem;border-top:3px dashed #64748b;margin-right:.3rem}.graph-layout{display:flex;gap:2rem;align-items:flex-start;flex-wrap:wrap}svg{width:min(500px,100%);border:1px solid #cbd5e1;border-radius:8px;background:#f8fafc}.resolution-edge{cursor:pointer}.resolution-edge:focus{outline:4px solid #f59e0b}.node{fill:#fff;stroke:#0f172a;stroke-width:2}.node-label{font-size:12px;text-anchor:middle;pointer-events:none}.graph-details{max-width:42rem}.pair-controls{display:grid;gap:.4rem}.pair-control{text-align:left}table{border-collapse:collapse}th,td{border:1px solid #cbd5e1;padding:.4rem;vertical-align:top}</style></head><body><h1>renca predictive evidence report</h1><p>All conclusions are predictive, not causal. Every result retains <code>not_yet_causal</code>.</p><section class="resolution-graph"><h2>Predictive ResolutionGraph</h2><p class="warning">Predictive evidence only — not causal; all pairs remain <code>not_yet_causal</code>.</p><div class="legend"><span class="legend-candidate">Solid: candidate adjacency</span><span class="legend-unresolved">Dashed: unresolved</span><span>Absent: certified practical nonedge</span><span>Line width: larger directional predictive importance</span></div><div class="graph-layout"><svg viewBox="0 0 500 500" aria-label="Predictive resolution graph" role="img"><line class="resolution-edge" data-pair="engagement--retention_intent" x1="250.0" y1="75.0" x2="401.6" y2="337.5" style="stroke:#64748b;stroke-dasharray:7 6;opacity:.62;stroke-width:3.62" tabindex="0" role="button"><title>engagement--retention_intent</title></line><line class="resolution-edge" data-pair="engagement--satisfaction" x1="250.0" y1="75.0" x2="98.4" y2="337.5" style="stroke:#334155;stroke-dasharray:none;opacity:1;stroke-width:5.47" tabindex="0" role="button"><title>engagement--satisfaction</title></line><circle cx="250.0" cy="75.0" r="27" class="node"/><text x="250.0" y="80.0" class="node-label">engagement</text><circle cx="401.6" cy="337.5" r="27" class="node"/><text x="401.6" y="342.5" class="node-label">retention_intent</text><circle cx="98.4" cy="337.5" r="27" class="node"/><text x="98.4" y="342.5" class="node-label">satisfaction</text></svg><div class="graph-details"><h3>Pair evidence</h3><div id="pair-panel"></div><div class="pair-controls"><button class="pair-control" data-pair="engagement--retention_intent">engagement--retention_intent — unresolved</button><button class="pair-control" data-pair="engagement--satisfaction">engagement--satisfaction — candidate_adjacency</button><button class="pair-control" data-pair="retention_intent--satisfaction">retention_intent--satisfaction — certified_nonedge</button></div></div></div></section><script>const pairEvidence=JSON.parse('{"engagement--retention_intent": {"adjusted_p": 1.0, "causal_status": "not_yet_causal", "directional_vimp": [{"added_variable": "retention_intent", "calibration_status": "calibrated_success", "delta": 0.05, "lower_ci": 0.028070058107840454, "status": "success", "target": "engagement", "theta_hat": 0.0799237964101979, "upper_ci": 0.13177753471255532}, {"added_variable": "engagement", "calibration_status": "calibrated_success", "delta": 0.05, "lower_ci": 0.03847959621027956, "status": "success", "target": "retention_intent", "theta_hat": 0.10125239850748509, "upper_ci": 0.16402520080469063}], "error_control": "FWER_Holm", "pair_id": "engagement--retention_intent", "reason": "Unresolved: neither practical separation nor searched-family inseparability was established.", "separator": ["satisfaction"], "state": "unresolved"}, "engagement--satisfaction": {"adjusted_p": 1.0, "causal_status": "not_yet_causal", "directional_vimp": [{"added_variable": "satisfaction", "calibration_status": "calibrated_success", "delta": 0.05, "lower_ci": 0.1399888912480262, "status": "success", "target": "engagement", "theta_hat": 0.21703011938851113, "upper_ci": 0.2940713475289961}, {"added_variable": "engagement", "calibration_status": "calibrated_success", "delta": 0.05, "lower_ci": 0.13112838857766154, "status": "success", "target": "satisfaction", "theta_hat": 0.2094560416596292, "upper_ci": 0.2877836947415968}], "error_control": "FWER_Holm", "pair_id": "engagement--satisfaction", "reason": "Candidate adjacency: no searched separator established practical separation; this is not a causal edge.", "separator": [], "state": "candidate_adjacency"}, "retention_intent--satisfaction": {"adjusted_p": 0.003501264345458082, "causal_status": "not_yet_causal", "directional_vimp": [{"added_variable": "satisfaction", "calibration_status": "calibrated_success", "delta": 0.05, "lower_ci": -0.008787322706289132, "status": "success", "target": "retention_intent", "theta_hat": 0.0033510724215825966, "upper_ci": 0.015489467549454326}, {"added_variable": "retention_intent", "calibration_status": "calibrated_success", "delta": 0.05, "lower_ci": -0.012103486627764073, "status": "success", "target": "satisfaction", "theta_hat": 0.000512864084824989, "upper_ci": 0.013129214797414052}], "error_control": "FWER_Holm", "pair_id": "retention_intent--satisfaction", "reason": "Certified practical nonedge under the matched predictive calibration profile; this is not a causal nonedge.", "separator": ["engagement"], "state": "certified_nonedge"}}');const panel=document.getElementById('pair-panel');function format(v){return v===null||v===undefined?'—':Number(v).toFixed(4)}function showPair(id){const p=pairEvidence[id];if(!p)return;const directions=p.directional_vimp.map(d=>`<li>${d.added_variable} → ${d.target}: θ=${format(d.theta_hat)} [${format(d.lower_ci)}, ${format(d.upper_ci)}], δ=${format(d.delta)} (${d.status}, ${d.calibration_status})</li>`).join('');panel.innerHTML=`<p><strong>${p.pair_id}</strong> — ${p.state}</p><p>${p.reason}</p><ul><li>Separator: ${p.separator.length?p.separator.join(', '):'none'}</li><li>Holm-adjusted p: ${format(p.adjusted_p)}</li><li>Error control: ${p.error_control}</li><li>Causal status: ${p.causal_status}</li>${directions}</ul>`;}document.querySelectorAll('[data-pair]').forEach(el=>{el.addEventListener('click',()=>showPair(el.dataset.pair));el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')showPair(el.dataset.pair)})});showPair('engagement--retention_intent');</script><h2>Calibration eligibility</h2><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>requested_profile_id</th>
+      <th>matched_profile_id</th>
+      <th>delta_target</th>
+      <th>status</th>
+      <th>mismatch_fields</th>
+      <th>message</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>v3-nested-blend-n300-d005-phase0</td>
+      <td>v3-nested-blend-n300-d005-phase0</td>
+      <td>0.05</td>
+      <td>calibrated_success</td>
+      <td>[]</td>
+      <td>The requested profile exactly matches this analysis; calibrated certification is permitted.</td>
+    </tr>
+  </tbody>
+</table><h2>Pair evidence table</h2><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>pair_id</th>
+      <th>state</th>
+      <th>separator</th>
+      <th>adjusted_p</th>
+      <th>causal_status</th>
+      <th>vimp_statuses</th>
+      <th>calibration_statuses</th>
+      <th>eligibility_status</th>
+      <th>eligibility_mismatch_fields</th>
+      <th>theta_estimates</th>
+      <th>resolution_reason</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>engagement--retention_intent</td>
+      <td>unresolved</td>
+      <td>satisfaction</td>
+      <td>1.000000</td>
+      <td>not_yet_causal</td>
+      <td>success;success</td>
+      <td>calibrated_success;calibrated_success</td>
+      <td>calibrated_success</td>
+      <td></td>
+      <td>0.0799237964101979;0.10125239850748509</td>
+      <td>Unresolved: neither practical separation nor searched-family inseparability was established.</td>
+    </tr>
+    <tr>
+      <td>engagement--satisfaction</td>
+      <td>candidate_adjacency</td>
+      <td></td>
+      <td>1.000000</td>
+      <td>not_yet_causal</td>
+      <td>success;success</td>
+      <td>calibrated_success;calibrated_success</td>
+      <td>calibrated_success</td>
+      <td></td>
+      <td>0.21703011938851113;0.2094560416596292</td>
+      <td>Candidate adjacency: no searched separator established practical separation; this is not a causal edge.</td>
+    </tr>
+    <tr>
+      <td>retention_intent--satisfaction</td>
+      <td>certified_nonedge</td>
+      <td>engagement</td>
+      <td>0.003501</td>
+      <td>not_yet_causal</td>
+      <td>success;success</td>
+      <td>calibrated_success;calibrated_success</td>
+      <td>calibrated_success</td>
+      <td></td>
+      <td>0.0033510724215825966;0.000512864084824989</td>
+      <td>Certified practical nonedge under the matched predictive calibration profile; this is not a causal nonedge.</td>
+    </tr>
+  </tbody>
+</table></body></html>
